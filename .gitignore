@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+*.db
+*.db-journal
+.pytest_cache/
+.ruff_cache/
+backend/.env
+
+# Node
+node_modules/
+dist/
+dist-ssr/
+*.local
+web/.env
+web/dev-dist/
+
+# Capacitor / Android
+web/android/app/build/
+web/android/.gradle/
+web/android/local.properties
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+scratch_*.log
