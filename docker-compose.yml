@@ -1,0 +1,27 @@
+# Local dev / demo-day fallback: `docker compose up` brings up Postgres + API on localhost:8000.
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: fitsathi
+      POSTGRES_PASSWORD: fitsathi
+      POSTGRES_DB: fitsathi
+    ports: ["5432:5432"]
+    volumes: ["pgdata:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fitsathi"]
+      interval: 5s
+      retries: 10
+  api:
+    build: ./backend
+    environment:
+      DATABASE_URL: postgresql+psycopg://fitsathi:fitsathi@db:5432/fitsathi
+      JWT_SECRET: change-me-in-production-please-32-bytes-min
+      CORS_ORIGINS: http://localhost:5173,http://localhost:4173
+      AUTO_SEED: "true"
+    ports: ["8000:8000"]
+    depends_on:
+      db:
+        condition: service_healthy
+volumes:
+  pgdata:

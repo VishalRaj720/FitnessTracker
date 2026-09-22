@@ -1150,3 +1150,25 @@ Native apps/RN, microservices, custom pose models, exercise auto-classification,
 | 6 | **Product · design · pitch** | Figma, exercise instructions and cue copy (EN/HI), PPT, demo script and video, tester recruitment (10 people), judge Q&A prep | 0, 9, 10 |
 
 Working rules: daily 15-minute stand-up; PRs reviewed by one other member; `main` always deployable; every exercise definition ships with a fixture; anyone blocked > 2 hours escalates to the lead.
+
+---
+
+## Appendix B — Implementation status (as of 22 Sep 2026)
+
+Built and verified end to end (backend tests 23/23, CV engine tests 10/10, full manual walkthrough in the browser):
+
+- **Backend**: all 19 endpoints in Part 17, `rules_v1` recommender with fit-to-budget, idempotent session save, verified calc, streaks, squads, institute aggregates with k-anonymity, seeds, demo-data script.
+- **Web**: all screens in Part 5, CV engine (Part 8) with 5 exercise definitions, manual fallback, offline queue, PWA precache (app + lite model + WASM), campus dashboard, `/dev/record` fixture recorder + fixture-driven tests.
+- **Verified in-browser**: MediaPipe loads self-hosted WASM + model in ~750 ms and infers at ~32 ms/frame on the GPU delegate.
+
+Deliberate deviations from the plan above:
+
+| Blueprint said | Built | Why |
+|---|---|---|
+| Postgres from day one | **SQLite default, Postgres via `DATABASE_URL`** (docker-compose provided) | Zero-setup MVP; schema is portable (no Postgres-only types). Switch before load testing. |
+| Separate `/workout/setup` route | **Setup is a stage inside `/workout/live`** | The camera stream and the detector must survive between framing, countdown, tracking and rest; a route change would tear them down. |
+| shadcn/ui | **Hand-written 10-component UI kit** (`components/ui`) | shadcn's CLI is interactive; the kit is ~150 lines and enough. |
+| Alembic migrations | **`create_all` on startup** | Fine until the first schema change after deploy; add Alembic then. |
+| OpenAPI-generated TS types | **Hand-mirrored `types/api.ts`** | Faster to iterate; regenerate with `openapi-typescript` once the API stabilises. |
+
+Still to do before the finale (Phases 9–10): calibrate thresholds on ≥ 10 people via `/dev/record`, record the demo-mode video (`public/demo/squat_demo.mp4`), deploy (Vercel + Railway), build the APK, rehearse with `docs/demo-script.md`.
