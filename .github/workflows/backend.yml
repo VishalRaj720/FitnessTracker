@@ -1,5 +1,6 @@
 name: backend
 on:
+  workflow_dispatch:        # lets you run CI manually from the Actions tab
   push: { paths: ["backend/**", ".github/workflows/backend.yml"] }
   pull_request: { paths: ["backend/**"] }
 jobs:

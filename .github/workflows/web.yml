@@ -1,5 +1,6 @@
 name: web
 on:
+  workflow_dispatch:        # lets you run CI manually from the Actions tab
   push: { paths: ["web/**", ".github/workflows/web.yml"] }
   pull_request: { paths: ["web/**"] }
 jobs:
