@@ -51,7 +51,9 @@ def main() -> None:
 
         inst = db.scalar(select(Institute).where(Institute.slug == "demo-institute"))
         ex_by_slug = {e.slug: e for e in db.scalars(select(Exercise)).all()}
-        cv_exercises = [ex_by_slug[s] for s in ("squat", "jumping_jack", "lunge", "pushup", "plank")]
+        cv_exercises = [
+            ex_by_slug[s] for s in ("squat", "jumping_jack", "lunge", "pushup", "plank")
+        ]
 
         users: list[User] = []
         for email, name, dept, hostel in STUDENTS:
@@ -76,7 +78,12 @@ def main() -> None:
             users.append(u)
         db.flush()
 
-        squad = Squad(name="Block C Beasts", invite_code="DEMO42", institute_id=inst.id, created_by=users[0].id)
+        squad = Squad(
+            name="Block C Beasts",
+            invite_code="DEMO42",
+            institute_id=inst.id,
+            created_by=users[0].id,
+        )
         for u in users[:5]:
             squad.members.append(SquadMember(user_id=u.id))
         db.add(squad)
@@ -164,7 +171,9 @@ def main() -> None:
                 last_day = d
                 total_sessions += 1
                 total_verified += verified_seconds
-            u.stats.current_streak = streak if last_day and (today.date() - last_day).days <= 1 else 0
+            u.stats.current_streak = (
+                streak if last_day and (today.date() - last_day).days <= 1 else 0
+            )
             u.stats.longest_streak = longest
             u.stats.last_workout_date = last_day
             u.stats.total_sessions = total_sessions
