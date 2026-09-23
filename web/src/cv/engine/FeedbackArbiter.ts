@@ -2,7 +2,7 @@ import type { AnalyzerEvent, Violation } from '@/cv/engine/types'
 
 export interface Cue {
   text: string
-  tone: 'correction' | 'praise' | 'count' | 'info'
+  tone: 'correction' | 'praise' | 'count' | 'info' | 'coach'
   speak: boolean
 }
 
@@ -88,6 +88,27 @@ export class FeedbackArbiter {
       return { text: this.numberWord(repCount), tone: 'count', speak: speakCount }
     }
     return null
+  }
+
+  /**
+   * Offer a cue that came from the coach model rather than from a rule.
+   *
+   * It arrives asynchronously, a beat after the rep that produced it, so it cannot go
+   * through `decide` — by then the next rep is already under way, which is exactly when we
+   * want it spoken. It still has to win the same debounce, and it never displaces a
+   * deterministic correction: those are instant and local, and a model answer that arrives
+   * on top of one would talk over the thing that actually matters.
+   *
+   * Returns the cue to deliver, or null if this is not the moment for it.
+   */
+  tryExternal(text: string, urgency: number, tMs: number): Cue | null {
+    if (!text.trim()) return null
+    // A severity-3 rule fired in the last couple of seconds: let that stand.
+    if (tMs - this.lastCorrectionAt < 2000) return null
+    const speak = this.canSpeak(tMs)
+    if (speak) this.mark(tMs)
+    // Below the speaking bar it still reaches the banner, which is free and not annoying.
+    return { text, tone: 'coach', speak: speak && urgency >= 2 }
   }
 
   private numberWord(n: number): string {

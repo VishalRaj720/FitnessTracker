@@ -3,6 +3,8 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { Badge, Button, Card, PageTitle } from '@/components/ui'
 import { targetLabel } from '@/lib/format'
 import { useSessionStore } from '@/features/workout/store/sessionStore'
+import { getCompletedTutorials } from '@/features/tutorial/completion'
+import { getDefinition } from '@/cv/exercises'
 import type { Plan, PlanItem } from '@/types/api'
 
 export interface PreviewLocationState {
@@ -18,6 +20,7 @@ export function WorkoutPreviewPage() {
   const state = (loc.state ?? {}) as PreviewLocationState
   const setup = useSessionStore((s) => s.setup)
   const [mode, setMode] = useState<'cv' | 'manual'>('cv')
+  const [learned, setLearned] = useState<string[] | null>(null)
 
   const items = state.items ?? state.plan?.items ?? []
   const planId = state.plan?.id ?? null
@@ -25,6 +28,16 @@ export function WorkoutPreviewPage() {
   useEffect(() => {
     if (!items.length) nav('/home', { replace: true })
   }, [items.length, nav])
+
+  useEffect(() => {
+    void getCompletedTutorials().then(setLearned)
+  }, [])
+
+  // Offer the tutorial for anything in today's workout the user has not been shown yet.
+  const unlearned =
+    learned === null
+      ? []
+      : items.filter((i) => getDefinition(i.exercise.slug)?.tutorial && !learned.includes(i.exercise.slug))
 
   const cvCount = items.filter((i) => i.exercise.cv_supported).length
   const orientations = Array.from(new Set(items.filter((i) => i.exercise.cv_supported).map((i) => i.exercise.orientation)))
@@ -37,6 +50,23 @@ export function WorkoutPreviewPage() {
   return (
     <div className="mx-auto flex h-full max-w-md flex-col px-4 pb-6 pt-[calc(var(--safe-top)+16px)]">
       <PageTitle title={state.title ?? "Today's workout"} subtitle={`${items.length} exercise${items.length === 1 ? '' : 's'} · ${cvCount} camera-tracked`} />
+
+      {unlearned.length > 0 && mode === 'cv' && (
+        <Card className="mb-3 border-brand-500/40 bg-brand-500/10">
+          <div className="text-sm font-semibold text-brand-200">First time with {unlearned[0].exercise.name}?</div>
+          <p className="mt-1 text-xs text-slate-300">
+            A two-minute camera tutorial shows you the movement and checks your form before it counts for anything.
+          </p>
+          <Button
+            size="sm"
+            variant="secondary"
+            className="mt-2"
+            onClick={() => nav(`/exercises/${unlearned[0].exercise.slug}/tutorial`)}
+          >
+            Learn {unlearned[0].exercise.name}
+          </Button>
+        </Card>
+      )}
 
       <Card className="mb-3 space-y-2">
         {items.map((it, i) => (

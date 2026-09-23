@@ -47,3 +47,60 @@ export const FULL_BODY = [
   LM.L_ANKLE,
   LM.R_ANKLE,
 ] as const
+
+/**
+ * Skeleton edges for the overlay, as a flat [a0,b0, a1,b1, …] list so the render loop can
+ * iterate without allocating. Deliberately a subset of MediaPipe's POSE_CONNECTIONS: the
+ * face mesh and the hand fans are dropped (clutter at phone size), the head is drawn as a
+ * circle instead. Keeping this here means the render path needs no MediaPipe import.
+ */
+export const BODY_EDGES = new Uint8Array([
+  // torso
+  LM.L_SHOULDER, LM.R_SHOULDER,
+  LM.L_SHOULDER, LM.L_HIP,
+  LM.R_SHOULDER, LM.R_HIP,
+  LM.L_HIP, LM.R_HIP,
+  // arms
+  LM.L_SHOULDER, LM.L_ELBOW,
+  LM.L_ELBOW, LM.L_WRIST,
+  LM.R_SHOULDER, LM.R_ELBOW,
+  LM.R_ELBOW, LM.R_WRIST,
+  // legs
+  LM.L_HIP, LM.L_KNEE,
+  LM.L_KNEE, LM.L_ANKLE,
+  LM.R_HIP, LM.R_KNEE,
+  LM.R_KNEE, LM.R_ANKLE,
+  // feet
+  LM.L_ANKLE, LM.L_HEEL,
+  LM.L_HEEL, LM.L_FOOT,
+  LM.L_ANKLE, LM.L_FOOT,
+  LM.R_ANKLE, LM.R_HEEL,
+  LM.R_HEEL, LM.R_FOOT,
+  LM.R_ANKLE, LM.R_FOOT,
+])
+
+/** Joints worth drawing a dot on at the `full` detail level. */
+export const BODY_JOINTS = new Uint8Array([
+  LM.L_SHOULDER, LM.R_SHOULDER, LM.L_ELBOW, LM.R_ELBOW, LM.L_WRIST, LM.R_WRIST,
+  LM.L_HIP, LM.R_HIP, LM.L_KNEE, LM.R_KNEE, LM.L_ANKLE, LM.R_ANKLE,
+])
+
+/** Allocate a pose whose landmark objects can be written in place by the render loop. */
+export function makePoseBuffer(): Pose {
+  const out: Pose = new Array(POSE_LANDMARK_COUNT)
+  for (let i = 0; i < POSE_LANDMARK_COUNT; i++) out[i] = { x: 0, y: 0, z: 0, visibility: 0 }
+  return out
+}
+
+/** Number of floats per landmark on the wire: x, y, z, visibility. */
+export const LANDMARK_STRIDE = 4
+
+/** Unpack the worker's flat transferable into a fresh Pose. */
+export function poseFromFloats(buf: Float32Array): Pose {
+  const out: Pose = new Array(POSE_LANDMARK_COUNT)
+  for (let i = 0; i < POSE_LANDMARK_COUNT; i++) {
+    const o = i * LANDMARK_STRIDE
+    out[i] = { x: buf[o], y: buf[o + 1], z: buf[o + 2], visibility: buf[o + 3] }
+  }
+  return out
+}

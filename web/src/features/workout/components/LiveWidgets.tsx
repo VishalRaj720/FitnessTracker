@@ -74,7 +74,8 @@ export function CueBanner() {
   useEffect(() => {
     if (!cue) return
     setVisible(true)
-    const id = setTimeout(() => setVisible(false), cue.tone === 'correction' ? 2400 : 1200)
+    // A coach line is a sentence, not a shout: give it long enough to actually read.
+    const id = setTimeout(() => setVisible(false), cue.tone === 'correction' ? 2400 : cue.tone === 'coach' ? 3600 : 1200)
     return () => clearTimeout(id)
   }, [cue])
   if (!cue || !visible) return null
@@ -86,6 +87,7 @@ export function CueBanner() {
         cue.tone === 'correction' && 'bg-rose-500 text-white',
         cue.tone === 'praise' && 'bg-brand-500 text-slate-950',
         cue.tone === 'info' && 'bg-slate-800/90 text-slate-100',
+        cue.tone === 'coach' && 'bg-sky-500 text-slate-950',
       )}
     >
       {cue.text}
@@ -103,12 +105,18 @@ export function GatedOverlay() {
   )
 }
 
+/**
+ * Render rate and inference rate are shown separately on purpose: the overlay runs its own
+ * loop, so these two numbers diverging (60 render / 24 cv) is the pipeline working correctly.
+ */
 export function FpsBadge() {
   const fps = useSessionStore((s) => s.live.fps)
+  const renderFps = useSessionStore((s) => s.live.renderFps)
   const inf = useSessionStore((s) => s.live.inferenceMs)
+  const tier = useSessionStore((s) => s.live.tier)
   return (
     <div className="rounded-md bg-slate-950/60 px-1.5 py-0.5 text-[10px] tabular-nums text-slate-300">
-      {fps} fps · {inf} ms
+      {renderFps} render · {fps} cv · {inf} ms · <span className={clsx(tier === 'low' && 'text-amber-300', tier === 'high' && 'text-brand-300')}>{tier}</span>
     </div>
   )
 }

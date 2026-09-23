@@ -10,7 +10,7 @@ An **offline-first PWA** that turns a hostel room into a coached gym:
 - 🏆 **Camera-verified minutes** drive squad and institute leaderboards that nobody can fake — you can't type "100 push-ups" into this app.
 - 📊 A **campus dashboard** gives the institute a live Fit India participation report at ₹0 per student.
 
-Design rationale, architecture decisions and roadmap: **[BLUEPRINT.md](BLUEPRINT.md)**.
+Design rationale, architecture decisions and roadmap: **[docs/BLUEPRINT.md](docs/BLUEPRINT.md)**.
 
 ---
 
@@ -299,7 +299,7 @@ FitnessTracker/
 │       ├── components/       UI kit + app shell      lib/       api client, formatting
 │       └── types/api.ts      wire DTOs mirroring the backend schemas
 ├── docs/                     demo script, CV authoring guide
-├── BLUEPRINT.md              full product + architecture design document
+├── docs/BLUEPRINT.md         full product + architecture design document
 └── docker-compose.yml        Postgres + API (optional)
 ```
 

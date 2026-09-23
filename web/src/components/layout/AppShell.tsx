@@ -2,10 +2,12 @@ import { NavLink, Outlet } from 'react-router-dom'
 import { clsx } from 'clsx'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 import { useOfflineQueueSync } from '@/features/workout/sync/useOfflineQueueSync'
+import { useCompanionStatus } from '@/features/companion/CoachPage'
 
 const TABS = [
   { to: '/home', label: 'Home', icon: HomeIcon },
   { to: '/exercises', label: 'Exercises', icon: DumbbellIcon },
+  { to: '/coach', label: 'Coach', icon: CoachIcon, needsCompanion: true },
   { to: '/squad', label: 'Squad', icon: UsersIcon },
   { to: '/progress', label: 'Progress', icon: ChartIcon },
   { to: '/profile', label: 'Profile', icon: UserIcon },
@@ -14,6 +16,9 @@ const TABS = [
 export function AppShell() {
   const online = useOnlineStatus()
   const pending = useOfflineQueueSync()
+  // With no API key configured the coach does not exist, so neither does its tab.
+  const companion = useCompanionStatus()
+  const tabs = TABS.filter((t) => !t.needsCompanion || companion.data?.enabled)
   return (
     <div className="mx-auto flex h-full max-w-md flex-col md:max-w-2xl lg:max-w-3xl">
       {(!online || pending > 0) && (
@@ -26,7 +31,7 @@ export function AppShell() {
       </main>
       <nav className="fixed inset-x-0 bottom-0 z-20 border-t border-slate-800 bg-slate-950/90 backdrop-blur">
         <div className="mx-auto flex max-w-md justify-around md:max-w-2xl lg:max-w-3xl" style={{ paddingBottom: 'var(--safe-bottom)' }}>
-          {TABS.map(({ to, label, icon: Icon }) => (
+          {tabs.map(({ to, label, icon: Icon }) => (
             <NavLink
               key={to}
               to={to}
@@ -44,6 +49,13 @@ export function AppShell() {
   )
 }
 
+function CoachIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 11.5a8.4 8.4 0 0 1-9 8.3 9 9 0 0 1-3.3-.6L3 21l1.9-5.1A8.2 8.2 0 0 1 4 11.5C4 6.9 7.8 3.5 12.5 3.5S21 6.9 21 11.5z" />
+    </svg>
+  )
+}
 function HomeIcon() {
   return (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

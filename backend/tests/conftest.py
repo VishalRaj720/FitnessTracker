@@ -3,6 +3,10 @@ import uuid
 
 os.environ.setdefault("AUTO_SEED", "false")
 os.environ.setdefault("RATE_LIMIT_ENABLED", "false")
+# Force the coach off for the whole suite. A developer's real key lives in backend/.env,
+# and pydantic-settings would happily load it here — which silently turned unit tests into
+# live, billable Gemini calls. An explicit empty value outranks the .env file.
+os.environ.setdefault("GEMINI_API_KEY", "")
 
 import pytest
 from fastapi.testclient import TestClient

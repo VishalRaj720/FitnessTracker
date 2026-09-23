@@ -1,15 +1,19 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { DrawingUtils } from '@mediapipe/tasks-vision'
-import { PoseDetector, POSE_CONNECTIONS } from '@/cv/pose/PoseDetector'
+import { PoseWorkerClient } from '@/cv/pose/PoseWorkerClient'
+import { MainThreadPoseEngine } from '@/cv/pose/MainThreadPoseEngine'
+import type { PoseEngine, PoseResult } from '@/cv/pose/PoseEngine'
 import { CameraSource, VideoFileSource, type FrameSource } from '@/cv/sources/FrameSource'
+import { PoseRenderer } from '@/cv/render/PoseRenderer'
+import { PerformanceGovernor, TIER_PROFILES, probeDevice, type Tier, type TierProfile } from '@/cv/perf/PerformanceGovernor'
 import { ExerciseAnalyzer } from '@/cv/engine/ExerciseAnalyzer'
 import { FeedbackArbiter } from '@/cv/engine/FeedbackArbiter'
 import { getDefinition } from '@/cv/exercises'
 import { checkFraming, type FramingCheck } from '@/cv/geometry/orientation'
 import { Speaker } from '@/cv/feedback/tts'
+import { CoachDirector } from '@/features/companion/CoachDirector'
 import type { Pose } from '@/cv/pose/landmarks'
 import { env } from '@/lib/env'
-import { useSessionStore, type RunnerItem } from '@/features/workout/store/sessionStore'
+import { useSessionStore, type LiveState, type RunnerItem } from '@/features/workout/store/sessionStore'
 
 export type RunnerStage = 'loading' | 'framing' | 'countdown' | 'tracking' | 'error'
 
@@ -18,10 +22,27 @@ export interface RunnerOptions {
   canvasRef: React.RefObject<HTMLCanvasElement | null>
   item: RunnerItem | null
   enabled: boolean // false during rest / manual mode
+  /**
+   * Whether to hold the camera and pose engine open at all. Defaults to true.
+   *
+   * Callers that mount the <video> conditionally must drive this, because the boot effect
+   * keys off stable refs: if it runs while videoRef.current is still null it bails, and
+   * nothing would make it run again once the element appears.
+   */
+  active?: boolean
   voice: boolean
   lang: 'en' | 'hi'
   mirror: boolean
   demoVideoUrl?: string | null
+  /**
+   * Observe every inference result. Used by the tutorial to scale its ghost to the user's
+   * body. Called at inference rate, so it must not allocate or touch React state.
+   */
+  onPose?: (pose: Pose | null) => void
+  /** Enable the Gemini-backed per-rep coach. Off unless the backend reports it available. */
+  coach?: boolean
+  /** Which set of the current exercise this is, for the coach's context. */
+  setNumber?: number
 }
 
 export interface RunnerApi {
@@ -30,6 +51,9 @@ export interface RunnerApi {
   countdown: number
   error: string | null
   modelName: 'lite' | 'full'
+  tier: Tier
+  /** 'worker' when inference is off the main thread; 'main' on the fallback path. */
+  engineKind: 'worker' | 'main'
   /** Collect the analyzer's results for the current set and reset for the next one. */
   harvest: () => { reps: number; secondsHeld: number; formScore: number; meanVisibility: number; formFlags: Record<string, number>; repEvents: number[][] }
   restartFraming: () => void
@@ -38,49 +62,89 @@ export interface RunnerApi {
 
 const FRAMING_STABLE_MS = 1500
 const COUNTDOWN_S = 3
-
-function pickModel(): 'lite' | 'full' {
-  const cores = navigator.hardwareConcurrency ?? 4
-  const mem = (navigator as { deviceMemory?: number }).deviceMemory ?? 4
-  const mobile = /Android|iPhone|iPad/i.test(navigator.userAgent)
-  return !mobile && cores >= 8 && mem >= 8 ? 'full' : 'lite'
-}
+const LIVE_FLUSH_MS = 100
+const FRAMING_UI_MS = 200
 
 /**
- * Owns the camera, the pose detector and one ExerciseAnalyzer per set.
- * Writes high-frequency state into the Zustand session store; components subscribe to slices.
+ * Owns the camera, the pose engine, the overlay renderer and one ExerciseAnalyzer per set.
+ *
+ * Three loops run at different rates and must stay decoupled:
+ *   capture   - up to the camera frame rate, throttled to the tier's target Hz
+ *   inference - in the worker, one frame in flight, results arrive via onPose
+ *   render    - PoseRenderer's own rAF loop at display refresh, interpolating between poses
+ *
+ * High-frequency state goes into a ref and is flushed to Zustand at ~10 Hz; only discrete
+ * events (a rep, a phase change, a cue, the visibility gate) write through immediately.
  */
 export function useWorkoutRunner(opts: RunnerOptions): RunnerApi {
-  const { videoRef, canvasRef, item, enabled, voice, lang, mirror, demoVideoUrl } = opts
+  const { videoRef, canvasRef, item, enabled, voice, lang, mirror, demoVideoUrl, active = true, coach = false, setNumber = 1 } = opts
+  // Kept in a ref so a changing callback identity never re-boots the camera.
+  const onPoseCbRef = useRef(opts.onPose)
+  onPoseCbRef.current = opts.onPose
   const [stage, setStage] = useState<RunnerStage>('loading')
   const [framing, setFraming] = useState<FramingCheck | null>(null)
   const [countdown, setCountdown] = useState(COUNTDOWN_S)
   const [error, setError] = useState<string | null>(null)
-  const [modelName] = useState<'lite' | 'full'>(pickModel)
+  const [probe] = useState(probeDevice)
+  const [tier, setTier] = useState<Tier>(probe.initial)
+  const [engineKind, setEngineKind] = useState<'worker' | 'main'>('worker')
 
-  const detectorRef = useRef<PoseDetector | null>(null)
+  const engineRef = useRef<PoseEngine | null>(null)
   const sourceRef = useRef<FrameSource | null>(null)
+  const rendererRef = useRef<PoseRenderer | null>(null)
+  const governorRef = useRef<PerformanceGovernor | null>(null)
   const analyzerRef = useRef<ExerciseAnalyzer | null>(null)
   const arbiterRef = useRef<FeedbackArbiter | null>(null)
+  const directorRef = useRef<CoachDirector | null>(null)
+  const directorSlugRef = useRef<string | null>(null)
+  const coachRef = useRef(coach)
+  const setNumberRef = useRef(setNumber)
   const speakerRef = useRef<Speaker | null>(null)
   const stageRef = useRef<RunnerStage>('loading')
   const framingGoodSince = useRef<number | null>(null)
+  const framingUiAt = useRef(0)
   const countdownStart = useRef<number | null>(null)
   const rafRef = useRef<number>(0)
   const lastPoseRef = useRef<Pose | null>(null)
-  const fpsRef = useRef({ frames: 0, t: performance.now() })
+  const lastWorldRef = useRef<Float32Array | null>(null)
+  const fpsRef = useRef({ frames: 0, t: 0 })
+  const lastSubmitRef = useRef(0)
+  const minIntervalRef = useRef(1000 / TIER_PROFILES[probe.initial].targetHz)
   const itemRef = useRef<RunnerItem | null>(item)
   const enabledRef = useRef(enabled)
   const startedAtRef = useRef<number>(0)
-  const announcedRef = useRef(false)
+  const liveRef = useRef<Partial<LiveState>>({})
+  const lastSnapRef = useRef({ reps: -1, phase: '', gated: false })
 
   itemRef.current = item
   enabledRef.current = enabled
+  coachRef.current = coach
+  setNumberRef.current = setNumber
 
   const setStageBoth = useCallback((s: RunnerStage) => {
     stageRef.current = s
     setStage(s)
   }, [])
+
+  // ---- throttled live state ------------------------------------------------
+  const queueLive = useCallback((patch: Partial<LiveState>) => {
+    Object.assign(liveRef.current, patch)
+  }, [])
+
+  const flushLive = useCallback(() => {
+    const patch = liveRef.current
+    if (Object.keys(patch).length === 0) return
+    liveRef.current = {}
+    useSessionStore.getState().updateLive(patch)
+  }, [])
+
+  useEffect(() => {
+    const id = setInterval(flushLive, LIVE_FLUSH_MS)
+    return () => {
+      clearInterval(id)
+      flushLive()
+    }
+  }, [flushLive])
 
   // Speaker lifecycle
   useEffect(() => {
@@ -102,98 +166,107 @@ export function useWorkoutRunner(opts: RunnerOptions): RunnerApi {
     if (!def) return
     analyzerRef.current = new ExerciseAnalyzer(def, { lang })
     arbiterRef.current = new FeedbackArbiter({ lang, praiseText: def.praise ?? 'Good form' })
+    // The director outlives a single set: its set-end request is answered during the rest
+    // period, and rebuilding it here would abort that request just as the answer arrives.
+    // It is replaced only when the exercise itself changes.
+    if (directorSlugRef.current !== def.id) {
+      directorRef.current?.dispose()
+      directorRef.current = null
+      directorSlugRef.current = def.id
+    }
+    if (!directorRef.current && coachRef.current) {
+      directorRef.current = new CoachDirector({
+        def,
+        onCue: (c) => {
+          const arb = arbiterRef.current
+          if (!arb) return
+          const decided = arb.tryExternal(c.text, c.urgency, performance.now())
+          if (!decided) return
+          const store = useSessionStore.getState()
+          store.setCue({ text: decided.text, tone: decided.tone, at: performance.now() })
+          store.setCoachNote(c.observation ?? c.text)
+          if (decided.speak) speakerRef.current?.speak(decided.text, { interrupt: false })
+        },
+      })
+    }
     startedAtRef.current = performance.now()
-    announcedRef.current = false
+    lastSnapRef.current = { reps: -1, phase: '', gated: false }
   }, [lang])
 
   const restartFraming = useCallback(() => {
     framingGoodSince.current = null
     countdownStart.current = null
     setCountdown(COUNTDOWN_S)
-    if (detectorRef.current) setStageBoth('framing')
+    if (engineRef.current) setStageBoth('framing')
   }, [setStageBoth])
 
   // When the item changes (next exercise), go back to framing for a new orientation check.
   useEffect(() => {
     if (!item) return
     analyzerRef.current = null
-    if (detectorRef.current) restartFraming()
+    if (engineRef.current) restartFraming()
   }, [item?.key, restartFraming]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Camera + detector lifecycle
+  // Camera + engine + renderer lifecycle
   useEffect(() => {
     let cancelled = false
+    if (!active) return
     const video = videoRef.current
-    if (!video) return
+    const canvas = canvasRef.current
+    if (!video || !canvas) return
 
-    const boot = async () => {
-      try {
-        setStageBoth('loading')
-        const source: FrameSource = demoVideoUrl ? new VideoFileSource(video, demoVideoUrl) : new CameraSource(video, 'user')
-        sourceRef.current = source
-        await source.start()
-        if (cancelled) return
-        const detector = await PoseDetector.create({
-          wasmPath: env.wasmPath,
-          modelPath: modelName === 'full' ? env.modelFull : env.modelLite,
-          delegate: 'GPU',
-        })
-        if (cancelled) {
-          detector.dispose()
-          return
-        }
-        detectorRef.current = detector
-        restartFraming()
-        loop()
-      } catch (e) {
-        if (cancelled) return
-        const msg = (e as Error).name === 'NotAllowedError' ? 'Camera permission denied. You can still do this workout in manual mode.' : (e as Error).message || 'Could not start the camera'
-        setError(msg)
-        setStageBoth('error')
-      }
+    const applyProfile = (t: Tier, profile: TierProfile, reason: string) => {
+      if (cancelled) return
+      console.info('[cv] tier -> ' + t + ' (' + reason + ')')
+      setTier(t)
+      minIntervalRef.current = 1000 / profile.targetHz
+      rendererRef.current?.setDetail(profile.detail)
+      engineRef.current?.setInputWidth(profile.inputWidth)
+      engineRef.current?.setModel(profile.model === 'full' ? env.modelFull : env.modelLite)
+      const src = sourceRef.current
+      if (src instanceof CameraSource) void src.applyProfile(profile.capture)
     }
 
-    const loop = () => {
-      const v = videoRef.current
-      const det = detectorRef.current
-      if (!v || !det) return
-      const tick = () => {
-        if (cancelled) return
-        step(v, det)
-        schedule()
-      }
-      const schedule = () => {
-        const vv = videoRef.current as (HTMLVideoElement & { requestVideoFrameCallback?: (cb: () => void) => number }) | null
-        if (vv?.requestVideoFrameCallback) vv.requestVideoFrameCallback(tick)
-        else rafRef.current = requestAnimationFrame(tick)
-      }
-      schedule()
-    }
+    // ---- inference results: analyzer + governor + renderer ----
+    const onPose = ({ pose, world, ts, inferenceMs }: PoseResult) => {
+      if (cancelled) return
+      lastPoseRef.current = pose
+      if (world) lastWorldRef.current = world
+      onPoseCbRef.current?.(pose)
+      rendererRef.current?.push(pose, ts)
+      governorRef.current?.sample(inferenceMs, ts)
 
-    const step = (v: HTMLVideoElement, det: PoseDetector) => {
-      const now = performance.now()
-      const raw = det.detect(v, now)
-      if (raw === undefined) return // dropped frame, inference busy
-      lastPoseRef.current = raw
-      draw(raw)
-
-      // fps
       const f = fpsRef.current
       f.frames += 1
-      if (now - f.t >= 1000) {
-        useSessionStore.getState().updateLive({ fps: f.frames, inferenceMs: Math.round(det.inferenceMs) })
+      if (ts - f.t >= 1000) {
+        queueLive({
+          fps: Math.round((f.frames * 1000) / (ts - f.t)),
+          inferenceMs: Math.round(inferenceMs),
+          renderFps: rendererRef.current?.renderFps ?? 0,
+          tier: governorRef.current?.tier ?? 'medium',
+        })
+        flushLive()
         f.frames = 0
-        f.t = now
+        f.t = ts
       }
 
+      step(pose, ts)
+    }
+
+    const step = (raw: Pose | null, now: number) => {
       const it = itemRef.current
       const st = stageRef.current
       if (!it || !enabledRef.current) return
 
       if (st === 'framing' || st === 'countdown') {
+        governorRef.current?.setLocked(st === 'countdown')
         const def = getDefinition(it.exercise.slug)
         const fc = checkFraming(raw, def?.requiredLandmarks ?? [], def?.orientation ?? 'any')
-        setFraming(fc)
+        // The checklist is a human-readable hint; 5 Hz is plenty and keeps React out of the loop.
+        if (now - framingUiAt.current >= FRAMING_UI_MS) {
+          framingUiAt.current = now
+          setFraming(fc)
+        }
         const good = fc.visible && fc.inFrame && fc.facingOk
         if (st === 'framing') {
           if (good) {
@@ -231,8 +304,14 @@ export function useWorkoutRunner(opts: RunnerOptions): RunnerApi {
         an.setElapsed(now - startedAtRef.current)
         const events = an.update(raw, now)
         const snap = an.snapshot()
-        const store = useSessionStore.getState()
-        store.updateLive({
+        rendererRef.current?.setGated(snap.gated)
+
+        // Swapping the model resets tracking, so never do it once a set is under way.
+        governorRef.current?.setLocked(snap.reps > 0 || snap.heldMs > 0)
+
+        const last = lastSnapRef.current
+        const discrete = snap.reps !== last.reps || snap.phase !== last.phase || snap.gated !== last.gated
+        queueLive({
           reps: snap.reps,
           partials: snap.partials,
           heldMs: snap.heldMs,
@@ -241,47 +320,129 @@ export function useWorkoutRunner(opts: RunnerOptions): RunnerApi {
           formScore: snap.formScore,
           visibility: snap.visibility,
           gated: snap.gated,
+          cleanStreak: snap.cleanStreak,
         })
+        if (discrete) {
+          lastSnapRef.current = { reps: snap.reps, phase: snap.phase, gated: snap.gated }
+          flushLive()
+        }
+
+        const repEvent = events.find((e) => e.type === 'rep')
+        if (repEvent && directorRef.current) {
+          directorRef.current.onRep({
+            recent: an.recentKinematics(3),
+            repCount: snap.reps,
+            setNumber: setNumberRef.current,
+            violations: snap.flags,
+          })
+        }
+
         if (events.length) {
           const cue = arb.decide(events, now, snap.cleanStreak)
           if (cue) {
-            store.setCue({ text: cue.text, tone: cue.tone, at: now })
+            useSessionStore.getState().setCue({ text: cue.text, tone: cue.tone, at: now })
             if (cue.speak) speakerRef.current?.speak(cue.text, { interrupt: cue.tone === 'correction' })
           }
         }
       }
     }
 
-    const draw = (pose: Pose | null) => {
-      const canvas = canvasRef.current
-      const v = videoRef.current
-      if (!canvas || !v) return
-      if (canvas.width !== v.videoWidth || canvas.height !== v.videoHeight) {
-        canvas.width = v.videoWidth
-        canvas.height = v.videoHeight
+    // ---- capture loop: hands frames to the engine, never blocks on inference ----
+    const captureLoop = () => {
+      const tick = () => {
+        if (cancelled) return
+        const v = videoRef.current
+        const engine = engineRef.current
+        if (v && engine && !engine.busy) {
+          const now = performance.now()
+          if (now - lastSubmitRef.current >= minIntervalRef.current) {
+            lastSubmitRef.current = now
+            engine.submit(v, now)
+          }
+        }
+        schedule()
       }
-      const ctx = canvas.getContext('2d')
-      if (!ctx) return
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
-      if (!pose) return
-      const du = new DrawingUtils(ctx)
-      const gated = useSessionStore.getState().live.gated
-      const color = gated ? '#f59e0b' : '#34d399'
-      du.drawConnectors(pose, POSE_CONNECTIONS, { color, lineWidth: 3 })
-      du.drawLandmarks(pose, { color: '#ffffff', fillColor: color, lineWidth: 1, radius: 3 })
+      const schedule = () => {
+        const vv = videoRef.current as (HTMLVideoElement & { requestVideoFrameCallback?: (cb: () => void) => number }) | null
+        if (vv?.requestVideoFrameCallback) vv.requestVideoFrameCallback(tick)
+        else rafRef.current = requestAnimationFrame(tick)
+      }
+      schedule()
+    }
+
+    const boot = async () => {
+      try {
+        setStageBoth('loading')
+        const startProfile = TIER_PROFILES[probe.initial]
+        const source: FrameSource = demoVideoUrl
+          ? new VideoFileSource(video, demoVideoUrl)
+          : new CameraSource(video, 'user', startProfile.capture)
+        sourceRef.current = source
+        await source.start()
+        if (cancelled) return
+
+        const modelPath = startProfile.model === 'full' ? env.modelFull : env.modelLite
+        let engine: PoseEngine
+        try {
+          engine = await PoseWorkerClient.create({ modelPath, delegate: 'GPU' })
+        } catch (e) {
+          // Worker or WebGL2-in-worker unavailable: keep working, just on the main thread.
+          console.warn('[cv] pose worker unavailable, falling back to main thread', e)
+          engine = await MainThreadPoseEngine.create({ wasmPath: env.wasmPath, modelPath, delegate: 'GPU' })
+        }
+        if (cancelled) {
+          engine.dispose()
+          return
+        }
+        engineRef.current = engine
+        setEngineKind(engine.kind)
+        engine.setInputWidth(startProfile.inputWidth)
+        engine.onPose = onPose
+
+        const renderer = new PoseRenderer(canvas, {
+          videoSize: () => ({ width: video.videoWidth, height: video.videoHeight }),
+          detail: startProfile.detail,
+        })
+        rendererRef.current = renderer
+        renderer.start()
+
+        governorRef.current = new PerformanceGovernor({
+          initial: probe.initial,
+          maxTier: probe.maxTier,
+          onChange: applyProfile,
+        })
+
+        fpsRef.current = { frames: 0, t: performance.now() }
+        restartFraming()
+        captureLoop()
+      } catch (e) {
+        if (cancelled) return
+        const msg =
+          (e as Error).name === 'NotAllowedError'
+            ? 'Camera permission denied. You can still do this workout in manual mode.'
+            : (e as Error).message || 'Could not start the camera'
+        setError(msg)
+        setStageBoth('error')
+      }
     }
 
     boot()
     return () => {
       cancelled = true
       cancelAnimationFrame(rafRef.current)
-      detectorRef.current?.dispose()
-      detectorRef.current = null
+      directorRef.current?.dispose()
+      directorRef.current = null
+      directorSlugRef.current = null
+      rendererRef.current?.dispose()
+      rendererRef.current = null
+      engineRef.current?.dispose()
+      engineRef.current = null
+      governorRef.current = null
       sourceRef.current?.stop()
       sourceRef.current = null
       speakerRef.current?.stop()
     }
-  }, [videoRef, canvasRef, demoVideoUrl, modelName, setStageBoth, restartFraming, buildAnalyzer, lang]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [videoRef, canvasRef, demoVideoUrl, probe, active, setStageBoth, restartFraming, buildAnalyzer, lang, queueLive, flushLive])
 
   const harvest = useCallback(() => {
     const an = analyzerRef.current
@@ -296,6 +457,8 @@ export function useWorkoutRunner(opts: RunnerOptions): RunnerApi {
       repEvents: snap.repEvents,
     }
     analyzerRef.current = null
+    directorRef.current?.onSetEnd()
+    governorRef.current?.setLocked(false)
     return out
   }, [])
 
@@ -313,5 +476,16 @@ export function useWorkoutRunner(opts: RunnerOptions): RunnerApi {
   // Mirror handled by CSS on the video/canvas; nothing to do here.
   void mirror
 
-  return { stage, framing, countdown, error, modelName, harvest, restartFraming, switchCamera }
+  return {
+    stage,
+    framing,
+    countdown,
+    error,
+    modelName: TIER_PROFILES[tier].model,
+    tier,
+    engineKind,
+    harvest,
+    restartFraming,
+    switchCamera,
+  }
 }

@@ -1,4 +1,5 @@
 import type { Pose } from '@/cv/pose/landmarks'
+import type { RepKinematics } from '@/cv/engine/FeatureTrace'
 
 export type Features = Record<string, number>
 
@@ -65,6 +66,48 @@ export interface HoldConfig {
   graceFrames?: number
 }
 
+export interface I18n {
+  en: string
+  hi: string
+}
+
+/**
+ * Teaching content for the guided tutorial. Lives beside the rules on purpose: the
+ * mistakes it warns about are keyed by `FormRule.id`, so the tutorial can only describe
+ * errors the analyzer can actually detect, and adding an exercise stays a one-file job.
+ */
+export interface TutorialSpec {
+  /** Ordered coaching points shown while the demo loops. */
+  steps: { id: string; title: I18n; body: I18n }[]
+  /** The two or three things that matter most, shown as a checklist. */
+  keyPoints: I18n[]
+  /** What tends to go wrong, keyed by the rule that catches it. */
+  commonMistakes: Record<string, I18n>
+  /** Spoken while the user shadows the demo. */
+  shadowCue: I18n
+}
+
+/**
+ * Domain knowledge handed to the coach model alongside a rep's joint-angle series.
+ *
+ * This deliberately supplies *understanding*, not conclusions. The rules already compute
+ * verdicts; if the model were only given those it could paraphrase them and nothing more.
+ * Given the glossary, the envelope of a good rep and the coaching notes, it can reason about
+ * the numbers directly — which is what lets it catch tempo drift, asymmetry, fatigue and
+ * compensation patterns that no FormRule encodes.
+ */
+export interface CoachingSpec {
+  /** What each feature means, in words. Keys must match the keys `features()` returns. */
+  glossary: Record<string, string>
+  reference: {
+    /** The band a good rep passes through. Not a rule — a yardstick for the model. */
+    angles: Record<string, { top?: [number, number]; bottom?: [number, number]; max?: number; min?: number }>
+    tempo: { descentMs?: [number, number]; ascentMs?: [number, number]; bottomMs?: [number, number] }
+  }
+  /** How this movement fails, and what actually fixes it. */
+  notes: string
+}
+
 export interface ExerciseDefinition {
   id: string
   name: string
@@ -77,11 +120,13 @@ export interface ExerciseDefinition {
   rules: FormRule[]
   /** Positive cue spoken after N clean reps in a row. */
   praise?: string
+  tutorial?: TutorialSpec
+  coaching?: CoachingSpec
 }
 
 export type AnalyzerEvent =
   | { type: 'phase'; phase: Phase }
-  | { type: 'rep'; count: number; score: number; violations: Violation[]; stats: RepStats }
+  | { type: 'rep'; count: number; score: number; violations: Violation[]; stats: RepStats; kinematics: RepKinematics }
   | { type: 'partial'; violations: Violation[] }
   | { type: 'hold_tick'; heldMs: number; inTolerance: boolean; violations: Violation[] }
   | { type: 'gated'; reason: 'visibility' }

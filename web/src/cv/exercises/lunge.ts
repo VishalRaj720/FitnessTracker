@@ -63,4 +63,64 @@ export const lunge: ExerciseDefinition = {
     },
   ],
   praise: 'Strong lunge',
+  coaching: {
+    glossary: {
+      minKnee: 'the more bent of the two knee angles, in degrees. This is the front leg at the bottom of a lunge; 90 is a full lunge, 180 is standing.',
+      torsoLean: 'degrees the torso is tilted away from vertical. 0 is perfectly upright.',
+      stance: 'how unevenly the two feet are placed front-to-back, relative to the hips. Near 0 means the feet are almost level — barely a lunge at all.',
+    },
+    reference: {
+      angles: {
+        minKnee: { top: [155, 180], bottom: [80, 110] },
+        torsoLean: { max: 25 },
+        stance: { min: 0.12 },
+      },
+      tempo: { descentMs: [900, 2000], ascentMs: [700, 1600], bottomMs: [0, 700] },
+    },
+    notes: [
+      'A small stance is the root cause of most shallow lunges: with the feet too close together the front knee cannot reach 90 without the knee travelling far past the toes, so the user stops short. Cue a longer step before cueing more depth.',
+      'Lunges expose left/right differences more than any other movement here. Comparing minKnee and stance across consecutive reps — which alternate legs — is the way to spot one side being consistently shallower or less stable.',
+      'Leaning over the front thigh (torsoLean climbing at the bottom) shifts the work off the glutes and usually means the step was too short or the trunk is tired.',
+      'Descending forward instead of straight down shows up as stance shrinking through the descent.',
+    ].join(' '),
+  },
+  tutorial: {
+    steps: [
+      {
+        id: 'step',
+        title: { en: 'Step forward', hi: 'आगे कदम रखें' },
+        body: {
+          en: 'Stand side-on. Take a long step forward — long enough that both knees can reach 90 degrees.',
+          hi: 'बगल से खड़े हों। लंबा कदम आगे रखें ताकि दोनों घुटने 90 डिग्री तक पहुँच सकें।',
+        },
+      },
+      {
+        id: 'drop',
+        title: { en: 'Drop the back knee', hi: 'पिछला घुटना नीचे लाएँ' },
+        body: {
+          en: 'Lower straight down, not forward. The back knee travels toward the floor and stops just short of it.',
+          hi: 'सीधे नीचे जाएँ, आगे नहीं। पिछला घुटना फ़र्श के पास तक जाए।',
+        },
+      },
+      {
+        id: 'alternate',
+        title: { en: 'Alternate legs', hi: 'पैर बदलते रहें' },
+        body: {
+          en: 'Push back to standing and switch legs. Each lunge on either leg counts as one rep.',
+          hi: 'वापस खड़े हों और पैर बदलें। हर लंज एक रेप गिना जाता है।',
+        },
+      },
+    ],
+    keyPoints: [
+      { en: 'Both knees to about 90 degrees', hi: 'दोनों घुटने लगभग 90 डिग्री' },
+      { en: 'Torso stays upright', hi: 'धड़ सीधा रहे' },
+      { en: 'Lower straight down, not forward', hi: 'सीधे नीचे, आगे नहीं' },
+    ],
+    commonMistakes: {
+      depth: { en: 'Too short a step, so the back knee never drops far enough.', hi: 'कदम छोटा होना, जिससे पिछला घुटना नीचे नहीं आता।' },
+      torso_lean: { en: 'Leaning over the front thigh instead of staying tall.', hi: 'सीधे रहने के बजाय आगे की जांघ पर झुकना।' },
+      tempo: { en: 'Falling into the bottom instead of controlling it.', hi: 'नियंत्रण के बिना नीचे गिरना।' },
+    },
+    shadowCue: { en: 'Match the ghost — straight down', hi: 'आकृति के साथ — सीधे नीचे' },
+  },
 }

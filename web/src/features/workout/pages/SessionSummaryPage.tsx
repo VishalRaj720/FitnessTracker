@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { Badge, Button, Card, PageTitle, Stat } from '@/components/ui'
+import { DebriefCard } from '@/features/companion/DebriefCard'
 import { useSession, useSetRpe } from '@/features/workout/api'
 import { useSessionStore } from '@/features/workout/store/sessionStore'
 import { fmtMinutes } from '@/lib/format'
@@ -89,6 +90,8 @@ export function SessionSummaryPage() {
         <Stat label="Verified" value={fmtMinutes(verifiedSeconds)} hint={queued ? 'pending sync' : 'counts on leaderboard'} />
         <Stat label="Duration" value={fmtMinutes(durationSeconds)} />
       </div>
+
+      <DebriefCard sessionId={sessionId} />
 
       <Card className="mb-3 space-y-2">
         {rows.map((r) => {

@@ -13,6 +13,7 @@ import { SetupChecklist, SilhouetteGuide } from '@/features/workout/components/S
 import { errorMessage } from '@/lib/apiClient'
 import { fmtClock } from '@/lib/format'
 import { getDefinition } from '@/cv/exercises'
+import { useCompanionStatus } from '@/features/companion/CoachPage'
 
 export function ActiveSessionPage() {
   const nav = useNavigate()
@@ -33,6 +34,7 @@ export function ActiveSessionPage() {
   const finish = useSessionStore((s) => s.finish)
   const setLastSubmission = useSessionStore((s) => s.setLastSubmission)
 
+  const companion = useCompanionStatus()
   const item = items[currentIndex] ?? null
   const useCamera = !!item?.useCamera
   const def = item ? getDefinition(item.exercise.slug) : null
@@ -61,6 +63,8 @@ export function ActiveSessionPage() {
     lang: prefs.language === 'hi' ? 'hi' : 'en',
     mirror: prefs.mirror !== false,
     demoVideoUrl: anyCamera ? demoVideo : null,
+    coach: companion.data?.enabled === true,
+    setNumber: currentSet,
   })
 
   const manual = useManualCounter(item?.exercise.mode ?? 'reps', status === 'active' && (!useCamera || manualFallback))
@@ -142,7 +146,9 @@ export function ActiveSessionPage() {
       {/* Camera stage */}
       <div className={clsx('relative w-full overflow-hidden bg-slate-950', showCamera ? 'aspect-[3/4] max-h-[62vh] md:aspect-video' : 'h-0')}>
         <video ref={videoRef} className={clsx('absolute inset-0 h-full w-full object-cover', prefs.mirror !== false && !demoVideo && 'scale-x-[-1]')} playsInline muted />
-        <canvas ref={canvasRef} className={clsx('absolute inset-0 h-full w-full object-cover', prefs.mirror !== false && !demoVideo && 'scale-x-[-1]')} />
+        {/* The renderer sizes this to its CSS box and reproduces object-cover itself, so it
+            must not carry object-cover of its own. Mirroring stays a CSS transform. */}
+        <canvas ref={canvasRef} className={clsx('absolute inset-0 h-full w-full', prefs.mirror !== false && !demoVideo && 'scale-x-[-1]')} />
 
         {tracking && runner.stage === 'loading' && (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-slate-950/70">
@@ -284,6 +290,7 @@ export function ActiveSessionPage() {
 }
 
 function RestPanel({ seconds, next, set, onSkip }: { seconds: number; next?: string; set: number; onSkip: () => void }) {
+  const note = useSessionStore((s) => s.live.coachNote)
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-2 text-center">
       <div className="text-xs uppercase tracking-wide text-slate-400">Rest</div>
@@ -291,6 +298,11 @@ function RestPanel({ seconds, next, set, onSkip }: { seconds: number; next?: str
       <div className="text-sm text-slate-300">
         Next: <span className="font-semibold text-white">{next}</span> · set {set}
       </div>
+      {note && (
+        <div className="mt-2 max-w-sm rounded-xl border border-slate-800 bg-slate-900/70 px-3 py-2 text-xs text-slate-300">
+          {note}
+        </div>
+      )}
       <Button variant="secondary" size="sm" onClick={onSkip} className="mt-2">
         Skip rest
       </Button>

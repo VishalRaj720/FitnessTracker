@@ -2,6 +2,7 @@ import type { Pose } from '@/cv/pose/landmarks'
 import type { AnalyzerEvent, ExerciseDefinition, Features, FormRule, RepStats, Violation } from '@/cv/engine/types'
 import { RepCounterFSM } from '@/cv/engine/RepCounterFSM'
 import { HoldTimer } from '@/cv/engine/HoldTimer'
+import { FeatureTrace, type RepKinematics } from '@/cv/engine/FeatureTrace'
 import { VisibilityGate } from '@/cv/filters/visibilityGate'
 import { PoseSmoother } from '@/cv/filters/oneEuro'
 import { estimateFacing } from '@/cv/geometry/orientation'
@@ -46,6 +47,10 @@ export class ExerciseAnalyzer {
   private holdViolationFrames = 0
   private lastHoldMs = 0
   private lastFeatures: Features = {}
+  /** Per-frame feature history, kept so completed reps can be described as a movement. */
+  private trace = new FeatureTrace()
+  private phaseAt: Record<string, number> = {}
+  private repKinematics: RepKinematics[] = []
 
   constructor(
     public readonly def: ExerciseDefinition,
@@ -91,12 +96,14 @@ export class ExerciseAnalyzer {
     const pose = this.smoother.apply(g.pose as Pose, tMs)
     const features = this.def.features(pose)
     this.lastFeatures = features
+    this.trace.push(features, tMs)
     const facing = estimateFacing(pose)
 
     if (this.fsm) {
       const out = this.fsm.update(features, tMs)
       if (out.kind === 'phase' && out.phase !== this.lastPhase) {
         this.lastPhase = out.phase
+        this.phaseAt[out.phase] = tMs
         events.push({ type: 'phase', phase: out.phase })
       } else if (out.kind === 'rep') {
         this.lastPhase = 'TOP'
@@ -112,8 +119,12 @@ export class ExerciseAnalyzer {
           Math.round(out.stats.extreme * 10) / 10,
           Math.round(out.stats.durationMs),
         ])
+        const kinematics = this.buildKinematics(out.stats.startTs, tMs)
+        this.repKinematics.push(kinematics)
+        if (this.repKinematics.length > 12) this.repKinematics.shift()
+        this.phaseAt = {}
         events.push({ type: 'phase', phase: 'TOP' })
-        events.push({ type: 'rep', count: this.reps, score, violations, stats: out.stats })
+        events.push({ type: 'rep', count: this.reps, score, violations, stats: out.stats, kinematics })
       } else if (out.kind === 'partial') {
         this.lastPhase = 'TOP'
         this.partials += 1
@@ -191,6 +202,39 @@ export class ExerciseAnalyzer {
 
   meanVisibility(): number {
     return this.visCount ? this.visSum / this.visCount : 0
+  }
+
+  /**
+   * Turn the frames of one repetition into a compact description of the movement.
+   * Phase boundaries come from the FSM's own transitions, so "descent" means exactly what
+   * the rep counter thought it meant.
+   */
+  private buildKinematics(startTs: number, endTs: number): RepKinematics {
+    const bottomAt = this.phaseAt.BOTTOM ?? endTs
+    const upAt = this.phaseAt.GOING_UP ?? endTs
+    return {
+      series: this.trace.sample(startTs, endTs, 8),
+      descentMs: Math.max(0, Math.round(bottomAt - startTs)),
+      bottomMs: Math.max(0, Math.round(upAt - bottomAt)),
+      ascentMs: Math.max(0, Math.round(endTs - upAt)),
+      totalMs: Math.max(0, Math.round(endTs - startTs)),
+    }
+  }
+
+  /** The last `n` completed reps, most recent last. Trend lives here, not in a single rep. */
+  recentKinematics(n = 3): RepKinematics[] {
+    return this.repKinematics.slice(-n)
+  }
+
+  /** For holds, where there are no reps: the last `windowMs` of the feature series. */
+  holdKinematics(nowMs: number, windowMs = 6000): RepKinematics {
+    return {
+      series: this.trace.sample(nowMs - windowMs, nowMs, 8),
+      descentMs: 0,
+      bottomMs: Math.round(Math.min(windowMs, this.lastHoldMs)),
+      ascentMs: 0,
+      totalMs: Math.round(windowMs),
+    }
   }
 
   private elapsedMs = 0

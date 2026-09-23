@@ -1,9 +1,11 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { Alert, Badge, Button, Card, Chip, PageTitle, Spinner } from '@/components/ui'
 import { api, errorMessage } from '@/lib/apiClient'
 import { CATEGORY_LABEL } from '@/lib/format'
+import { getCompletedTutorials } from '@/features/tutorial/completion'
+import { getDefinition } from '@/cv/exercises'
 import type { Exercise, PlanItem } from '@/types/api'
 
 export function useExercises() {
@@ -15,6 +17,11 @@ export function ExercisesPage() {
   const q = useExercises()
   const [cat, setCat] = useState<string | null>(null)
   const [open, setOpen] = useState<Exercise | null>(null)
+  const [learned, setLearned] = useState<string[]>([])
+
+  useEffect(() => {
+    void getCompletedTutorials().then(setLearned)
+  }, [])
 
   const list = (q.data ?? []).filter((e) => !cat || e.category === cat)
   const cats = Array.from(new Set((q.data ?? []).map((e) => e.category)))
@@ -58,6 +65,9 @@ export function ExercisesPage() {
               </div>
               <div className="font-semibold">{ex.name}</div>
               <div className="text-xs text-slate-400">{ex.muscle_groups.join(', ')}</div>
+              {getDefinition(ex.slug)?.tutorial && !learned.includes(ex.slug) && (
+                <div className="mt-1.5 text-[11px] font-medium text-brand-300">Tutorial available</div>
+              )}
             </Card>
           </button>
         ))}
@@ -74,6 +84,15 @@ export function ExercisesPage() {
               {CATEGORY_LABEL[open.category]} · {open.muscle_groups.join(', ')}
             </div>
             <p className="mb-4 text-sm text-slate-300">{open.instructions}</p>
+            {getDefinition(open.slug)?.tutorial && (
+              <Button
+                variant="secondary"
+                className="mb-2 w-full"
+                onClick={() => nav(`/exercises/${open.slug}/tutorial`)}
+              >
+                {learned.includes(open.slug) ? 'Review the tutorial' : 'Learn this first'}
+              </Button>
+            )}
             <div className="flex gap-2">
               <Button variant="secondary" onClick={() => setOpen(null)}>
                 Close

@@ -11,32 +11,63 @@ export interface FrameSource {
   now(): number
 }
 
+/** Requested capture geometry. The governor changes this as the device proves itself. */
+export interface CaptureProfile {
+  width: number
+  height: number
+  frameRate: number
+}
+
+export const DEFAULT_CAPTURE: CaptureProfile = { width: 640, height: 480, frameRate: 30 }
+
 export class CameraSource implements FrameSource {
   readonly kind = 'camera' as const
   private stream: MediaStream | null = null
+  private profile: CaptureProfile
 
   constructor(
     public readonly video: HTMLVideoElement,
     private facingMode: 'user' | 'environment' = 'user',
-  ) {}
+    profile: CaptureProfile = DEFAULT_CAPTURE,
+  ) {
+    this.profile = profile
+  }
 
   async start(): Promise<void> {
     if (!navigator.mediaDevices?.getUserMedia) throw new Error('Camera not supported in this browser')
-    const constraints: MediaStreamConstraints = {
-      audio: false,
-      video: {
-        facingMode: this.facingMode,
-        width: { ideal: 640 },
-        height: { ideal: 480 },
-        frameRate: { ideal: 30, max: 30 },
-      },
-    }
+    const constraints: MediaStreamConstraints = { audio: false, video: this.videoConstraints() }
     this.stream = await navigator.mediaDevices.getUserMedia(constraints)
     this.video.srcObject = this.stream
     this.video.muted = true
     this.video.playsInline = true
     await this.video.play()
     await waitForDimensions(this.video)
+  }
+
+  private videoConstraints(): MediaTrackConstraints {
+    return {
+      facingMode: this.facingMode,
+      width: { ideal: this.profile.width },
+      height: { ideal: this.profile.height },
+      // `ideal` rather than `max` so a 60 fps capable camera is actually allowed to reach it.
+      frameRate: { ideal: this.profile.frameRate },
+    }
+  }
+
+  /**
+   * Retune the live track in place. Restarting the stream would drop the user out of the
+   * framing stage, so a tier change must never do that.
+   */
+  async applyProfile(profile: CaptureProfile): Promise<void> {
+    this.profile = profile
+    const track = this.stream?.getVideoTracks()[0]
+    if (!track) return
+    try {
+      await track.applyConstraints(this.videoConstraints())
+    } catch {
+      // Some devices refuse mid-stream constraint changes; the inference-side downscale
+      // and frame-rate throttle still apply, so this is not fatal.
+    }
   }
 
   stop(): void {

@@ -42,11 +42,19 @@ export interface LiveState {
   phase: string
   inTolerance: boolean
   formScore: number
-  cue: { text: string; tone: 'correction' | 'praise' | 'count' | 'info'; at: number } | null
+  cue: { text: string; tone: 'correction' | 'praise' | 'count' | 'info' | 'coach'; at: number } | null
+  /** The coach's latest observation, surfaced between sets rather than shouted mid-rep. */
+  coachNote: string | null
   visibility: number
   gated: boolean
+  /** Consecutive reps with no rule violations. Drives the tutorial's checkpoint. */
+  cleanStreak: number
+  /** Inference rate (poses per second). Decoupled from, and usually well below, renderFps. */
   fps: number
   inferenceMs: number
+  /** Overlay redraw rate. Should sit at the display refresh even when fps is low. */
+  renderFps: number
+  tier: 'high' | 'medium' | 'low'
 }
 
 interface SessionState {
@@ -70,6 +78,7 @@ interface SessionState {
   markItemStarted: () => void
   updateLive: (patch: Partial<LiveState>) => void
   setCue: (cue: LiveState['cue']) => void
+  setCoachNote: (note: string | null) => void
   completeSet: (partial: Partial<ExerciseResult> & { repsCompleted?: number; secondsHeld?: number; formScore?: number | null; meanVisibility?: number | null; formFlags?: Record<string, number>; repEvents?: number[][] }) => void
   skipItem: () => void
   endRest: () => void
@@ -86,10 +95,14 @@ const initialLive: LiveState = {
   inTolerance: false,
   formScore: 100,
   cue: null,
+  coachNote: null,
   visibility: 0,
   gated: false,
+  cleanStreak: 0,
   fps: 0,
   inferenceMs: 0,
+  renderFps: 0,
+  tier: 'medium',
 }
 
 function toRunnerItems(items: PlanItem[], mode: 'cv' | 'manual', only?: string): RunnerItem[] {
@@ -147,6 +160,8 @@ export const useSessionStore = create<SessionState>()((set, get) => ({
   updateLive: (patch) => set((s) => ({ live: { ...s.live, ...patch } })),
 
   setCue: (cue) => set((s) => ({ live: { ...s.live, cue } })),
+
+  setCoachNote: (coachNote) => set((s) => ({ live: { ...s.live, coachNote } })),
 
   completeSet: (partial) => {
     const s = get()
