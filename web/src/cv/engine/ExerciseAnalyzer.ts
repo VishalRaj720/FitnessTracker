@@ -107,6 +107,14 @@ export class ExerciseAnalyzer {
         events.push({ type: 'phase', phase: out.phase })
       } else if (out.kind === 'rep') {
         this.lastPhase = 'TOP'
+        // Describe the rep before judging it. The per-rep rules read this rep's curve and
+        // the trend rules compare it with the ones before, so the history has to already
+        // include it by the time `evaluate` runs.
+        const kinematics = this.buildKinematics(out.stats.startTs, tMs)
+        out.stats.kinematics = kinematics
+        this.repKinematics.push(kinematics)
+        if (this.repKinematics.length > 12) this.repKinematics.shift()
+        this.phaseAt = {}
         const violations = this.evaluate('rep_complete', features, out.stats, facing)
         const score = Math.max(0, 100 - violations.reduce((s, v) => s + v.penalty, 0))
         this.reps += 1
@@ -119,10 +127,6 @@ export class ExerciseAnalyzer {
           Math.round(out.stats.extreme * 10) / 10,
           Math.round(out.stats.durationMs),
         ])
-        const kinematics = this.buildKinematics(out.stats.startTs, tMs)
-        this.repKinematics.push(kinematics)
-        if (this.repKinematics.length > 12) this.repKinematics.shift()
-        this.phaseAt = {}
         events.push({ type: 'phase', phase: 'TOP' })
         events.push({ type: 'rep', count: this.reps, score, violations, stats: out.stats, kinematics })
       } else if (out.kind === 'partial') {
@@ -168,7 +172,7 @@ export class ExerciseAnalyzer {
       if (rule.orientation && facing !== 'unknown' && rule.orientation !== facing) continue
       let violated = false
       try {
-        violated = rule.check(f, rep)
+        violated = rule.check(f, rep, this.repKinematics)
       } catch {
         violated = false
       }

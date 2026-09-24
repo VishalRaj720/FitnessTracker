@@ -22,7 +22,9 @@ export const plank: ExerciseDefinition = {
     // depends on direction, so normalise by the x-order of shoulder and ankle.
     let off = signedDistanceFromLine(j.hip, j.shoulder, j.ankle) / torso
     if (j.shoulder.x > j.ankle.x) off = -off
-    return { bodyLine, hipOffset: off }
+    // Soft knees do not move the shoulder-hip-ankle angle much, so bodyLine cannot see them.
+    const kneeAngle = angleDeg(j.hip, j.knee, j.ankle)
+    return { bodyLine, hipOffset: off, kneeAngle }
   },
   hold: { feature: 'bodyLine', min: 158, max: 185, graceFrames: 4 },
   rules: [
@@ -42,17 +44,47 @@ export const plank: ExerciseDefinition = {
       penalty: 0,
       check: (f) => f.bodyLine < 158 && (f.hipOffset ?? 0) <= 0,
     },
+    // Graded severity. These overlap the two rules above on purpose: when the position is
+    // badly lost, both fire and the arbiter speaks the higher-severity one, so the cue gets
+    // more urgent without a second threshold system. Hold penalties are 0, so nothing
+    // double-counts — the score for a hold is time in tolerance, not a penalty sum.
+    {
+      id: 'hip_sag_severe',
+      phase: 'any',
+      cue: { en: 'Reset — come back up to the line', hi: 'रुकें — सीध में वापस आएँ' },
+      severity: 3,
+      penalty: 0,
+      check: (f) => f.bodyLine < 142 && (f.hipOffset ?? 0) > 0,
+    },
+    {
+      id: 'hip_pike_severe',
+      phase: 'any',
+      cue: { en: 'Drop your hips right down into line', hi: 'कूल्हे पूरी तरह सीध में लाएँ' },
+      severity: 3,
+      penalty: 0,
+      check: (f) => f.bodyLine < 142 && (f.hipOffset ?? 0) <= 0,
+    },
+    {
+      id: 'knee_bend',
+      phase: 'any',
+      cue: { en: 'Straighten your legs', hi: 'पैर सीधे करें' },
+      severity: 2,
+      penalty: 0,
+      check: (f) => (f.kneeAngle ?? 180) < 158,
+    },
   ],
   praise: 'Hold it',
   coaching: {
     glossary: {
       bodyLine: 'shoulder-hip-ankle angle in degrees. 180 is a perfectly straight body; the timer only runs between 158 and 185.',
       hipOffset: 'how far the hips sit off the straight line between shoulders and ankles, in torso lengths. Positive means the hips have dropped below the line; negative means they are lifted above it.',
+      kneeAngle: 'hip-knee-ankle angle in degrees. 180 is a straight leg; anything much below means the knees have softened and the hold is being made easier.',
     },
     reference: {
       angles: {
         bodyLine: { min: 158, max: 185 },
         hipOffset: { min: -0.05, max: 0.05 },
+        kneeAngle: { min: 165 },
       },
       tempo: {},
     },
@@ -98,6 +130,7 @@ export const plank: ExerciseDefinition = {
     commonMistakes: {
       hip_sag: { en: 'Hips sinking toward the floor, which stops the timer.', hi: 'कूल्हे नीचे गिरना, जिससे टाइमर रुक जाता है।' },
       hip_pike: { en: 'Hips riding up into an upside-down V to make it easier.', hi: 'आसान करने के लिए कूल्हे ऊपर उठाना।' },
+      knee_bend: { en: 'Letting the knees bend, which takes the work off the middle.', hi: 'घुटने मोड़ लेना, जिससे पेट पर ज़ोर कम हो जाता है।' },
     },
     shadowCue: { en: 'Hold the line', hi: 'सीध बनाए रखें' },
   },

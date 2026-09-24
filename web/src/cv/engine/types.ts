@@ -15,6 +15,14 @@ export interface RepStats {
   atBottom: Features
   /** Snapshot of all features at rep completion (back at TOP). */
   atTop: Features
+  /**
+   * The shape of the rep: every feature sampled across it, plus the phase durations.
+   *
+   * Present for completed reps, absent for partials (there was no rep to describe). Rules
+   * read it through the helpers in `traceMath` so they can judge *how* the rep was done —
+   * dropped or lowered, bounced or paused, hips before chest — not just where it ended up.
+   */
+  kinematics?: RepKinematics
 }
 
 export interface Violation {
@@ -33,8 +41,14 @@ export interface FormRule {
   penalty: number
   /** Only valid from this camera view; skipped otherwise. */
   orientation?: 'side' | 'front'
-  /** Return true when the rule is violated. */
-  check: (f: Features, rep: RepStats | null) => boolean
+  /**
+   * Return true when the rule is violated.
+   *
+   * `history` holds the recent completed reps, oldest first, with the rep being judged
+   * last. Trend rules (fatigue, asymmetry, fading depth) need it; everything else ignores
+   * it. Empty for holds and for the first reps of a set.
+   */
+  check: (f: Features, rep: RepStats | null, history?: RepKinematics[]) => boolean
 }
 
 export interface RepFsmConfig {

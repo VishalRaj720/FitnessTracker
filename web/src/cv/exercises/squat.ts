@@ -1,6 +1,7 @@
 import type { ExerciseDefinition } from '@/cv/engine/types'
 import { LM } from '@/cv/pose/landmarks'
-import { angleDeg, betterSide, dist, mid, sideJoints, verticalAngleDeg } from '@/cv/geometry/angles'
+import { angleDeg, betterSide, dist, mid, sideJoints, torsoLength, verticalAngleDeg } from '@/cv/geometry/angles'
+import { ascentWindow, changeOver, maxIn, minIn, trendAcross } from '@/cv/engine/traceMath'
 
 /**
  * Squat — side view.
@@ -23,7 +24,14 @@ export const squat: ExerciseDefinition = {
     const ankleSpread = dist(pose[LM.L_ANKLE], pose[LM.R_ANKLE])
     const kneeAnkleRatio = ankleSpread > 1e-3 ? kneeSpread / ankleSpread : 1
     const hipY = mid(pose[LM.L_HIP], pose[LM.R_HIP]).y
-    return { kneeAngle, hipAngle, torsoLean, kneeAnkleRatio, hipY }
+    // Heel lift: y grows downward, so a heel that has left the floor sits *above* the toe.
+    // Both points are low-confidence on a phone at floor level, so a foot the model cannot
+    // see reports 0 rather than a fault — the rule reading this must not fire on a guess.
+    const heel = side === 'left' ? pose[LM.L_HEEL] : pose[LM.R_HEEL]
+    const toe = side === 'left' ? pose[LM.L_FOOT] : pose[LM.R_FOOT]
+    const footSeen = Math.min(heel?.visibility ?? 0, toe?.visibility ?? 0)
+    const heelLift = footSeen < 0.5 ? 0 : (toe.y - heel.y) / Math.max(1e-3, torsoLength(pose))
+    return { kneeAngle, hipAngle, torsoLean, kneeAnkleRatio, hipY, heelLift }
   },
   fsm: {
     feature: 'kneeAngle',
@@ -79,6 +87,108 @@ export const squat: ExerciseDefinition = {
       orientation: 'front',
       check: (_f, rep) => !!rep && (rep.atBottom.kneeAnkleRatio ?? 1) < 0.75,
     },
+    // ---- Rules that read the shape of the rep, not just its extremes -------------------
+    //
+    // Everything below needs `rep.kinematics` (this rep's curve) or `history` (the reps
+    // before it). These are the faults a coach calls out mid-set that a pair of snapshots
+    // cannot see: how the rep was performed rather than where it ended up.
+    {
+      id: 'hips_before_chest',
+      phase: 'rep_complete',
+      cue: { en: 'Chest first, then hips', hi: 'पहले सीना, फिर कूल्हे' },
+      severity: 3,
+      penalty: 15,
+      orientation: 'side',
+      // The good-morning: out of the hole the knees straighten while the torso stays folded
+      // over, turning the squat into a stiff-legged back lift. Judged over the first half of
+      // the ascent, where the two joints are supposed to move together.
+      check: (_f, rep) => {
+        const k = rep?.kinematics
+        if (!k) return false
+        const [u0, u1] = ascentWindow(k)
+        const half = u0 + (u1 - u0) * 0.55
+        const kneeOpened = changeOver(k.series.kneeAngle, u0, half)
+        const leanRecovered = -changeOver(k.series.torsoLean, u0, half)
+        return kneeOpened > 20 && leanRecovered < 4
+      },
+    },
+    {
+      id: 'lean_creep',
+      phase: 'rep_complete',
+      cue: { en: 'Brace your core — chest is dropping', hi: 'पेट कसें — सीना गिर रहा है' },
+      severity: 2,
+      penalty: 10,
+      orientation: 'side',
+      // Lean climbing while depth holds is the trunk tiring, not the legs. Cue bracing, not
+      // depth — telling someone to go lower here just buys more lean.
+      check: (_f, _rep, history) => {
+        const lean = trendAcross(history, (k) => maxIn(k.series.torsoLean))
+        const depth = trendAcross(history, (k) => minIn(k.series.kneeAngle))
+        return lean > 3 && Math.abs(depth) < 6
+      },
+    },
+    {
+      id: 'depth_fade',
+      phase: 'rep_complete',
+      cue: { en: 'Same depth as your first reps', hi: 'पहले जितना नीचे जाएँ' },
+      severity: 2,
+      penalty: 10,
+      check: (_f, _rep, history) => trendAcross(history, (k) => minIn(k.series.kneeAngle)) > 5,
+    },
+    //
+    // Bouncing out of the hole is deliberately NOT a rule here, though it is a real fault
+    // and the notes below ask the model about it. It cannot be measured from what the
+    // analyzer keeps: `bottomMs` is time spent below a fixed angle, so a deep rep reports a
+    // long bottom whether or not the user paused, and eight samples per rep is too coarse to
+    // resolve the dwell directly. A rule for it would be a guess dressed as a measurement.
+    {
+      id: 'dropping',
+      phase: 'rep_complete',
+      cue: { en: 'Lower it under control', hi: 'नियंत्रण से नीचे जाएँ' },
+      severity: 2,
+      penalty: 10,
+      // Falling in rather than lowering: the descent takes half the time the ascent does.
+      check: (_f, rep) => {
+        const k = rep?.kinematics
+        return !!k && k.descentMs > 0 && k.ascentMs > 0 && k.descentMs < 400 && k.descentMs * 1.5 < k.ascentMs
+      },
+    },
+    {
+      id: 'heel_lift',
+      phase: 'rep_complete',
+      cue: { en: 'Keep your heels down', hi: 'एड़ियाँ ज़मीन पर रखें' },
+      severity: 2,
+      penalty: 15,
+      orientation: 'side',
+      check: (_f, rep) => !!rep && (rep.atBottom.heelLift ?? 0) > 0.08,
+    },
+    {
+      id: 'shallow_with_lean',
+      phase: 'rep_complete',
+      cue: { en: 'Widen your stance and sit back', hi: 'पैर चौड़े करें और पीछे बैठें' },
+      severity: 2,
+      penalty: 8,
+      orientation: 'side',
+      // Shallow *and* leaning is one problem, not two: the depth is missing because the
+      // ankles or the stance will not allow it, so "go lower" is the wrong cue.
+      check: (_f, rep) => !!rep && rep.extreme > 100 && (rep.atBottom.torsoLean ?? 0) > 40,
+    },
+    {
+      id: 'knee_cave_late',
+      phase: 'rep_complete',
+      cue: { en: 'Push your knees out as you stand', hi: 'उठते समय घुटने बाहर रखें' },
+      severity: 2,
+      penalty: 12,
+      orientation: 'front',
+      // Knees that were fine at the bottom and collapse on the way up, the hardest part of
+      // the rep. Knees already in at the bottom are `knee_valgus`, so the two never overlap.
+      check: (_f, rep) => {
+        const k = rep?.kinematics
+        if (!k || !rep || (rep.atBottom.kneeAnkleRatio ?? 1) < 0.75) return false
+        const [u0, u1] = ascentWindow(k)
+        return minIn(k.series.kneeAnkleRatio, u0, u1) < 0.82
+      },
+    },
   ],
   praise: 'Good depth',
   coaching: {
@@ -88,12 +198,14 @@ export const squat: ExerciseDefinition = {
       torsoLean: 'degrees the torso is tilted away from vertical. 0 is perfectly upright.',
       kneeAnkleRatio: 'gap between the knees divided by the gap between the ankles. Below 1 means the knees are falling inward. Only meaningful from a front view.',
       hipY: 'height of the hips in the frame, measured downward from the top. Larger means lower.',
+      heelLift: 'how far the heel has come off the floor, in torso lengths, measured against the toe. 0 is a flat foot; positive means the weight has shifted onto the toes.',
     },
     reference: {
       angles: {
         kneeAngle: { top: [160, 180], bottom: [70, 100] },
         torsoLean: { max: 45 },
         kneeAnkleRatio: { min: 0.85 },
+        heelLift: { max: 0.05 },
       },
       tempo: { descentMs: [800, 1800], ascentMs: [600, 1500], bottomMs: [0, 700] },
     },
@@ -151,6 +263,12 @@ export const squat: ExerciseDefinition = {
       torso_lean: { en: 'Folding forward at the chest instead of hinging at the hips.', hi: 'कूल्हों से झुकने के बजाय सीने से आगे झुकना।' },
       knee_valgus: { en: 'Letting the knees collapse inward as you stand up.', hi: 'उठते समय घुटनों का अंदर की ओर मुड़ना।' },
       tempo: { en: 'Dropping and bouncing instead of controlling the descent.', hi: 'नियंत्रण के बिना गिरना और उछलना।' },
+      hips_before_chest: {
+        en: 'Standing up hips-first, leaving the chest folded over — the squat becomes a back lift.',
+        hi: 'पहले कूल्हे उठाना और सीना झुका रहना — स्क्वाट पीठ का व्यायाम बन जाता है।',
+      },
+      heel_lift: { en: 'Heels coming off the floor, usually tight ankles.', hi: 'एड़ियाँ ज़मीन से उठना, आमतौर पर टखनों की जकड़न।' },
+      depth_fade: { en: 'Reps getting shallower as the set goes on.', hi: 'सेट के अंत तक रेप कम गहरे होना।' },
     },
     shadowCue: { en: 'Match the ghost — sit back and down', hi: 'आकृति के साथ चलें — पीछे और नीचे बैठें' },
   },
