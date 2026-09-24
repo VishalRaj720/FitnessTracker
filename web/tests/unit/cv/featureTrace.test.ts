@@ -114,8 +114,13 @@ describe('rep kinematics from a known movement', () => {
     const rep = events.find((e) => e.type === 'rep')
     if (rep?.type !== 'rep') throw new Error('no rep')
     // The secondary features are where the interesting observations live: a coach that only
-    // sees kneeAngle can talk about depth and nothing else.
-    expect(Object.keys(rep.kinematics.series).sort()).toEqual(['hipAngle', 'hipY', 'kneeAngle', 'kneeAnkleRatio', 'torsoLean'])
+    // sees kneeAngle can talk about depth and nothing else. Compared against what the
+    // definition actually produces, so adding a feature cannot silently stop being traced.
+    const squatClip = DEMO_CLIPS.squat
+    const standing = projectToPose(sampleClipWorld(squatClip, 0), squatClip.view)
+    const produced = Object.keys(EXERCISE_DEFINITIONS.squat.features(standing)).sort()
+    expect(produced.length).toBeGreaterThan(3)
+    expect(Object.keys(rep.kinematics.series).sort()).toEqual(produced)
   })
 
   it('keeps a rolling window of recent reps for trend, not just the last one', () => {
