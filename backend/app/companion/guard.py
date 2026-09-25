@@ -38,21 +38,24 @@ MEDICAL_REPLY = {
     ),
 }
 
+# The coach still never improvises food advice. The Nutrition tab computes targets from the
+# person's own profile with fixed, published formulas, so that is where these questions go.
 NUTRITION_REPLY = {
     "en": (
-        "I don't give nutrition or weight targets. I can help with the training side — "
-        "what you train, how often, and how your form is holding up."
+        "I don't improvise nutrition or weight targets — your Nutrition tab calculates them "
+        "from your goal and body metrics. I can help with the training side: what you train, "
+        "how often, and how your form is holding up."
     ),
     "hi": (
-        "मैं खानपान या वज़न के लक्ष्य नहीं बताता। ट्रेनिंग के हिस्से में मदद कर सकता हूँ — क्या करें, "
-        "कितनी बार, और फ़ॉर्म कैसी चल रही है।"
+        "मैं खानपान या वज़न के लक्ष्य अपने मन से नहीं बताता — आपका Nutrition टैब आपके लक्ष्य और "
+        "शरीर के माप से उन्हें गिनता है। ट्रेनिंग में मदद कर सकता हूँ — क्या करें, कितनी बार, "
+        "और फ़ॉर्म कैसी चल रही है।"
     ),
 }
 
 OUT_OF_SCOPE_REPLY = {
     "en": (
-        "That's outside what I can help with. "
-        "Ask me about your training, your form or your plan."
+        "That's outside what I can help with. Ask me about your training, your form or your plan."
     ),
     "hi": "यह मेरे दायरे से बाहर है। अपनी ट्रेनिंग, फ़ॉर्म या प्लान के बारे में पूछें।",
 }
