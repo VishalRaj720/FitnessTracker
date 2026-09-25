@@ -9,6 +9,7 @@ An **offline-first PWA** that turns a hostel room into a coached gym:
 - 🧠 **Tomorrow's plan adapts** to what the camera saw today, and tells you *why* in plain English ("+1 squats because your form has been consistent").
 - 🏆 **Camera-verified minutes** drive squad and institute leaderboards that nobody can fake — you can't type "100 push-ups" into this app.
 - 📊 A **campus dashboard** gives the institute a live Fit India participation report at ₹0 per student.
+- 🍽️ **Diet & Nutrition** turns your onboarding goal and level into daily calorie, protein, carb, fat, fibre, water and micronutrient targets — with meal ideas from the hostel mess, foods to limit, and a daily intake log.
 
 Design rationale, architecture decisions and roadmap: **[docs/BLUEPRINT.md](docs/BLUEPRINT.md)**.
 
@@ -202,6 +203,7 @@ Under **Profile → Settings** each user can toggle voice cues, Hindi cues, and 
 6. Do squats. The counter ticks on real reps. **Deliberately do a shallow one** — it is *not counted* and the coach says "Go lower". Lean forward → "Chest up".
 7. **Finish workout** → summary with reps, form score, verified minutes, streak, and an RPE picker.
 8. Check **Progress**, **Squad** (verified-minutes leaderboard) and the **campus dashboard**.
+9. Open **Nutrition**: the demo student already has body metrics and a week of meals. Log a food or a glass of water and watch the rings move; try **Log this meal** on a suggestion. (Other demo students, e.g. `vikram@fitsathi.app`, start without a nutrition profile so you can see the setup flow.)
 
 No camera, bad lighting, or testing on a machine without a webcam? Pick **Manual** mode (or the **"Use manual mode"** button) — you tap to count. Manual minutes deliberately **never** count as verified.
 
@@ -218,6 +220,36 @@ The full 8-minute judging script, including fallbacks for things that break live
 | Plank | side, phone on floor | body-line hold timer | Hips up · Lower your hips |
 
 Nine more exercises run in timer/manual mode. Adding a new camera-tracked exercise is **one file** — see [docs/cv-exercise-authoring.md](docs/cv-exercise-authoring.md).
+
+### Diet & nutrition
+
+Nutrition is driven by the **category the person already chose at onboarding** (goal + level + training volume), plus a small nutrition profile (sex, age, height, weight, activity, diet type):
+
+```
+Onboarding goal & level ─┐
+Body metrics & diet ─────┼─► nutrition engine ─► daily targets ─► meal ideas, foods, guidance
+Training days × minutes ─┘      (pure, tested)        │
+                                                      └─► intake log: consumed vs target vs remaining
+```
+
+- **Energy**: Mifflin-St Jeor BMR × activity factor, then the goal's adjustment — fat loss −20% (never below BMR), strength +10%, general/consistency at maintenance.
+- **Macros**: protein per kg scaled by goal and level; fat share by goal with a per-kg floor; carbs fill the rest (never below 130 g).
+- **Micros & water**: iron, calcium and vitamin C from ICMR-NIN 2020 RDAs; fibre at 14 g per 1000 kcal; water from body weight plus weekly training minutes.
+- **Food**: a seeded catalog of 66 common Indian hostel/mess foods (`backend/seeds/foods.json`), filtered by diet type (vegan ⊂ veg ⊂ egg ⊂ non-veg), with FSSAI-style veg/non-veg marks in the UI. Meal suggestions are portioned to each meal's calorie budget.
+- The AI coach still never improvises food advice; it points people to this deterministic tab instead.
+
+| Endpoint | What it does |
+|---|---|
+| `GET/PUT /api/v1/nutrition/profile` | Read or save body metrics and diet type |
+| `POST /api/v1/nutrition/preview` | Targets for unsaved metrics (live preview while typing) |
+| `GET /api/v1/nutrition/plan` | Category, targets, recommended diet, foods, foods to limit, meals, guidance |
+| `GET /api/v1/nutrition/day?date=` | One IST day: targets, consumed, remaining, entries |
+| `GET /api/v1/nutrition/history?days=7` | Daily totals for the intake chart |
+| `GET /api/v1/nutrition/foods?q=&compatible=` | Search the food catalog |
+| `POST /api/v1/nutrition/logs` · `/logs/batch` · `DELETE /logs/{id}` | Log a food, a whole suggested meal, or remove an entry |
+| `POST /api/v1/nutrition/water` | Add (or remove) water for a day |
+
+All of them require the bearer token and only ever touch the caller's own data. New tables are created automatically on start-up (no migration step).
 
 ---
 
@@ -253,13 +285,13 @@ Once loaded over HTTPS, tap your browser's **"Add to Home Screen"** — the app 
 cd backend && uv run pytest -q
 ```
 
-23 tests: auth, onboarding, plan generation and idempotency, session saving/idempotency, verified-minutes calculation, streak edge cases, squads, leaderboard week boundaries, institute aggregates with k-anonymity, and the recommender rules.
+Auth, onboarding, plan generation and idempotency, session saving/idempotency, verified-minutes calculation, streak edge cases, squads, leaderboard week boundaries, institute aggregates with k-anonymity, the recommender rules, the AI coach guard rails, and the nutrition engine and API (targets checked against hand calculations, diet filtering, portioning, logging, water, history and per-user isolation).
 
 ```bash
 cd web && npm test
 ```
 
-CV engine tests: rep counting on synthetic joint-angle trajectories (clean reps, shallow reps, jitter, impossibly fast reps, occlusion), plank hold tolerance, plus any recorded landmark fixtures in `web/tests/fixtures/`.
+CV engine tests: rep counting on synthetic joint-angle trajectories (clean reps, shallow reps, jitter, impossibly fast reps, occlusion), plank hold tolerance, plus any recorded landmark fixtures in `web/tests/fixtures/`. UI tests cover the nutrition helpers and render the daily-intake panel against a payload shaped exactly like the API's.
 
 Lint and typecheck:
 
@@ -282,9 +314,10 @@ FitnessTracker/
 │   │   ├── api/v1/           HTTP routes (thin — parse, call a service, return)
 │   │   ├── services/         business logic; the only layer touching the DB
 │   │   ├── recommender/      rules_v1 plan generator (pure Python, no ORM imports)
+│   │   ├── nutrition/        category-based nutrition engine (pure Python, no ORM imports)
 │   │   ├── models/           SQLAlchemy tables      schemas/  Pydantic DTOs
 │   │   └── core/             config, database, security, logging, errors
-│   ├── seeds/                exercise catalog (JSON) + institute list (CSV)
+│   ├── seeds/                exercise + food catalogs (JSON) + institute list (CSV)
 │   ├── scripts/demo_data.py  generates the demo campus
 │   └── tests/
 ├── web/                      React 19 + Vite + TypeScript PWA
@@ -295,8 +328,10 @@ FitnessTracker/
 │       │   ├── pose/         MediaPipe wrapper       filters/   One-Euro + visibility gate
 │       │   ├── geometry/     angles, orientation     engine/    FSM, hold timer, rules, cues
 │       │   └── exercises/    one declarative file per exercise
-│       ├── features/         one folder per feature (auth, home, workout, squad, …)
-│       ├── components/       UI kit + app shell      lib/       api client, formatting
+│       ├── features/         one folder per feature (auth, home, workout, squad, nutrition, …)
+│       ├── components/       ui/ design-system kit, layout/ app shell, charts/ chart theme
+│       ├── styles/           design tokens (colours, fonts, glows) — self-hosted fonts
+│       ├── lib/              api client, formatting
 │       └── types/api.ts      wire DTOs mirroring the backend schemas
 ├── docs/                     demo script, CV authoring guide
 ├── docs/BLUEPRINT.md         full product + architecture design document
