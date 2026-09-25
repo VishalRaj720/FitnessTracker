@@ -111,13 +111,13 @@ export function RecordFixturePage() {
   return (
     <div className="mx-auto max-w-2xl p-4">
       <PageTitle title="Fixture recorder" subtitle={`dev tool · ${status}`} />
-      <div className="relative mb-3 aspect-video overflow-hidden rounded-2xl bg-black">
+      <div className="relative mb-3 aspect-video overflow-hidden rounded-2xl border border-line bg-ink-950">
         <video ref={videoRef} className="absolute inset-0 h-full w-full scale-x-[-1] object-cover" playsInline muted />
         <canvas ref={canvasRef} className="absolute inset-0 h-full w-full scale-x-[-1] object-cover" />
-        <div className="absolute left-2 top-2 rounded-md bg-slate-950/70 px-2 py-1 font-mono text-xs">
+        <div className="absolute left-2 top-2 rounded-md border border-line bg-ink-950/80 px-2 py-1 font-mono text-xs">
           reps {snap.reps} · partials {snap.partials} · {snap.phase} · form {snap.score} · hold {(snap.heldMs / 1000).toFixed(1)}s
         </div>
-        <div className="absolute bottom-2 left-2 rounded-md bg-slate-950/70 px-2 py-1 font-mono text-[10px] text-slate-300">{snap.features}</div>
+        <div className="absolute bottom-2 left-2 rounded-md border border-line bg-ink-950/80 px-2 py-1 font-mono text-[10px] text-slate-300">{snap.features}</div>
       </div>
       <div className="no-scrollbar mb-3 flex gap-2 overflow-x-auto">
         {Object.keys(EXERCISE_DEFINITIONS).map((s) => (
@@ -126,7 +126,7 @@ export function RecordFixturePage() {
           </Chip>
         ))}
       </div>
-      <Card className="flex items-center gap-3">
+      <Card pad="sm" radius="xl" className="flex items-center gap-3">
         <Button onClick={toggle} variant={recording ? 'danger' : 'primary'}>
           {recording ? `Stop (${frameCount} frames)` : 'Record'}
         </Button>

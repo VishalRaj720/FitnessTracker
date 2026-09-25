@@ -1,127 +1,166 @@
 import { Link, useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
-import { Alert, Badge, Card, Spinner, Stat } from '@/components/ui'
+import { clsx } from 'clsx'
+import { Alert, ButtonLink, Card, EmptyState, Icon, PageHeader, PanelHeader, Skeleton, Stat } from '@/components/ui'
+import { AXIS_TICK, CHART_COLORS, CURSOR_FILL, GRID_STROKE } from '@/components/charts/chartTheme'
+import { TelemetryTooltip } from '@/components/charts/TelemetryTooltip'
+import { Backdrop } from '@/components/layout/Backdrop'
+import { FlowFooter, FlowHeader } from '@/components/layout/FlowHeader'
+import { useAuthStore } from '@/features/auth/authStore'
 import { api, errorMessage } from '@/lib/apiClient'
-import { weekShort } from '@/lib/format'
+import { fmtInt, weekShort } from '@/lib/format'
 import type { InstituteStats } from '@/types/api'
-
-const tooltipStyle = { background: '#0f172a', border: '1px solid #334155', borderRadius: 12, fontSize: 12 }
 
 export function CampusDashboardPage() {
   const { slug } = useParams()
+  const token = useAuthStore((s) => s.token)
   const q = useQuery({
     queryKey: ['institute', slug, 'stats'],
     queryFn: () => api<InstituteStats>(`/institutes/${slug}/stats?weeks=8`, { auth: false }),
     enabled: !!slug,
     staleTime: 60_000,
   })
+  const d = q.data
 
   return (
-    <div className="mx-auto min-h-full max-w-5xl px-4 pb-10 pt-[calc(var(--safe-top)+16px)]">
-      <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <div className="flex items-center gap-2">
-            <img src="/icons/icon.svg" alt="" className="h-7 w-7 rounded-md" />
-            <span className="text-sm font-semibold text-slate-400">FitSathi · Campus</span>
-            <Badge tone="brand">Fit India</Badge>
+    <div className="relative flex min-h-full flex-col">
+      <Backdrop variant="dots" />
+      <FlowHeader
+        tag="campus // fit india"
+        logoTo={token ? '/home' : '/'}
+        width="max-w-[1440px]"
+        right={
+          token ? (
+            <ButtonLink to="/home" variant="secondary" size="sm" icon="arrow-left">
+              Back to app
+            </ButtonLink>
+          ) : (
+            <ButtonLink to="/register" variant="signal" size="sm" iconRight="arrow-right">
+              Join FitSathi
+            </ButtonLink>
+          )
+        }
+      />
+      <main className="relative z-10 mx-auto w-full max-w-[1440px] flex-1 space-y-8 px-4 py-8 sm:px-6 lg:px-10 lg:py-10">
+        <PageHeader
+          size="lg"
+          badge={d ? `Campus telemetry // week ${weekShort(d.week)}` : 'Campus telemetry'}
+          badgeTone="volt"
+          title={d?.institute.name ?? slug}
+          subtitle={
+            d
+              ? `${[d.institute.city, d.institute.state].filter(Boolean).join(', ')} · ${d.total_students} student${d.total_students === 1 ? '' : 's'} on FitSathi · camera-verified participation only`
+              : 'Fit India participation report'
+          }
+        />
+
+        {q.isPending && (
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+            {Array.from({ length: 4 }, (_, i) => (
+              <Skeleton key={i} className="h-24 rounded-xl" />
+            ))}
           </div>
-          <h1 className="mt-1 text-3xl font-black tracking-tight">{q.data?.institute.name ?? slug}</h1>
-          {q.data && (
-            <div className="text-sm text-slate-400">
-              {q.data.institute.city}, {q.data.institute.state} · {q.data.total_students} students on FitSathi · week {weekShort(q.data.week)}
+        )}
+        {q.isError && <Alert title="Couldn't load this campus">{errorMessage(q.error)}</Alert>}
+
+        {d && (
+          <>
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+              <Stat label="Active students" value={d.this_week.active_students} icon="users" tone="pulse" hint="This week" />
+              <Stat label="Verified sessions" value={d.this_week.verified_sessions} icon="scan" hint="Camera-counted" />
+              <Stat label="Verified minutes" value={fmtInt(d.this_week.verified_minutes)} unit="min" icon="shield-check" tone="brand" hint="This week" />
+              <Stat label="Avg form score" value={d.this_week.avg_form_score == null ? '—' : Math.round(d.this_week.avg_form_score)} icon="target" tone="volt" hint="0–100, on-device" />
             </div>
-          )}
-        </div>
-        <Link to="/home" className="text-sm text-slate-400 hover:text-slate-200">
-          ← Back to app
-        </Link>
-      </div>
 
-      {q.isPending && <Spinner />}
-      {q.isError && <Alert>{errorMessage(q.error)}</Alert>}
-
-      {q.data && (
-        <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-            <Stat label="Active students" value={q.data.this_week.active_students} hint="this week" />
-            <Stat label="Verified sessions" value={q.data.this_week.verified_sessions} hint="camera-counted" />
-            <Stat label="Verified minutes" value={q.data.this_week.verified_minutes.toLocaleString('en-IN')} hint="this week" />
-            <Stat label="Avg form score" value={q.data.this_week.avg_form_score == null ? '—' : Math.round(q.data.this_week.avg_form_score)} hint="0–100" />
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-2">
-            <Card>
-              <div className="mb-2 font-semibold">Participation trend</div>
-              <div className="h-56">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={q.data.trend.map((t) => ({ ...t, label: weekShort(t.week) }))} margin={{ top: 8, right: 0, left: -20, bottom: 0 }}>
-                    <CartesianGrid vertical={false} stroke="#1e293b" />
-                    <XAxis dataKey="label" tick={{ fill: '#94a3b8', fontSize: 11 }} axisLine={false} tickLine={false} />
-                    <YAxis yAxisId="students" tick={{ fill: '#94a3b8', fontSize: 11 }} axisLine={false} tickLine={false} allowDecimals={false} />
-                    <YAxis yAxisId="minutes" orientation="right" tick={{ fill: '#94a3b8', fontSize: 11 }} axisLine={false} tickLine={false} allowDecimals={false} width={40} />
-                    <Tooltip contentStyle={tooltipStyle} labelStyle={{ color: '#cbd5e1' }} />
-                    <Line yAxisId="students" type="monotone" dataKey="active_students" name="active students" stroke="#34d399" strokeWidth={2.5} dot={{ r: 3, fill: '#34d399' }} />
-                    <Line yAxisId="minutes" type="monotone" dataKey="verified_minutes" name="verified min" stroke="#38bdf8" strokeWidth={2} dot={false} />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </Card>
-
-            <Card>
-              <div className="mb-2 flex items-baseline justify-between">
-                <div className="font-semibold">By department</div>
-                <div className="text-xs text-slate-500">rows with &lt; {q.data.k_anonymity_threshold} active students are hidden</div>
-              </div>
-              {q.data.by_department.length === 0 ? (
-                <div className="flex h-56 items-center justify-center text-sm text-slate-500">Not enough active students per department yet this week.</div>
-              ) : (
-                <div className="h-56">
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+              <Card radius="xl" pad="md" brackets>
+                <PanelHeader kicker="Fig 1.1 // Participation" kickerDot="brand" title="Active students & verified minutes" />
+                <div className="h-64">
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={q.data.by_department} layout="vertical" margin={{ top: 4, right: 16, left: 8, bottom: 0 }}>
-                      <CartesianGrid horizontal={false} stroke="#1e293b" />
-                      <XAxis type="number" tick={{ fill: '#94a3b8', fontSize: 11 }} axisLine={false} tickLine={false} />
-                      <YAxis type="category" dataKey="department" width={60} tick={{ fill: '#cbd5e1', fontSize: 12 }} axisLine={false} tickLine={false} />
-                      <Tooltip contentStyle={tooltipStyle} labelStyle={{ color: '#cbd5e1' }} cursor={{ fill: '#1e293b' }} />
-                      <Bar dataKey="verified_minutes" name="verified min" fill="#34d399" radius={[0, 6, 6, 0]} barSize={28} />
-                    </BarChart>
+                    <LineChart data={d.trend.map((t) => ({ ...t, label: weekShort(t.week) }))} margin={{ top: 8, right: 0, left: 0, bottom: 0 }}>
+                      <CartesianGrid vertical={false} stroke={GRID_STROKE} />
+                      <XAxis dataKey="label" tick={AXIS_TICK} axisLine={false} tickLine={false} />
+                      <YAxis yAxisId="students" tick={AXIS_TICK} axisLine={false} tickLine={false} allowDecimals={false} width={28} />
+                      <YAxis yAxisId="minutes" orientation="right" tick={AXIS_TICK} axisLine={false} tickLine={false} allowDecimals={false} width={40} />
+                      <Tooltip content={<TelemetryTooltip units={{ verified_minutes: 'min' }} />} />
+                      <Line yAxisId="students" type="monotone" dataKey="active_students" name="Active students" stroke={CHART_COLORS.brand} strokeWidth={2.4} dot={{ r: 2.5, fill: CHART_COLORS.brand, strokeWidth: 0 }} />
+                      <Line yAxisId="minutes" type="monotone" dataKey="verified_minutes" name="Verified minutes" stroke={CHART_COLORS.pulse} strokeWidth={2} strokeDasharray="4 4" dot={false} />
+                    </LineChart>
                   </ResponsiveContainer>
                 </div>
+              </Card>
+
+              <Card radius="xl" pad="md" brackets>
+                <PanelHeader
+                  kicker="Fig 1.2 // By department"
+                  kickerDot="pulse"
+                  title="Verified minutes this week"
+                  right={<span className="font-mono text-[10px] text-slate-500">hidden below {d.k_anonymity_threshold} active</span>}
+                />
+                {d.by_department.length === 0 ? (
+                  <div className="flex h-64 items-center justify-center rounded-xl border border-dashed border-line px-6 text-center text-sm text-slate-500">
+                    Not enough active students per department yet this week.
+                  </div>
+                ) : (
+                  <div className="h-64">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={d.by_department} layout="vertical" margin={{ top: 4, right: 16, left: 8, bottom: 0 }}>
+                        <CartesianGrid horizontal={false} stroke={GRID_STROKE} />
+                        <XAxis type="number" tick={AXIS_TICK} axisLine={false} tickLine={false} />
+                        <YAxis type="category" dataKey="department" width={60} tick={{ ...AXIS_TICK, fill: '#cbd5e1' }} axisLine={false} tickLine={false} />
+                        <Tooltip cursor={{ fill: CURSOR_FILL }} content={<TelemetryTooltip units={{ verified_minutes: 'min' }} />} />
+                        <Bar dataKey="verified_minutes" name="Verified minutes" fill={CHART_COLORS.brand} radius={[0, 5, 5, 0]} barSize={26} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                )}
+              </Card>
+            </div>
+
+            <Card radius="xl" pad="md">
+              <PanelHeader kicker="Campus league // top squads" kickerDot="volt" title="This week's leaderboard" right={<span className="font-mono text-[10px] text-slate-500">camera-verified minutes</span>} />
+              {d.top_squads.length === 0 ? (
+                <EmptyState flat icon="users" title="No squads yet" body="Create one from the Squad tab and it will appear here." />
+              ) : (
+                <ol className="space-y-2">
+                  {d.top_squads.map((s, i) => (
+                    <li key={s.name} className={clsx('flex items-center justify-between gap-3 rounded-lg border p-3', i === 0 ? 'border-line-strong bg-ink-850' : 'border-line bg-ink-900/60')}>
+                      <div className="flex min-w-0 items-center gap-3">
+                        <span
+                          className={clsx(
+                            'flex h-6 w-6 shrink-0 items-center justify-center rounded font-mono text-[11px] font-bold',
+                            i === 0 ? 'bg-volt text-ink-950' : i === 1 ? 'bg-slate-300 text-ink-950' : i === 2 ? 'bg-flame/80 text-ink-950' : 'bg-ink-700 text-slate-300',
+                          )}
+                        >
+                          {String(i + 1).padStart(2, '0')}
+                        </span>
+                        <div className="min-w-0">
+                          <div className="truncate text-sm font-semibold text-white">{s.name}</div>
+                          <div className="font-mono text-[11px] text-slate-500">
+                            {s.members} member{s.members === 1 ? '' : 's'}
+                          </div>
+                        </div>
+                      </div>
+                      <span className={clsx('shrink-0 font-mono text-sm font-bold', i === 0 ? 'text-brand-400' : 'text-slate-200')}>{fmtInt(s.verified_minutes)} min</span>
+                    </li>
+                  ))}
+                </ol>
               )}
             </Card>
-          </div>
 
-          <Card>
-            <div className="mb-2 font-semibold">Top squads this week</div>
-            {q.data.top_squads.length === 0 ? (
-              <div className="py-4 text-sm text-slate-500">No squads yet.</div>
-            ) : (
-              <table className="w-full text-sm">
-                <thead className="text-left text-xs uppercase tracking-wide text-slate-500">
-                  <tr>
-                    <th className="py-1">#</th>
-                    <th className="py-1">Squad</th>
-                    <th className="py-1 text-right">Members</th>
-                    <th className="py-1 text-right">Verified min</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-800">
-                  {q.data.top_squads.map((s, i) => (
-                    <tr key={s.name}>
-                      <td className="py-2 font-bold text-slate-400">{i + 1}</td>
-                      <td className="py-2 font-medium">{s.name}</td>
-                      <td className="py-2 text-right">{s.members}</td>
-                      <td className="py-2 text-right font-semibold">{s.verified_minutes}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </Card>
-
-          <p className="text-center text-xs text-slate-600">Aggregates only. No individual data is shown. All pose detection ran on students' own devices.</p>
-        </div>
-      )}
+            <p className="flex items-center justify-center gap-2 text-center font-mono text-[11px] text-slate-500">
+              <Icon name="lock" size={12} /> Aggregates only. No individual data is shown. All pose detection ran on students' own devices.
+            </p>
+          </>
+        )}
+        {!slug && (
+          <Link to="/" className="text-sm text-pulse">
+            Back
+          </Link>
+        )}
+      </main>
+      <FlowFooter width="max-w-[1440px]" />
     </div>
   )
 }

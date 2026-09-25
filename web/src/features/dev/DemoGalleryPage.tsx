@@ -18,7 +18,7 @@ export function DemoGalleryPage() {
   const slugs = Object.keys(DEMO_CLIPS)
 
   return (
-    <div className="mx-auto max-w-5xl space-y-4 p-4">
+    <div className="mx-auto max-w-5xl space-y-4 p-4 sm:p-6">
       <PageTitle title="Demo gallery" subtitle="dev tool · the tutorial figure for every exercise" />
 
       <div className="flex flex-wrap gap-2">
@@ -40,12 +40,12 @@ export function DemoGalleryPage() {
           const u = frozen ?? clip.holdAt
           const features = def.features(projectToPose(sampleClipWorld(clip, u), clip.view))
           return (
-            <Card key={slug} className="p-3">
+            <Card key={slug} pad="sm" radius="xl">
               <div className="mb-1 flex items-center justify-between">
                 <div className="font-semibold">{def.name}</div>
                 <span className="text-[11px] text-slate-500">{clip.view}</span>
               </div>
-              <div className="aspect-square w-full overflow-hidden rounded-xl bg-slate-950">
+              <div className="aspect-square w-full overflow-hidden rounded-xl border border-line bg-ink-950">
                 <DemoFigure clip={clip} frozenAt={frozen ?? undefined} />
               </div>
               <div className="mt-2 space-y-0.5 font-mono text-[11px] text-slate-400">

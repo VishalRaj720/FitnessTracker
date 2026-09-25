@@ -223,3 +223,173 @@ export interface InstituteStats {
   total_students: number
   k_anonymity_threshold: number
 }
+
+// ---------------------------------------------------------------------------------------------
+// Diet & nutrition — mirrors backend/app/schemas/nutrition.py field for field.
+
+export type Sex = 'male' | 'female' | 'other'
+export type ActivityLevel = 'sedentary' | 'light' | 'moderate' | 'active' | 'very_active'
+export type DietType = 'vegan' | 'veg' | 'egg' | 'non_veg'
+export type Meal = 'breakfast' | 'lunch' | 'snack' | 'dinner'
+
+export interface NutritionProfileIn {
+  sex: Sex
+  age: number
+  height_cm: number
+  weight_kg: number
+  activity_level: ActivityLevel
+  diet_type: DietType
+}
+
+export interface NutritionProfile extends NutritionProfileIn {
+  bmi: number
+  updated_at: string
+}
+
+export interface FoodNutrients {
+  calories: number
+  protein_g: number
+  carbs_g: number
+  fat_g: number
+  fiber_g: number
+  iron_mg: number
+  calcium_mg: number
+  vitamin_c_mg: number
+}
+
+export interface DailyNutrients extends FoodNutrients {
+  water_ml: number
+}
+
+export interface NutritionTargets extends DailyNutrients {
+  bmr: number
+  tdee: number
+  adjustment_pct: number
+  protein_pct: number
+  carbs_pct: number
+  fat_pct: number
+  meal_calories: Record<Meal, number>
+}
+
+export interface NutritionCategory {
+  goal: Goal
+  goal_label: string
+  level: Level
+  level_label: string
+  diet_type: DietType
+  diet_label: string
+  activity_level: ActivityLevel
+  label: string
+}
+
+export interface Food {
+  id: number
+  slug: string
+  name: string
+  category: string
+  diet: DietType
+  serving: string
+  nutrients: FoodNutrients
+  tags: string[]
+}
+
+export interface FoodPick {
+  food: Food
+  reason: string
+}
+
+export interface FoodGroup {
+  key: 'protein' | 'carbs' | 'fats' | 'produce'
+  title: string
+  items: FoodPick[]
+}
+
+export interface LimitItem {
+  food: Food
+  reason: string
+}
+
+export interface MealItem {
+  food: Food
+  servings: number
+}
+
+export interface MealSuggestion {
+  key: string
+  meal: Meal
+  title: string
+  items: MealItem[]
+  nutrients: FoodNutrients
+  budget_calories: number
+}
+
+export interface NutritionGuidance {
+  code: string
+  title: string
+  body: string
+  tone: 'info' | 'tip' | 'warn'
+}
+
+export interface NutritionPlan {
+  category: NutritionCategory
+  profile: NutritionProfile
+  targets: NutritionTargets
+  strategy: { title: string; summary: string; principles: string[] }
+  food_groups: FoodGroup[]
+  limit: LimitItem[]
+  meals: MealSuggestion[]
+  guidance: NutritionGuidance[]
+}
+
+export interface CustomFoodIn {
+  name: string
+  calories: number
+  protein_g?: number
+  carbs_g?: number
+  fat_g?: number
+  fiber_g?: number
+}
+
+export interface FoodLogIn {
+  meal: Meal
+  food_id?: number | null
+  custom?: CustomFoodIn | null
+  servings?: number
+  date?: string | null
+}
+
+export interface FoodLogEntry {
+  id: string
+  date: string
+  meal: Meal
+  food_id: number | null
+  name: string
+  serving: string | null
+  servings: number
+  nutrients: FoodNutrients
+  created_at: string
+}
+
+export interface DailyNutrition {
+  date: string
+  has_profile: boolean
+  targets: NutritionTargets | null
+  consumed: DailyNutrients
+  remaining: DailyNutrients | null
+  entries: FoodLogEntry[]
+}
+
+export interface NutritionHistoryDay extends DailyNutrients {
+  date: string
+  entries: number
+}
+
+export interface NutritionHistory {
+  days: NutritionHistoryDay[]
+  targets: NutritionTargets | null
+}
+
+export interface WaterOut {
+  date: string
+  water_ml: number
+}

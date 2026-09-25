@@ -1,17 +1,104 @@
-@import "tailwindcss";
+@import 'tailwindcss';
+@import './fonts.css';
 
+/*
+ * FitSathi design tokens — distilled from the seven reference screens.
+ *
+ *   ink      obsidian surfaces, darkest (canvas) to lightest (raised controls)
+ *   line     hairline borders (white at 8% / 14%)
+ *   brand    emerald: go, start, verified, success          (welcome, workout, squad join)
+ *   iris     indigo: setup and configuration flows          (onboarding, create, export)
+ *   pulse    cyan: live telemetry, active navigation, focus (dashboard, squad)
+ *   volt     neon lime: camera-tracked highlights, rank #1  (dashboard, welcome board)
+ *   flame    amber: streaks and warnings
+ */
 @theme {
+  --font-sans: 'Inter Variable', 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  --color-ink-950: #050608;
+  --color-ink-900: #090b0e;
+  --color-ink-850: #0d1016;
+  --color-ink-800: #11141b;
+  --color-ink-750: #161a23;
+  --color-ink-700: #1c2230;
+  --color-ink-600: #283247;
+  --color-ink-500: #3a4560;
+
+  --color-line: rgb(255 255 255 / 0.08);
+  --color-line-strong: rgb(255 255 255 / 0.14);
+
   --color-brand-50: #ecfdf5;
   --color-brand-100: #d1fae5;
   --color-brand-200: #a7f3d0;
-  --color-brand-300: #6ee7b7;
-  --color-brand-400: #34d399;
+  --color-brand-300: #5ef2bf;
+  --color-brand-400: #00e599;
   --color-brand-500: #10b981;
   --color-brand-600: #059669;
   --color-brand-700: #047857;
   --color-brand-800: #065f46;
   --color-brand-900: #064e3b;
-  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --color-brand-950: #022c22;
+
+  --color-iris-200: #c7cdff;
+  --color-iris-300: #a5afff;
+  --color-iris-400: #7c8aff;
+  --color-iris-500: #5a6bff;
+  --color-iris-600: #4655ec;
+  --color-iris-700: #3842c4;
+
+  --color-pulse: #00f2fe;
+  --color-aqua: #00d2b4;
+  --color-volt: #d2ff00;
+  --color-flame: #ffb800;
+
+  --shadow-card: 0 10px 30px -10px rgb(0 0 0 / 0.85), 0 0 0 1px rgb(255 255 255 / 0.03);
+  --shadow-glow-brand: 0 0 24px -4px rgb(16 185 129 / 0.5);
+  --shadow-glow-signal: 0 0 26px -4px rgb(0 229 153 / 0.5);
+  --shadow-glow-iris: 0 0 24px -2px rgb(90 107 255 / 0.45);
+  --shadow-glow-pulse: 0 0 22px -4px rgb(0 242 254 / 0.45);
+  --shadow-glow-volt: 0 0 22px -4px rgb(210 255 0 / 0.4);
+  --shadow-glow-aqua: 0 0 26px -4px rgb(0 210 180 / 0.5);
+
+  --animate-pulse-slow: pulse-slow 2.4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-scanline: scanline 3.2s ease-in-out infinite;
+  --animate-dash: dash-flow 18s linear infinite;
+  --animate-fade-up: fade-up 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+
+  @keyframes pulse-slow {
+    0%,
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.45;
+      transform: scale(0.85);
+    }
+  }
+  @keyframes scanline {
+    0% {
+      transform: translateY(-100%);
+    }
+    100% {
+      transform: translateY(260%);
+    }
+  }
+  @keyframes dash-flow {
+    to {
+      stroke-dashoffset: -120;
+    }
+  }
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
 }
 
 :root {
@@ -20,27 +107,146 @@
   --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
 
-html,
-body,
-#root {
-  height: 100%;
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-ink-950 font-sans text-slate-200 antialiased;
+    overscroll-behavior-y: none;
+    -webkit-tap-highlight-color: transparent;
+    font-feature-settings: 'cv11', 'ss01';
+  }
+
+  ::selection {
+    background: rgb(0 229 153 / 0.28);
+    color: #fff;
+  }
+
+  :focus-visible {
+    outline: 2px solid rgb(0 242 254 / 0.75);
+    outline-offset: 2px;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #222631;
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #2f3545;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
 }
 
-body {
-  @apply bg-slate-950 text-slate-100 antialiased;
-  overscroll-behavior-y: none;
-  -webkit-tap-highlight-color: transparent;
+/* Backgrounds from the references: dot matrix (dashboard), line grid (onboarding), emerald
+   viewfinder dots (welcome HUD) and fine cyan dots (chart frames). */
+@utility bg-dot-grid {
+  background-image: radial-gradient(rgb(255 255 255 / 0.075) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+@utility bg-dot-fine {
+  background-image: radial-gradient(rgb(0 242 254 / 0.12) 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+@utility bg-dot-signal {
+  background-image: radial-gradient(circle, rgb(0 229 153 / 0.14) 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+@utility bg-line-grid {
+  background-image:
+    linear-gradient(to right, rgb(255 255 255 / 0.022) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(255 255 255 / 0.022) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+@utility bg-tech-grid {
+  background-image:
+    linear-gradient(to right, rgb(255 255 255 / 0.025) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(255 255 255 / 0.025) 1px, transparent 1px);
+  background-size: 24px 24px;
 }
 
-/* Hide scrollbars on the horizontal chip rows */
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
+/* Telemetry corner marks on hero cards (dashboard "Today's plan", chart frames). */
+@utility corner-brackets {
+  position: relative;
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    width: 9px;
+    height: 9px;
+    pointer-events: none;
+  }
+  &::before {
+    top: -1px;
+    left: -1px;
+    border-top: 1.5px solid rgb(0 242 254 / 0.7);
+    border-left: 1.5px solid rgb(0 242 254 / 0.7);
+    border-top-left-radius: 3px;
+  }
+  &::after {
+    bottom: -1px;
+    right: -1px;
+    border-bottom: 1.5px solid rgb(0 242 254 / 0.7);
+    border-right: 1.5px solid rgb(0 242 254 / 0.7);
+    border-bottom-right-radius: 3px;
+  }
 }
-.no-scrollbar {
+
+/* The small uppercase mono caption used across every reference ("// SYSTEM ARCHITECTURE"). */
+@utility label-mono {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  line-height: 1.25;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+@utility no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
+/* Welcome: one phone-width column in the reference order, two columns from desktop up. */
+@layer components {
+  .welcome-grid {
+    display: grid;
+    gap: 1.5rem;
+    grid-template-areas: 'hero' 'hud' 'features' 'board' 'cta';
+  }
+  @media (min-width: 64rem) {
+    .welcome-grid {
+      grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+      column-gap: 3.5rem;
+      row-gap: 2rem;
+      align-items: start;
+      grid-template-areas: 'hero hud' 'features hud' 'features board' 'cta board';
+    }
+  }
+}
+
+/* Live-workout micro animations (unchanged behaviour). */
 @keyframes pulse-ring {
   0% {
     transform: scale(0.95);

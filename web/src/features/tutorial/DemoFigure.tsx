@@ -7,7 +7,18 @@ import { sampleClipWorld, type DemoClip } from '@/cv/demo/clips'
  * The rotatable demo figure. Drag to orbit; it drifts on its own when left alone so the
  * three-dimensionality is obvious without the user having to discover the gesture.
  */
-export function DemoFigure({ clip, className, frozenAt }: { clip: DemoClip; className?: string; frozenAt?: number }) {
+export function DemoFigure({
+  clip,
+  className,
+  frozenAt,
+  wire,
+}: {
+  clip: DemoClip
+  className?: string
+  frozenAt?: number
+  /** A finer, smaller wireframe for small HUD panels. */
+  wire?: boolean
+}) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const frozenRef = useRef(frozenAt)
   frozenRef.current = frozenAt
@@ -19,11 +30,13 @@ export function DemoFigure({ clip, className, frozenAt }: { clip: DemoClip; clas
       // Start square-on to the camera angle the exercise is coached from.
       yaw: clip.view === 'side' ? 75 : 0,
       pitch: 6,
+      margin: wire ? 0.66 : undefined,
+      boneScale: wire ? 0.42 : undefined,
       sampler: (tMs) => sampleClipWorld(clip, frozenRef.current ?? (tMs % clip.loopMs) / clip.loopMs),
     })
     fig.start()
     return () => fig.dispose()
-  }, [clip])
+  }, [clip, wire])
 
   return <canvas ref={canvasRef} className={clsx('h-full w-full cursor-grab active:cursor-grabbing', className)} />
 }
