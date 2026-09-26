@@ -1,4 +1,4 @@
-"""Idempotent seeding of the exercise catalog and institute list.
+"""Idempotent seeding of the exercise catalog, institute list and food catalog.
 
 Run: uv run python -m seeds.seed   (also runs automatically on app start when AUTO_SEED=true)
 """
@@ -10,7 +10,7 @@ from pathlib import Path
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.models import Exercise, Institute
+from app.models import Exercise, Food, Institute
 
 HERE = Path(__file__).parent
 
@@ -46,8 +46,29 @@ def seed_institutes(db: Session) -> int:
     return added
 
 
+def seed_foods(db: Session) -> int:
+    """Upsert the food catalog by slug, like exercises: edits to foods.json reach old DBs."""
+    data = json.loads((HERE / "foods.json").read_text(encoding="utf-8"))
+    existing = {f.slug: f for f in db.scalars(select(Food)).all()}
+    added = 0
+    for row in data:
+        food = existing.get(row["slug"])
+        if food is None:
+            db.add(Food(**row))
+            added += 1
+        else:
+            for k, v in row.items():
+                setattr(food, k, v)
+    db.commit()
+    return added
+
+
 def seed_all(db: Session) -> dict[str, int]:
-    return {"exercises": seed_exercises(db), "institutes": seed_institutes(db)}
+    return {
+        "exercises": seed_exercises(db),
+        "institutes": seed_institutes(db),
+        "foods": seed_foods(db),
+    }
 
 
 if __name__ == "__main__":

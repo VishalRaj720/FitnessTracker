@@ -1,3 +1,4 @@
+import { useQuery } from '@tanstack/react-query'
 import { api } from '@/lib/apiClient'
 
 export interface CompanionStatus {
@@ -61,4 +62,14 @@ export const companionApi = {
   debrief: (sessionId: string) => api<{ text: string | null }>(`/companion/debrief/${sessionId}`),
   cue: (payload: CuePayload, signal?: AbortSignal) =>
     api<CueReply>('/companion/cue', { method: 'POST', body: payload, signal }),
+}
+
+/** Whether the AI coach is configured on this server (no API key = no Coach tab). */
+export function useCompanionStatus() {
+  return useQuery({
+    queryKey: ['companion', 'status'],
+    queryFn: () => companionApi.status(),
+    staleTime: 5 * 60_000,
+    retry: false,
+  })
 }

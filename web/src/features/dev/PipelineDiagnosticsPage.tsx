@@ -155,12 +155,12 @@ export function PipelineDiagnosticsPage() {
         </Chip>
       </div>
 
-      <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-slate-950">
+      <div className="relative aspect-video w-full overflow-hidden rounded-xl border border-line bg-ink-950">
         <video ref={videoRef} className="absolute inset-0 h-full w-full object-cover" playsInline muted />
         <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" />
       </div>
 
-      <Card className="space-y-2 p-4 text-sm">
+      <Card pad="sm" radius="xl" className="space-y-2 text-sm">
         <Row label="status" value={status} />
         <Row label="engine" value={info.engine === 'worker' ? 'Web Worker (off main thread)' : info.engine === 'main' ? 'main thread (fallback)' : '—'} />
         <Row label="delegate" value={info.delegate} />

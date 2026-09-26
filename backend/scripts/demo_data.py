@@ -47,6 +47,7 @@ def main() -> None:
         seed_all(db)
         if db.scalar(select(User).where(User.email == STUDENTS[0][0])):
             print("demo data already present")
+            seed_demo_nutrition(db)
             return
 
         inst = db.scalar(select(Institute).where(Institute.slug == "demo-institute"))
@@ -181,6 +182,101 @@ def main() -> None:
         db.commit()
         print(f"created {len(users)} demo students, squad DEMO42, ~3 weeks of sessions")
         print("login: demo@fitsathi.app / demo12345   dashboard: /campus/demo-institute")
+        seed_demo_nutrition(db)
+
+
+# A week of plausible hostel eating for the demo account: (meal, food slug, servings).
+DEMO_DAY_MENUS = (
+    (
+        ("breakfast", "veg_poha", 1),
+        ("breakfast", "masala_chai", 1),
+        ("lunch", "roti", 3),
+        ("lunch", "toor_dal", 1),
+        ("lunch", "mixed_veg", 1),
+        ("lunch", "curd", 1),
+        ("snack", "roasted_chana", 1),
+        ("snack", "banana", 1),
+        ("dinner", "khichdi", 1),
+        ("dinner", "salad", 1),
+    ),
+    (
+        ("breakfast", "idli", 3),
+        ("breakfast", "sambar", 1),
+        ("lunch", "rajma", 1),
+        ("lunch", "rice", 1.5),
+        ("lunch", "salad", 1),
+        ("snack", "samosa", 1),
+        ("snack", "masala_chai", 1),
+        ("dinner", "roti", 3),
+        ("dinner", "palak_sabzi", 1),
+        ("dinner", "paneer", 0.5),
+    ),
+    (
+        ("breakfast", "oats", 1),
+        ("breakfast", "milk_toned", 1),
+        ("breakfast", "banana", 1),
+        ("lunch", "roti", 2),
+        ("lunch", "chole", 1),
+        ("lunch", "curd", 1),
+        ("snack", "sprouts", 1),
+        ("dinner", "rice", 1),
+        ("dinner", "toor_dal", 1),
+        ("dinner", "aloo_sabzi", 1),
+    ),
+)
+
+
+def seed_demo_nutrition(db) -> None:
+    """Give the demo student a nutrition profile and a week of logs. Idempotent."""
+    from app.models import Food, FoodLog, NutritionProfile, WaterIntake
+    from app.utils.dates import local_today
+
+    demo = db.scalar(select(User).where(User.email == STUDENTS[0][0]))
+    if demo is None or db.get(NutritionProfile, demo.id) is not None:
+        return
+    db.add(
+        NutritionProfile(
+            user_id=demo.id,
+            sex="female",
+            age=20,
+            height_cm=158,
+            weight_kg=54,
+            activity_level="light",
+            diet_type="veg",
+        )
+    )
+    foods = {f.slug: f for f in db.scalars(select(Food)).all()}
+    today = local_today()
+    for back in range(6, -1, -1):
+        day = today - timedelta(days=back)
+        menu = DEMO_DAY_MENUS[back % len(DEMO_DAY_MENUS)]
+        if back == 0:  # today: only breakfast and lunch so far, leaving room to log more
+            menu = tuple(m for m in menu if m[0] in ("breakfast", "lunch"))
+        for meal, slug, servings in menu:
+            f = foods[slug]
+            db.add(
+                FoodLog(
+                    user_id=demo.id,
+                    log_date=day,
+                    meal=meal,
+                    food_id=f.id,
+                    name=f.name,
+                    serving=f.serving,
+                    servings=servings,
+                    calories=round(f.calories * servings, 1),
+                    protein_g=round(f.protein_g * servings, 1),
+                    carbs_g=round(f.carbs_g * servings, 1),
+                    fat_g=round(f.fat_g * servings, 1),
+                    fiber_g=round(f.fiber_g * servings, 1),
+                    iron_mg=round(f.iron_mg * servings, 1),
+                    calcium_mg=round(f.calcium_mg * servings, 1),
+                    vitamin_c_mg=round(f.vitamin_c_mg * servings, 1),
+                )
+            )
+        water = 1000 if back == 0 else 1750 + (back % 3) * 250
+        db.add(WaterIntake(user_id=demo.id, log_date=day, water_ml=water))
+    db.commit()
+    print("demo nutrition: profile + 7 days of meals and water for demo@fitsathi.app")
 
 
 if __name__ == "__main__":

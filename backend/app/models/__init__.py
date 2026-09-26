@@ -1,6 +1,7 @@
 from app.models.companion import CompanionMessage, CompanionThread, SessionDebrief
 from app.models.exercise import Exercise
 from app.models.institute import Institute
+from app.models.nutrition import Food, FoodLog, NutritionProfile, WaterIntake
 from app.models.plan import PlanItem, WorkoutPlan
 from app.models.session import SessionExercise, WorkoutSession
 from app.models.squad import Squad, SquadMember
@@ -11,7 +12,11 @@ __all__ = [
     "CompanionThread",
     "SessionDebrief",
     "Exercise",
+    "Food",
+    "FoodLog",
     "Institute",
+    "NutritionProfile",
+    "WaterIntake",
     "PlanItem",
     "WorkoutPlan",
     "SessionExercise",
