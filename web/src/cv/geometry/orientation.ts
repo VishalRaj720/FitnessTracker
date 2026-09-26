@@ -1,5 +1,5 @@
 import type { Pose } from '@/cv/pose/landmarks'
-import { FULL_BODY } from '@/cv/pose/landmarks'
+import { FULL_BODY, toIsotropic } from '@/cv/pose/landmarks'
 import { shoulderWidth, torsoLength, visibilityOf } from '@/cv/geometry/angles'
 
 export type Facing = 'front' | 'side' | 'unknown'
@@ -27,7 +27,12 @@ export interface FramingCheck {
   hint: string | null
 }
 
-export function checkFraming(pose: Pose | null, required: readonly number[], wanted: 'front' | 'side' | 'any'): FramingCheck {
+/**
+ * `pose` is MediaPipe's raw normalized output, which the in-frame margins are defined on.
+ * `aspect` (frame width / height) is needed for the facing estimate, which compares a
+ * horizontal length with a vertical one and is meaningless without it.
+ */
+export function checkFraming(pose: Pose | null, required: readonly number[], wanted: 'front' | 'side' | 'any', aspect = 1): FramingCheck {
   if (!pose) {
     return { visible: false, inFrame: false, facingOk: false, facing: 'unknown', visibility: 0, hint: 'Step into the frame' }
   }
@@ -41,7 +46,7 @@ export function checkFraming(pose: Pose | null, required: readonly number[], wan
       break
     }
   }
-  const facing = estimateFacing(pose)
+  const facing = estimateFacing(toIsotropic(pose, aspect))
   const facingOk = wanted === 'any' || facing === wanted
   let hint: string | null = null
   if (!visible) hint = 'Move to better light or step back'

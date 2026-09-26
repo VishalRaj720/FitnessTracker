@@ -95,6 +95,25 @@ export function makePoseBuffer(): Pose {
 /** Number of floats per landmark on the wire: x, y, z, visibility. */
 export const LANDMARK_STRIDE = 4
 
+/**
+ * Rescale x so both axes share one unit: the frame height.
+ *
+ * MediaPipe normalizes x by the frame's width and y by its height, so on any non-square
+ * frame a step of 0.1 in x is a different physical length from 0.1 in y. Angles and ratios
+ * taken on those raw values are skewed by the camera's aspect ratio — an oblique thigh
+ * reads ~8° off in a 3:4 portrait frame and ~15° off at 16:9. Anything that *measures* the
+ * body must go through this first; only drawing over the video wants the raw values.
+ */
+export function toIsotropic(pose: Pose, aspect: number): Pose {
+  if (aspect === 1 || !Number.isFinite(aspect) || aspect <= 0) return pose
+  const out: Pose = new Array(pose.length)
+  for (let i = 0; i < pose.length; i++) {
+    const l = pose[i]
+    out[i] = { x: l.x * aspect, y: l.y, z: l.z, visibility: l.visibility }
+  }
+  return out
+}
+
 /** Unpack the worker's flat transferable into a fresh Pose. */
 export function poseFromFloats(buf: Float32Array): Pose {
   const out: Pose = new Array(POSE_LANDMARK_COUNT)

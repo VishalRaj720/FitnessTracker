@@ -11,7 +11,7 @@ import { getDefinition } from '@/cv/exercises'
 import { checkFraming, type FramingCheck } from '@/cv/geometry/orientation'
 import { Speaker } from '@/cv/feedback/tts'
 import { CoachDirector } from '@/features/companion/CoachDirector'
-import type { Pose } from '@/cv/pose/landmarks'
+import { toIsotropic, type Pose } from '@/cv/pose/landmarks'
 import { env } from '@/lib/env'
 import { useSessionStore, type LiveState, type RunnerItem } from '@/features/workout/store/sessionStore'
 
@@ -257,11 +257,13 @@ export function useWorkoutRunner(opts: RunnerOptions): RunnerApi {
       const it = itemRef.current
       const st = stageRef.current
       if (!it || !enabledRef.current) return
+      // Read per frame: switching cameras can change the stream's shape mid-session.
+      const aspect = video.videoHeight ? video.videoWidth / video.videoHeight : 1
 
       if (st === 'framing' || st === 'countdown') {
         governorRef.current?.setLocked(st === 'countdown')
         const def = getDefinition(it.exercise.slug)
-        const fc = checkFraming(raw, def?.requiredLandmarks ?? [], def?.orientation ?? 'any')
+        const fc = checkFraming(raw, def?.requiredLandmarks ?? [], def?.orientation ?? 'any', aspect)
         // The checklist is a human-readable hint; 5 Hz is plenty and keeps React out of the loop.
         if (now - framingUiAt.current >= FRAMING_UI_MS) {
           framingUiAt.current = now
@@ -302,7 +304,8 @@ export function useWorkoutRunner(opts: RunnerOptions): RunnerApi {
         const arb = arbiterRef.current
         if (!an || !arb) return
         an.setElapsed(now - startedAtRef.current)
-        const events = an.update(raw, now)
+        // The analyzer measures angles and ratios, so it gets the pose in square units.
+        const events = an.update(raw && toIsotropic(raw, aspect), now)
         const snap = an.snapshot()
         rendererRef.current?.setGated(snap.gated)
 
@@ -459,8 +462,14 @@ export function useWorkoutRunner(opts: RunnerOptions): RunnerApi {
     analyzerRef.current = null
     directorRef.current?.onSetEnd()
     governorRef.current?.setLocked(false)
+    // The next set needs its own framing check and countdown, which is what builds its
+    // analyzer. A new exercise gets that from the item-change effect, but the next set of
+    // the *same* exercise keeps the same item key, so without this the stage stayed at
+    // 'tracking' with no analyzer and the whole set silently counted nothing.
+    rendererRef.current?.setGated(false)
+    restartFraming()
     return out
-  }, [])
+  }, [restartFraming])
 
   const switchCamera = useCallback(async () => {
     const src = sourceRef.current

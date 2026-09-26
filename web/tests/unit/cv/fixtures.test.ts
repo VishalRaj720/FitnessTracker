@@ -3,12 +3,14 @@ import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { ExerciseAnalyzer } from '@/cv/engine/ExerciseAnalyzer'
 import { EXERCISE_DEFINITIONS } from '@/cv/exercises'
-import type { Pose } from '@/cv/pose/landmarks'
+import { toIsotropic, type Pose } from '@/cv/pose/landmarks'
 
 interface Fixture {
   exercise: string
   expectedReps: number
   fps?: number
+  /** Frame width / height. Absent only on fixtures from before it was recorded. */
+  aspect?: number
   frames: { t: number; pose: Pose }[]
 }
 
@@ -39,7 +41,7 @@ describe('recorded landmark fixtures', () => {
         const an = new ExerciseAnalyzer(def)
         for (const fr of fx.frames) {
           an.setElapsed(fr.t)
-          an.update(fr.pose, fr.t)
+          an.update(toIsotropic(fr.pose, fx.aspect ?? 1), fr.t)
         }
         return an.snapshot()
       }

@@ -1,4 +1,4 @@
-import { BODY_EDGES, LM, type Pose } from '@/cv/pose/landmarks'
+import { BODY_EDGES, LM, toIsotropic, type Pose } from '@/cv/pose/landmarks'
 import { coverMap } from '@/cv/render/coverMap'
 import { alignToUser, projectToPose, type DemoView } from '@/cv/demo/project'
 
@@ -103,18 +103,21 @@ export class GhostRenderer {
     const world = this.opts.sampler(this.frozenAt === null ? tMs : this.frozenAt)
     const raw = projectToPose(world, this.opts.view)
 
+    // The ghost is laid out in frame-height units, where the metre-space demo keeps its
+    // proportions; the user's width-normalized pose is brought into the same units first.
+    const aspect = vw / vh
     const user = this.opts.userPose()
     let pose: Pose
     if (user) {
-      pose = alignToUser(raw, user)
+      pose = alignToUser(raw, toIsotropic(user, aspect))
     } else {
       // No tracked body yet: park the ghost centre-frame at a sensible size so the user
       // has something to walk into.
-      pose = fitToFrame(raw)
+      pose = fitToFrame(raw, aspect)
     }
 
     const { scale, dx, dy } = coverMap(this.cssW, this.cssH, vw, vh)
-    const px = (i: number) => dx + pose[i].x * vw * scale
+    const px = (i: number) => dx + pose[i].x * vh * scale
     const py = (i: number) => dy + pose[i].y * vh * scale
 
     ctx.lineCap = 'round'
@@ -149,8 +152,8 @@ export class GhostRenderer {
   }
 }
 
-/** Normalize a metre-space pose into the 0..1 frame, upright and centred. */
-function fitToFrame(pose: Pose): Pose {
+/** Place a metre-space pose in the frame (height units, so x spans 0..aspect), centred. */
+function fitToFrame(pose: Pose, aspect: number): Pose {
   let minX = Infinity
   let maxX = -Infinity
   let minY = Infinity
@@ -165,7 +168,7 @@ function fitToFrame(pose: Pose): Pose {
   const k = 0.78 / h
   const cx = (minX + maxX) / 2
   return pose.map((p) => ({
-    x: 0.5 + (p.x - cx) * k,
+    x: 0.5 * aspect + (p.x - cx) * k,
     y: 0.5 + (p.y - (minY + maxY) / 2) * k,
     z: p.z * k,
     visibility: p.visibility,

@@ -5,7 +5,7 @@ import { PoseDetector, POSE_CONNECTIONS } from '@/cv/pose/PoseDetector'
 import { CameraSource } from '@/cv/sources/FrameSource'
 import { ExerciseAnalyzer } from '@/cv/engine/ExerciseAnalyzer'
 import { EXERCISE_DEFINITIONS } from '@/cv/exercises'
-import type { Pose } from '@/cv/pose/landmarks'
+import { toIsotropic, type Pose } from '@/cv/pose/landmarks'
 import { env } from '@/lib/env'
 
 /**
@@ -13,7 +13,9 @@ import { env } from '@/lib/env'
  * unit-tested deterministically without a camera. Also shows the live analyzer so thresholds
  * can be calibrated on real people. Not linked from the app UI.
  *
- * Fixture format: { exercise, expectedReps, fps, frames: [{ t: ms, pose: [{x,y,z,visibility} x33] }] }
+ * Fixture format: { exercise, expectedReps, fps, aspect, frames: [{ t: ms, pose: [{x,y,z,visibility} x33] }] }
+ * Poses are stored raw (MediaPipe-normalized); `aspect` is the frame's width / height, which
+ * replay needs to measure them the way the live runner does.
  */
 export function RecordFixturePage() {
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -24,6 +26,7 @@ export function RecordFixturePage() {
   const [frameCount, setFrameCount] = useState(0)
   const [snap, setSnap] = useState({ reps: 0, partials: 0, phase: 'TOP', score: 100, heldMs: 0, features: '' })
   const framesRef = useRef<{ t: number; pose: Pose }[]>([])
+  const aspectRef = useRef(1)
   const recordingRef = useRef(false)
   const analyzerRef = useRef<ExerciseAnalyzer | null>(null)
   const slugRef = useRef(slug)
@@ -55,6 +58,7 @@ export function RecordFixturePage() {
               canvas.width = v.videoWidth
               canvas.height = v.videoHeight
             }
+            aspectRef.current = v.videoHeight ? v.videoWidth / v.videoHeight : 1
             const ctx = canvas.getContext('2d')!
             ctx.clearRect(0, 0, canvas.width, canvas.height)
             if (pose) {
@@ -66,7 +70,7 @@ export function RecordFixturePage() {
             const an = analyzerRef.current
             if (an) {
               an.setElapsed(now - t0)
-              an.update(pose, now)
+              an.update(pose && toIsotropic(pose, aspectRef.current), now)
               const s = an.snapshot()
               const f = an.features
               setSnap({ reps: s.reps, partials: s.partials, phase: s.phase, score: s.formScore, heldMs: s.heldMs, features: Object.entries(f).map(([k, v]) => `${k}=${v.toFixed(1)}`).join('  ') })
@@ -101,7 +105,7 @@ export function RecordFixturePage() {
     const expected = Number(prompt('How many real reps did you do?', String(snap.reps)) ?? snap.reps)
     const frames = framesRef.current
     const fps = frames.length > 1 ? Math.round((1000 * frames.length) / (frames[frames.length - 1].t - frames[0].t)) : 0
-    const blob = new Blob([JSON.stringify({ exercise: slug, expectedReps: expected, fps, recordedAt: new Date().toISOString(), frames })], { type: 'application/json' })
+    const blob = new Blob([JSON.stringify({ exercise: slug, expectedReps: expected, fps, aspect: aspectRef.current, recordedAt: new Date().toISOString(), frames })], { type: 'application/json' })
     const a = document.createElement('a')
     a.href = URL.createObjectURL(blob)
     a.download = `${slug}_${expected}reps_${Date.now()}.json`
