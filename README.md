@@ -115,7 +115,7 @@ Then open **http://localhost:5173 in Chrome**.
 
 > ⚠️ **Use `localhost`, not your IP address.** Browsers only allow camera access on a "secure context" — HTTPS, or `localhost`. Opening `http://192.168.x.x:5173` will load the app but the camera will be blocked.
 
-### What to click
+### What to click 
 
 | URL | What it is | Credentials |
 |---|---|---|
