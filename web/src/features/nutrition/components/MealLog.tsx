@@ -39,7 +39,7 @@ export function MealLog({ day, onAdd }: { day: DailyNutrition; onAdd: (meal: Mea
               <div className="mb-2 flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2.5">
                   <span className={clsx('h-2 w-2 rounded-full', MEAL_ICON_TONE[meal])} />
-                  <h3 className="text-sm font-semibold text-white">{MEAL_LABEL[meal]}</h3>
+                  <h3 className="text-sm font-semibold text-fg">{MEAL_LABEL[meal]}</h3>
                   <span className="font-mono text-[11px] text-slate-500">
                     {fmtInt(kcal)}
                     {budget ? ` / ~${fmtInt(budget)}` : ''} kcal
@@ -68,7 +68,7 @@ export function MealLog({ day, onAdd }: { day: DailyNutrition; onAdd: (meal: Mea
                         </div>
                       </div>
                       <div className="flex shrink-0 items-center gap-2">
-                        <span className="font-mono text-sm font-semibold tabular-nums text-white">{fmtInt(e.nutrients.calories)}</span>
+                        <span className="font-mono text-sm font-semibold tabular-nums text-fg">{fmtInt(e.nutrients.calories)}</span>
                         <span className="font-mono text-[10px] text-slate-500">kcal</span>
                         <button
                           type="button"

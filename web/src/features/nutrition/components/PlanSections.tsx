@@ -44,11 +44,11 @@ export function CategoryCard({ plan, onRecalibrate }: { plan: NutritionPlan; onR
                 <div className="truncate font-mono text-[10px] text-slate-500">{s.hint}</div>
               </div>
             </div>
-            <span className="shrink-0 font-mono text-xs font-semibold text-white">{s.v}</span>
+            <span className="shrink-0 font-mono text-xs font-semibold text-fg">{s.v}</span>
           </li>
         ))}
         <li className="flex items-center justify-between gap-3 rounded-lg border border-brand-400/30 bg-brand-400/[0.06] px-3 py-2.5">
-          <span className="text-xs font-semibold text-white">Daily target</span>
+          <span className="text-xs font-semibold text-fg">Daily target</span>
           <span className="font-mono text-base font-bold text-brand-400">{fmtInt(t.calories)} kcal</span>
         </li>
       </ol>
@@ -61,7 +61,7 @@ function Metric({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-lg border border-line bg-ink-950/50 px-2 py-1.5">
       <div className="text-[9px] uppercase tracking-wider text-slate-500">{label}</div>
-      <div className="text-xs font-bold text-white">{value}</div>
+      <div className="text-xs font-bold text-fg">{value}</div>
     </div>
   )
 }
@@ -71,7 +71,7 @@ export function StrategyCard({ plan }: { plan: NutritionPlan }) {
     <Card radius="xl" pad="md" className="overflow-hidden">
       <div className="pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full bg-brand-400/[0.06] blur-3xl" />
       <MonoLabel dot="brand">Recommended diet</MonoLabel>
-      <h3 className="mt-2 text-lg font-bold tracking-tight text-white">{plan.strategy.title}</h3>
+      <h3 className="mt-2 text-lg font-bold tracking-tight text-fg">{plan.strategy.title}</h3>
       <p className="mt-2 text-sm leading-relaxed text-slate-400">{plan.strategy.summary}</p>
       <ul className="mt-4 space-y-2">
         {plan.strategy.principles.map((pr) => (
@@ -112,7 +112,7 @@ export function MealSuggestions({ plan, dateKey }: { plan: NutritionPlan; dateKe
       <div className="flex flex-wrap items-end justify-between gap-2">
         <div>
           <MonoLabel dot="volt">Meal suggestions // portioned to your budget</MonoLabel>
-          <h2 id="meal-suggestions" className="mt-1 text-xl font-bold tracking-tight text-white">
+          <h2 id="meal-suggestions" className="mt-1 text-xl font-bold tracking-tight text-fg">
             What to eat today
           </h2>
         </div>
@@ -124,7 +124,7 @@ export function MealSuggestions({ plan, dateKey }: { plan: NutritionPlan; dateKe
           return (
             <div key={meal} className="space-y-3">
               <div className="flex items-center justify-between px-0.5">
-                <span className="text-sm font-semibold text-white">{MEAL_LABEL[meal]}</span>
+                <span className="text-sm font-semibold text-fg">{MEAL_LABEL[meal]}</span>
                 <span className="font-mono text-[10px] text-slate-500">~{fmtInt(plan.targets.meal_calories[meal])} kcal</span>
               </div>
               {options.map((m, i) => (
@@ -147,7 +147,7 @@ export function MealSuggestions({ plan, dateKey }: { plan: NutritionPlan; dateKe
                     ))}
                   </ul>
                   <div className="mb-3 flex items-baseline justify-between border-t border-line pt-2.5 font-mono text-[11px] text-slate-400">
-                    <span className="text-sm font-bold text-white">{fmtInt(m.nutrients.calories)} kcal</span>
+                    <span className="text-sm font-bold text-fg">{fmtInt(m.nutrients.calories)} kcal</span>
                     <span>
                       P {fmtNum(m.nutrients.protein_g, 0)} · C {fmtNum(m.nutrients.carbs_g, 0)} · F {fmtNum(m.nutrients.fat_g, 0)}
                     </span>
@@ -195,7 +195,7 @@ export function FoodGroups({ plan, onQuickAdd }: { plan: NutritionPlan; onQuickA
                 <span className={clsx('flex h-7 w-7 items-center justify-center rounded-lg border', st.tone)}>
                   <Icon name={st.icon} size={14} />
                 </span>
-                <h3 className="text-sm font-semibold text-white">{g.title}</h3>
+                <h3 className="text-sm font-semibold text-fg">{g.title}</h3>
               </div>
               <ul className="space-y-1.5">
                 {g.items.map((p) => (
@@ -259,7 +259,7 @@ export function GuidanceGrid({ plan }: { plan: NutritionPlan }) {
     <section aria-labelledby="guidance" className="space-y-4">
       <div>
         <MonoLabel dot="iris">Nutrition guidance // for your category</MonoLabel>
-        <h2 id="guidance" className="mt-1 text-xl font-bold tracking-tight text-white">
+        <h2 id="guidance" className="mt-1 text-xl font-bold tracking-tight text-fg">
           How to make it work
         </h2>
       </div>
@@ -272,7 +272,7 @@ export function GuidanceGrid({ plan }: { plan: NutritionPlan }) {
                 <Icon name={st.icon} size={15} />
               </span>
               <div>
-                <h3 className="text-sm font-semibold text-white">{g.title}</h3>
+                <h3 className="text-sm font-semibold text-fg">{g.title}</h3>
                 <p className="mt-1 text-xs leading-relaxed text-slate-400">{g.body}</p>
               </div>
             </article>

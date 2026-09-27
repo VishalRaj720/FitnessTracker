@@ -59,7 +59,7 @@ function Avg({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-lg border border-line bg-ink-850 px-2.5 py-2">
       <div className="text-[9px] uppercase tracking-wider text-slate-500">{label}</div>
-      <div className="text-sm font-bold text-white">{value}</div>
+      <div className="text-sm font-bold text-fg">{value}</div>
     </div>
   )
 }

@@ -66,7 +66,7 @@ export function IconButton({
       title={label}
       aria-label={label}
       className={clsx(
-        'relative inline-flex h-9 w-9 items-center justify-center rounded-lg border border-transparent text-slate-400 transition hover:border-line hover:bg-ink-800 hover:text-white',
+        'relative inline-flex h-9 w-9 items-center justify-center rounded-lg border border-transparent text-slate-400 transition hover:border-line hover:bg-ink-800 hover:text-fg',
         className,
       )}
       {...rest}
@@ -84,10 +84,10 @@ type Pad = 'none' | 'sm' | 'md' | 'lg'
 const PAD: Record<Pad, string> = { none: '', sm: 'p-4', md: 'p-5 sm:p-6', lg: 'p-6 sm:p-8' }
 type Surface = 'panel' | 'raised' | 'inset' | 'glass'
 const SURFACE: Record<Surface, string> = {
-  panel: 'bg-ink-900/85',
+  panel: 'bg-ink-900',
   raised: 'bg-ink-800',
-  inset: 'bg-ink-950/70',
-  glass: 'bg-ink-850/70 backdrop-blur-md',
+  inset: 'bg-ink-950',
+  glass: 'bg-ink-900',
 }
 type CardAccent = 'none' | 'pulse' | 'iris' | 'brand' | 'flame'
 const CARD_BORDER: Record<CardAccent, string> = {
@@ -253,9 +253,9 @@ export function Input({
   return (
     <input
       className={clsx(
-        'w-full rounded-lg bg-ink-950/70 px-4 text-white placeholder:text-slate-600 transition focus:outline-none disabled:opacity-50',
+        'w-full rounded-lg bg-ink-950/70 px-4 text-fg placeholder:text-slate-600 transition focus:outline-none disabled:opacity-50',
         big ? 'h-12 text-base' : 'h-11 text-sm',
-        highlight ? 'border-2 border-brand-500/60 shadow-[0_0_15px_rgba(16,185,129,0.15)]' : 'border border-line',
+        highlight ? 'border-2 border-brand-500/60' : 'border border-line',
         mono && 'font-mono uppercase tracking-[0.12em]',
         FOCUS[accent],
         className,
@@ -326,13 +326,13 @@ export function InfoTip({ text, title }: { text: string; title?: string }) {
       <button
         type="button"
         aria-label={title ?? 'More information'}
-        className="flex h-4 w-4 items-center justify-center rounded-full border border-line bg-white/[0.06] font-mono text-[10px] text-slate-400 transition hover:bg-white/[0.12] hover:text-slate-200"
+        className="flex h-4 w-4 items-center justify-center rounded-full border border-line bg-veil/[0.06] font-mono text-[10px] text-slate-400 transition hover:bg-veil/[0.12] hover:text-slate-200"
       >
         i
       </button>
       <span
         role="tooltip"
-        className="pointer-events-none absolute bottom-full left-0 z-50 mb-2 w-64 translate-y-1 rounded-lg border border-line bg-ink-900/95 p-2.5 text-[11px] leading-relaxed text-slate-300 opacity-0 shadow-xl backdrop-blur-md transition duration-200 group-focus-within/tip:translate-y-0 group-focus-within/tip:opacity-100 group-hover/tip:translate-y-0 group-hover/tip:opacity-100"
+        className="pointer-events-none absolute bottom-full left-0 z-50 mb-2 w-64 translate-y-1 rounded-lg border border-line bg-ink-900/95 p-2.5 text-[11px] leading-relaxed text-slate-300 opacity-0 shadow-xl transition duration-200 group-focus-within/tip:translate-y-0 group-focus-within/tip:opacity-100 group-hover/tip:translate-y-0 group-hover/tip:opacity-100"
       >
         {title && <span className="label-mono mb-1 flex items-center gap-1.5 text-pulse">{title}</span>}
         {text}
@@ -341,7 +341,7 @@ export function InfoTip({ text, title }: { text: string; title?: string }) {
   )
 }
 
-/** Pill selector (minutes, days, filters). The active pill glows in the accent colour. */
+/** Pill selector (minutes, days, filters). The active pill uses the accent colour. */
 export function Chip({
   active,
   children,
@@ -358,9 +358,9 @@ export function Chip({
   className?: string
 }) {
   const on = {
-    iris: 'border-iris-500 bg-iris-500/15 text-white shadow-[0_0_16px_-2px_rgba(90,107,255,0.45)]',
-    pulse: 'border-pulse/60 bg-pulse/10 text-white shadow-[0_0_14px_-3px_rgba(0,242,254,0.45)]',
-    brand: 'border-brand-400/70 bg-brand-400/10 text-white shadow-[0_0_14px_-3px_rgba(0,229,153,0.45)]',
+    iris: 'border-iris-500 bg-iris-500/15 text-fg',
+    pulse: 'border-pulse/60 bg-pulse/10 text-fg',
+    brand: 'border-brand-400/70 bg-brand-400/10 text-fg',
   }[accent]
   return (
     <button
@@ -370,7 +370,7 @@ export function Chip({
       className={clsx(
         'rounded-lg border text-center transition duration-150',
         size === 'sm' ? 'px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.1em]' : 'px-3 py-2.5 text-sm font-medium',
-        active ? on : 'border-line bg-ink-750/60 text-slate-300 hover:border-line-strong hover:text-white',
+        active ? on : 'border-line bg-ink-750/60 text-slate-300 hover:border-line-strong hover:text-fg',
         className,
       )}
     >
@@ -405,7 +405,7 @@ export function Segmented<T extends string | number>({
           className={clsx(
             'rounded-md transition',
             size === 'sm' ? 'py-1 text-[11px]' : 'py-1.5 text-xs',
-            o.value === value ? 'border border-line-strong bg-ink-750 font-medium text-white shadow-sm' : 'border border-transparent text-slate-400 hover:text-slate-200',
+            o.value === value ? 'border border-line-strong bg-ink-750 font-medium text-fg shadow-sm' : 'border border-transparent text-slate-400 hover:text-slate-200',
           )}
         >
           {o.label}
@@ -426,7 +426,7 @@ export function Toggle({ checked, onChange, label, disabled }: { checked: boolea
       onClick={() => onChange(!checked)}
       className={clsx(
         'relative h-6 w-11 shrink-0 rounded-full border transition disabled:opacity-50',
-        checked ? 'border-pulse/60 bg-pulse/25 shadow-[0_0_12px_-2px_rgba(0,242,254,0.45)]' : 'border-line bg-ink-700',
+        checked ? 'border-pulse/60 bg-pulse/25' : 'border-line bg-ink-700',
       )}
     >
       <span className={clsx('absolute top-0.5 h-[18px] w-[18px] rounded-full transition-all', checked ? 'left-[22px] bg-pulse' : 'left-0.5 bg-slate-400')} />
@@ -456,7 +456,7 @@ export function RadioCard({
   const on =
     accent === 'iris'
       ? 'border-iris-500 bg-iris-500/[0.07] shadow-glow-iris'
-      : 'border-brand-500/80 bg-brand-500/[0.06] shadow-[0_0_15px_rgba(16,185,129,0.08)]'
+      : 'border-brand-500/80 bg-brand-500/[0.06]'
   return (
     <button
       type="button"
@@ -467,7 +467,7 @@ export function RadioCard({
       onClick={onSelect}
       className={clsx(
         'group flex w-full items-center justify-between gap-4 rounded-xl border-2 p-4 text-left transition duration-150',
-        selected ? on : 'border-line bg-white/[0.02] hover:border-white/20 hover:bg-white/[0.04]',
+        selected ? on : 'border-line bg-veil/[0.02] hover:border-line-strong hover:bg-veil/[0.04]',
         className,
       )}
     >
@@ -483,7 +483,7 @@ export function RadioCard({
           </span>
         )}
         <div className="min-w-0">
-          <div id={`${id}-t`} className={clsx('text-[15px] tracking-tight', selected ? 'font-semibold text-white' : 'font-medium text-slate-200 group-hover:text-white')}>
+          <div id={`${id}-t`} className={clsx('text-[15px] tracking-tight', selected ? 'font-semibold text-fg' : 'font-medium text-slate-200 group-hover:text-fg')}>
             {title}
           </div>
           {hint && (
@@ -497,7 +497,7 @@ export function RadioCard({
         aria-hidden
         className={clsx(
           'flex h-5 w-5 shrink-0 items-center justify-center rounded-full',
-          selected ? (accent === 'iris' ? 'border-2 border-iris-500' : 'border-2 border-brand-400') : 'border border-white/30 group-hover:border-white/50',
+          selected ? (accent === 'iris' ? 'border-2 border-iris-500' : 'border-2 border-brand-400') : 'border border-line group-hover:border-line-strong',
         )}
       >
         {selected && <span className={clsx('h-2.5 w-2.5 rounded-full', accent === 'iris' ? 'bg-iris-500' : 'bg-brand-400')} />}
@@ -519,7 +519,7 @@ export function Spinner({ className }: { className?: string }) {
 }
 
 export function Skeleton({ className }: { className?: string }) {
-  return <div aria-hidden className={clsx('animate-pulse rounded-lg bg-white/[0.05]', className)} />
+  return <div aria-hidden className={clsx('animate-pulse rounded-lg bg-veil/[0.05]', className)} />
 }
 
 export function Alert({ tone = 'danger', title, children, className }: { tone?: 'danger' | 'info' | 'warn' | 'success'; title?: string; children: ReactNode; className?: string }) {
@@ -533,7 +533,7 @@ export function Alert({ tone = 'danger', title, children, className }: { tone?: 
     <div role={tone === 'danger' ? 'alert' : 'status'} className={clsx('flex items-start gap-3 rounded-xl border px-4 py-3 text-sm', t.cls, className)}>
       <Icon name={t.icon} className="mt-0.5 shrink-0" />
       <div className="min-w-0">
-        {title && <div className="mb-0.5 font-semibold text-white">{title}</div>}
+        {title && <div className="mb-0.5 font-semibold text-fg">{title}</div>}
         {children}
       </div>
     </div>

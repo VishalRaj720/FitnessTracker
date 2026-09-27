@@ -98,7 +98,7 @@ export function CoachPage() {
             {messages.length > 0 && (
               <button
                 type="button"
-                className="rounded px-2 py-0.5 text-slate-400 transition hover:bg-white/[0.05] hover:text-white"
+                className="rounded px-2 py-0.5 text-slate-400 transition hover:bg-veil/[0.05] hover:text-fg"
                 onClick={async () => {
                   await companionApi.clearThread()
                   void qc.invalidateQueries({ queryKey: ['companion', 'thread'] })
@@ -122,7 +122,7 @@ export function CoachPage() {
                       key={s}
                       type="button"
                       onClick={() => submit(s)}
-                      className="rounded-full border border-line bg-ink-850/60 px-3.5 py-1.5 text-left text-xs text-slate-300 transition hover:border-pulse/40 hover:text-white"
+                      className="rounded-full border border-line bg-ink-850/60 px-3.5 py-1.5 text-left text-xs text-slate-300 transition hover:border-pulse/40 hover:text-fg"
                     >
                       {s}
                     </button>

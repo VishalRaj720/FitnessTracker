@@ -3,14 +3,27 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#050608" />
+    <meta name="theme-color" content="#F8F9FA" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <link rel="icon" type="image/svg+xml" href="/icons/icon.svg" />
     <link rel="apple-touch-icon" href="/icons/icon-192.png" />
-    <title>FitSathi</title>
+    <title>Fitniti</title>
+    <script>
+      ;(function () {
+        try {
+          var t = localStorage.getItem('fitniti.theme')
+          if (t !== 'light' && t !== 'dark') t = 'light'
+          document.documentElement.setAttribute('data-theme', t)
+          var meta = document.querySelector('meta[name="theme-color"]')
+          if (meta) meta.setAttribute('content', t === 'dark' ? '#0F1115' : '#F8F9FA')
+        } catch (e) {
+          document.documentElement.setAttribute('data-theme', 'light')
+        }
+      })()
+    </script>
   </head>
-  <body class="bg-ink-950 text-slate-200">
+  <body class="bg-ink-950 text-fg">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

@@ -2,63 +2,204 @@
 @import './fonts.css';
 
 /*
- * FitSathi design tokens — distilled from the seven reference screens.
- *
- *   ink      obsidian surfaces, darkest (canvas) to lightest (raised controls)
- *   line     hairline borders (white at 8% / 14%)
- *   brand    emerald: go, start, verified, success          (welcome, workout, squad join)
- *   iris     indigo: setup and configuration flows          (onboarding, create, export)
- *   pulse    cyan: live telemetry, active navigation, focus (dashboard, squad)
- *   volt     neon lime: camera-tracked highlights, rank #1  (dashboard, welcome board)
- *   flame    amber: streaks and warnings
+ * Fitniti design tokens.
+ * Light is the default. Dark is a grounded charcoal, not pitch black.
+ * Existing utilities (bg-ink-*, text-brand-*, text-slate-*) read these variables
+ * so screens keep their structure while the palette can switch at runtime.
  */
-@theme {
-  --font-sans: 'Inter Variable', 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  --font-mono: 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
-  --color-ink-950: #050608;
-  --color-ink-900: #090b0e;
-  --color-ink-850: #0d1016;
-  --color-ink-800: #11141b;
-  --color-ink-750: #161a23;
-  --color-ink-700: #1c2230;
-  --color-ink-600: #283247;
-  --color-ink-500: #3a4560;
+:root {
+  --font-heading: 'Space Grotesk', -apple-system, sans-serif;
+  --font-body: 'Plus Jakarta Sans', -apple-system, sans-serif;
+  --radius-card: 16px;
+  --radius-btn: 12px;
+  color-scheme: light;
+}
 
-  --color-line: rgb(255 255 255 / 0.08);
-  --color-line-strong: rgb(255 255 255 / 0.14);
+:root,
+[data-theme='light'] {
+  color-scheme: light;
+  --bg-main: #f8f9fa;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f1f3f5;
+  --text-primary: #1a1d20;
+  --text-secondary: #6c757d;
+  --accent-primary: #2b6cb0;
+  --accent-success: #2f855a;
+  --border-color: #e9ecef;
+  --shadow-subtle: 0 4px 20px rgba(0, 0, 0, 0.03);
 
-  --color-brand-50: #ecfdf5;
-  --color-brand-100: #d1fae5;
-  --color-brand-200: #a7f3d0;
-  --color-brand-300: #5ef2bf;
-  --color-brand-400: #00e599;
-  --color-brand-500: #10b981;
-  --color-brand-600: #059669;
-  --color-brand-700: #047857;
-  --color-brand-800: #065f46;
-  --color-brand-900: #064e3b;
-  --color-brand-950: #022c22;
+  --veil: #1a1d20;
+  --ink-950: #f8f9fa;
+  --ink-900: #ffffff;
+  --ink-850: #fcfcfd;
+  --ink-800: #f1f3f5;
+  --ink-750: #e9ecef;
+  --ink-700: #dee2e6;
+  --ink-600: #ced4da;
+  --ink-500: #adb5bd;
 
-  --color-iris-200: #c7cdff;
-  --color-iris-300: #a5afff;
-  --color-iris-400: #7c8aff;
-  --color-iris-500: #5a6bff;
-  --color-iris-600: #4655ec;
-  --color-iris-700: #3842c4;
+  --line: #e9ecef;
+  --line-strong: #dee2e6;
 
-  --color-pulse: #00f2fe;
-  --color-aqua: #00d2b4;
-  --color-volt: #d2ff00;
-  --color-flame: #ffb800;
+  --brand-50: #f3faf6;
+  --brand-100: #e3f5ea;
+  --brand-200: #c6e8d4;
+  --brand-300: #1f6b45;
+  --brand-400: #2f855a;
+  --brand-500: #276749;
+  --brand-600: #22543d;
+  --brand-700: #1c4532;
+  --brand-800: #163628;
+  --brand-900: #122b20;
+  --brand-950: #e7f3ec;
 
-  --shadow-card: 0 10px 30px -10px rgb(0 0 0 / 0.85), 0 0 0 1px rgb(255 255 255 / 0.03);
-  --shadow-glow-brand: 0 0 24px -4px rgb(16 185 129 / 0.5);
-  --shadow-glow-signal: 0 0 26px -4px rgb(0 229 153 / 0.5);
-  --shadow-glow-iris: 0 0 24px -2px rgb(90 107 255 / 0.45);
-  --shadow-glow-pulse: 0 0 22px -4px rgb(0 242 254 / 0.45);
-  --shadow-glow-volt: 0 0 22px -4px rgb(210 255 0 / 0.4);
-  --shadow-glow-aqua: 0 0 26px -4px rgb(0 210 180 / 0.5);
+  --iris-200: #d3e0f2;
+  --iris-300: #234e82;
+  --iris-400: #2b6cb0;
+  --iris-500: #2b6cb0;
+  --iris-600: #2a5f9e;
+  --iris-700: #1e4b82;
+
+  --pulse: #2b6cb0;
+  --aqua: #276e6f;
+  --volt: #8a5a12;
+  --flame: #c05621;
+
+  --color-slate-100: #1a1d20;
+  --color-slate-200: #2c3238;
+  --color-slate-300: #495057;
+  --color-slate-400: #6c757d;
+  --color-slate-500: #868e96;
+  --color-slate-600: #adb5bd;
+  --color-slate-700: #ced4da;
+  --color-slate-800: #dee2e6;
+  --color-rose-200: #9b2c2c;
+  --color-rose-300: #c53030;
+  --color-amber-100: #975a16;
+  --color-amber-200: #92400e;
+  --color-sky-100: #2b6cb0;
+  --color-emerald-400: #2f855a;
+  --color-lime-950: #e7f3ec;
+}
+
+[data-theme='dark'] {
+  color-scheme: dark;
+  --bg-main: #0f1115;
+  --bg-card: #181b20;
+  --bg-card-hover: #22262d;
+  --text-primary: #f0f3f6;
+  --text-secondary: #8c96a3;
+  --accent-primary: #4c82f6;
+  --accent-success: #38a169;
+  --border-color: rgba(255, 255, 255, 0.08);
+  --shadow-subtle: 0 4px 20px rgba(0, 0, 0, 0.2);
+
+  --veil: #f0f3f6;
+  --ink-950: #0f1115;
+  --ink-900: #181b20;
+  --ink-850: #1c2026;
+  --ink-800: #22262d;
+  --ink-750: #2a3038;
+  --ink-700: #343b46;
+  --ink-600: #3e4654;
+  --ink-500: #4e5868;
+
+  --line: rgba(255, 255, 255, 0.08);
+  --line-strong: rgba(255, 255, 255, 0.14);
+
+  --brand-50: #ecfdf5;
+  --brand-100: #d1fae5;
+  --brand-200: #a7f3d0;
+  --brand-300: #68d391;
+  --brand-400: #48bb78;
+  --brand-500: #38a169;
+  --brand-600: #2f855a;
+  --brand-700: #276749;
+  --brand-800: #22543d;
+  --brand-900: #1c4532;
+  --brand-950: #10281c;
+
+  --iris-200: #d6e2ff;
+  --iris-300: #b9ccff;
+  --iris-400: #93b4ff;
+  --iris-500: #4c82f6;
+  --iris-600: #3b6fe0;
+  --iris-700: #2c5cc5;
+
+  --pulse: #4c82f6;
+  --aqua: #3d9b90;
+  --volt: #e2b657;
+  --flame: #ed8936;
+
+  --color-slate-100: #f0f3f6;
+  --color-slate-200: #e2e7ed;
+  --color-slate-300: #c5ced8;
+  --color-slate-400: #8c96a3;
+  --color-slate-500: #6e7886;
+  --color-slate-600: #5c6672;
+  --color-slate-700: #3e4652;
+  --color-slate-800: #2a313c;
+  --color-emerald-400: #38a169;
+  --color-lime-950: #1a2420;
+}
+
+@theme inline {
+  --font-sans: var(--font-body);
+  --font-mono: var(--font-body);
+  --font-display: var(--font-heading);
+
+  --radius-lg: var(--radius-btn);
+  --radius-xl: var(--radius-card);
+  --radius-2xl: var(--radius-card);
+
+  --color-fg: var(--text-primary);
+  --color-veil: var(--veil);
+  --color-canvas: var(--bg-main);
+
+  --color-ink-950: var(--ink-950);
+  --color-ink-900: var(--ink-900);
+  --color-ink-850: var(--ink-850);
+  --color-ink-800: var(--ink-800);
+  --color-ink-750: var(--ink-750);
+  --color-ink-700: var(--ink-700);
+  --color-ink-600: var(--ink-600);
+  --color-ink-500: var(--ink-500);
+
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+
+  --color-brand-50: var(--brand-50);
+  --color-brand-100: var(--brand-100);
+  --color-brand-200: var(--brand-200);
+  --color-brand-300: var(--brand-300);
+  --color-brand-400: var(--brand-400);
+  --color-brand-500: var(--brand-500);
+  --color-brand-600: var(--brand-600);
+  --color-brand-700: var(--brand-700);
+  --color-brand-800: var(--brand-800);
+  --color-brand-900: var(--brand-900);
+  --color-brand-950: var(--brand-950);
+
+  --color-iris-200: var(--iris-200);
+  --color-iris-300: var(--iris-300);
+  --color-iris-400: var(--iris-400);
+  --color-iris-500: var(--iris-500);
+  --color-iris-600: var(--iris-600);
+  --color-iris-700: var(--iris-700);
+
+  --color-pulse: var(--pulse);
+  --color-aqua: var(--aqua);
+  --color-volt: var(--volt);
+  --color-flame: var(--flame);
+
+  --shadow-card: var(--shadow-subtle);
+  --shadow-glow-brand: var(--shadow-subtle);
+  --shadow-glow-signal: var(--shadow-subtle);
+  --shadow-glow-iris: var(--shadow-subtle);
+  --shadow-glow-pulse: var(--shadow-subtle);
+  --shadow-glow-volt: var(--shadow-subtle);
+  --shadow-glow-aqua: var(--shadow-subtle);
 
   --animate-pulse-slow: pulse-slow 2.4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   --animate-scanline: scanline 3.2s ease-in-out infinite;
@@ -72,8 +213,8 @@
       transform: scale(1);
     }
     50% {
-      opacity: 0.45;
-      transform: scale(0.85);
+      opacity: 0.55;
+      transform: scale(0.92);
     }
   }
   @keyframes scanline {
@@ -101,10 +242,9 @@
   }
 }
 
-:root {
-  color-scheme: dark;
-  --safe-top: env(safe-area-inset-top, 0px);
-  --safe-bottom: env(safe-area-inset-bottom, 0px);
+@utility font-display {
+  font-family: var(--font-heading);
+  letter-spacing: -0.02em;
 }
 
 @layer base {
@@ -115,19 +255,37 @@
   }
 
   body {
-    @apply bg-ink-950 font-sans text-slate-200 antialiased;
+    @apply bg-ink-950 font-sans text-fg antialiased;
     overscroll-behavior-y: none;
     -webkit-tap-highlight-color: transparent;
-    font-feature-settings: 'cv11', 'ss01';
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-heading);
+    letter-spacing: -0.02em;
+  }
+
+  /* Key figures stay in the heading face even when a screen marks them as mono. */
+  .font-mono.text-2xl,
+  .font-mono.text-3xl,
+  .font-mono.text-4xl,
+  .font-mono.text-5xl,
+  .font-mono.text-6xl,
+  .font-mono.text-7xl {
+    font-family: var(--font-heading);
+    letter-spacing: -0.02em;
   }
 
   ::selection {
-    background: rgb(0 229 153 / 0.28);
-    color: #fff;
+    background: color-mix(in srgb, var(--accent-primary) 22%, transparent);
+    color: var(--text-primary);
   }
 
   :focus-visible {
-    outline: 2px solid rgb(0 242 254 / 0.75);
+    outline: 2px solid var(--accent-primary);
     outline-offset: 2px;
   }
 
@@ -139,11 +297,11 @@
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: #222631;
+    background: var(--ink-600);
     border-radius: 9999px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #2f3545;
+    background: var(--ink-500);
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -157,34 +315,31 @@
   }
 }
 
-/* Backgrounds from the references: dot matrix (dashboard), line grid (onboarding), emerald
-   viewfinder dots (welcome HUD) and fine cyan dots (chart frames). */
 @utility bg-dot-grid {
-  background-image: radial-gradient(rgb(255 255 255 / 0.075) 1px, transparent 1px);
+  background-image: radial-gradient(color-mix(in srgb, var(--text-secondary) 22%, transparent) 1px, transparent 1px);
   background-size: 24px 24px;
 }
 @utility bg-dot-fine {
-  background-image: radial-gradient(rgb(0 242 254 / 0.12) 1px, transparent 1px);
+  background-image: radial-gradient(color-mix(in srgb, var(--text-secondary) 28%, transparent) 1px, transparent 1px);
   background-size: 16px 16px;
 }
 @utility bg-dot-signal {
-  background-image: radial-gradient(circle, rgb(0 229 153 / 0.14) 1px, transparent 1px);
+  background-image: radial-gradient(circle, color-mix(in srgb, var(--accent-success) 22%, transparent) 1px, transparent 1px);
   background-size: 16px 16px;
 }
 @utility bg-line-grid {
   background-image:
-    linear-gradient(to right, rgb(255 255 255 / 0.022) 1px, transparent 1px),
-    linear-gradient(to bottom, rgb(255 255 255 / 0.022) 1px, transparent 1px);
+    linear-gradient(to right, color-mix(in srgb, var(--text-secondary) 12%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--text-secondary) 12%, transparent) 1px, transparent 1px);
   background-size: 40px 40px;
 }
 @utility bg-tech-grid {
   background-image:
-    linear-gradient(to right, rgb(255 255 255 / 0.025) 1px, transparent 1px),
-    linear-gradient(to bottom, rgb(255 255 255 / 0.025) 1px, transparent 1px);
+    linear-gradient(to right, color-mix(in srgb, var(--text-secondary) 14%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--text-secondary) 14%, transparent) 1px, transparent 1px);
   background-size: 24px 24px;
 }
 
-/* Telemetry corner marks on hero cards (dashboard "Today's plan", chart frames). */
 @utility corner-brackets {
   position: relative;
   &::before,
@@ -198,26 +353,26 @@
   &::before {
     top: -1px;
     left: -1px;
-    border-top: 1.5px solid rgb(0 242 254 / 0.7);
-    border-left: 1.5px solid rgb(0 242 254 / 0.7);
+    border-top: 1.5px solid color-mix(in srgb, var(--accent-primary) 45%, transparent);
+    border-left: 1.5px solid color-mix(in srgb, var(--accent-primary) 45%, transparent);
     border-top-left-radius: 3px;
   }
   &::after {
     bottom: -1px;
     right: -1px;
-    border-bottom: 1.5px solid rgb(0 242 254 / 0.7);
-    border-right: 1.5px solid rgb(0 242 254 / 0.7);
+    border-bottom: 1.5px solid color-mix(in srgb, var(--accent-primary) 45%, transparent);
+    border-right: 1.5px solid color-mix(in srgb, var(--accent-primary) 45%, transparent);
     border-bottom-right-radius: 3px;
   }
 }
 
-/* The small uppercase mono caption used across every reference ("// SYSTEM ARCHITECTURE"). */
 @utility label-mono {
-  font-family: var(--font-mono);
+  font-family: var(--font-body);
   font-size: 10.5px;
   line-height: 1.25;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
+  font-weight: 600;
 }
 
 @utility no-scrollbar {
@@ -228,7 +383,6 @@
   }
 }
 
-/* Welcome: one phone-width column in the reference order, two columns from desktop up. */
 @layer components {
   .welcome-grid {
     display: grid;
@@ -246,7 +400,6 @@
   }
 }
 
-/* Live-workout micro animations (unchanged behaviour). */
 @keyframes pulse-ring {
   0% {
     transform: scale(0.95);

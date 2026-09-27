@@ -43,17 +43,17 @@ export function HomePage() {
     <div className="space-y-10">
       <section className="flex flex-col justify-between gap-6 border-b border-line pb-6 xl:flex-row xl:items-end" aria-labelledby="home-title">
         <div className="max-w-4xl space-y-3">
-          <div className="inline-flex items-center gap-2 rounded border border-white/10 bg-ink-900 px-2.5 py-1 font-mono text-[11px] tracking-wider text-pulse">
+          <div className="inline-flex items-center gap-2 rounded border border-line bg-ink-900 px-2.5 py-1 font-mono text-[11px] tracking-wider text-pulse">
             <span className="h-1.5 w-1.5 rounded-full bg-pulse" />
             ATHLETE DISCIPLINE PROTOCOL // {protocol}
           </div>
-          <h1 id="home-title" className="text-balance text-3xl font-extrabold leading-[1.12] tracking-tight text-white sm:text-4xl lg:text-5xl">
+          <h1 id="home-title" className="text-balance text-3xl font-extrabold leading-[1.12] tracking-tight text-fg sm:text-4xl lg:text-5xl">
             {greeting()}, {firstName(user?.name)}.
             <br className="hidden sm:block" />{' '}
             <span className="text-slate-300">{done ? 'Today’s session is in the bank.' : 'Your command dashboard is ready.'}</span>
           </h1>
           <p className="max-w-2xl text-sm leading-relaxed text-slate-400 sm:text-base">
-            FitSathi turns scattered daily routines, on-device camera form checks, fuel targets and verified minutes into one calm, low-noise cockpit.
+            Fitniti turns scattered daily routines, on-device camera form checks, fuel targets and verified minutes into one calm, low-noise cockpit.
           </p>
         </div>
         <div className="flex flex-col items-start gap-3.5 sm:flex-row xl:flex-col xl:items-end">
@@ -84,12 +84,12 @@ export function HomePage() {
             regenerating={regen.isPending}
             onRetry={() => void plan.refetch()}
           />
-          <div className="flex flex-wrap items-center justify-between gap-2 rounded border border-white/5 bg-ink-900/60 p-4 font-mono text-xs text-slate-400">
+          <div className="flex flex-wrap items-center justify-between gap-2 rounded border border-line bg-ink-900/60 p-4 font-mono text-xs text-slate-400">
             <span className="flex items-center gap-2">
               <span className="h-2 w-2 rounded-full bg-pulse" />
               POSE ENGINE: MediaPipe Pose Landmarker · on-device inference
             </span>
-            <span className="text-white/40">ZERO-CLOUD VIDEO PRIVACY</span>
+            <span className="text-fg/40">ZERO-CLOUD VIDEO PRIVACY</span>
           </div>
         </div>
 

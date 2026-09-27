@@ -38,7 +38,7 @@ export function PageHeader({
         )}
         <h1
           className={clsx(
-            'font-extrabold tracking-tight text-white',
+            'font-extrabold tracking-tight text-fg',
             size === 'lg' && 'text-3xl leading-[1.1] sm:text-4xl lg:text-5xl',
             size === 'md' && 'text-2xl leading-tight sm:text-3xl',
             size === 'sm' && 'text-xl leading-tight sm:text-2xl',
@@ -88,7 +88,7 @@ export function PanelHeader({
     <div className={clsx('flex flex-wrap items-start justify-between gap-3', divider && 'mb-4 border-b border-line pb-4', !divider && 'mb-4', className)}>
       <div className="min-w-0 space-y-1">
         {kicker && <MonoLabel dot={kickerDot}>{kicker}</MonoLabel>}
-        {title && <h2 className="text-base font-bold tracking-tight text-white sm:text-lg">{title}</h2>}
+        {title && <h2 className="text-base font-bold tracking-tight text-fg sm:text-lg">{title}</h2>}
       </div>
       {right && <div className="flex shrink-0 items-center gap-2">{right}</div>}
     </div>
@@ -124,7 +124,7 @@ export function Stat({
         <MonoLabel className="text-slate-500">{label}</MonoLabel>
         {icon && <Icon name={icon} size={14} className={tone ? TONE_TEXT[tone] : 'text-slate-500'} />}
       </div>
-      <div className={clsx('mt-1.5 font-mono text-2xl font-bold tracking-tight tabular-nums', tone ? TONE_TEXT[tone] : 'text-white')}>
+      <div className={clsx('mt-1.5 font-mono text-2xl font-bold tracking-tight tabular-nums', tone ? TONE_TEXT[tone] : 'text-fg')}>
         {value}
         {unit && <span className="ml-1 font-sans text-xs font-normal text-slate-400">{unit}</span>}
       </div>
@@ -192,7 +192,7 @@ export function SegmentBar({
           className={clsx(
             'rounded-full transition-colors duration-300',
             height,
-            i < filled ? TONE_BG[tone] : 'bg-white/[0.08]',
+            i < filled ? TONE_BG[tone] : 'bg-veil/[0.08]',
             (current === i || (current === undefined && i === filled - 1)) && i < filled && TONE_GLOW[tone],
           )}
         />
@@ -208,7 +208,7 @@ export function Ring({
   size = 120,
   stroke = 10,
   tone = 'brand',
-  track = '#1c2230',
+  track = 'var(--border-color)',
   children,
   className,
 }: {
@@ -240,7 +240,7 @@ export function Ring({
           fill="none"
           strokeLinecap="round"
           strokeDasharray={`${pct * c} ${c}`}
-          style={{ filter: `drop-shadow(0 0 6px ${color}88)`, transition: 'stroke-dasharray 0.6s ease' }}
+          style={{ transition: 'stroke-dasharray 0.6s ease' }}
         />
         )}
       </svg>
@@ -283,7 +283,7 @@ export function EmptyState({
         <span className={clsx('flex h-12 w-12 items-center justify-center rounded-full border border-line-strong bg-ink-800 shadow-inner', TONE_TEXT[tone])}>
           <Icon name={icon} size={22} strokeWidth={1.8} />
         </span>
-        <h3 className="text-lg font-bold tracking-tight text-white sm:text-xl">{title}</h3>
+        <h3 className="text-lg font-bold tracking-tight text-fg sm:text-xl">{title}</h3>
         {body && <p className="text-sm leading-relaxed text-slate-400">{body}</p>}
         {action && <div className="pt-1">{action}</div>}
       </div>

@@ -16,7 +16,7 @@ from app.models import User, WorkoutSession
 from app.models.companion import CompanionMessage, CompanionThread, SessionDebrief
 from app.schemas.companion import ChatIn, ChatOut, CueIn, CueOut, DebriefOut, SuggestedAction
 
-log = logging.getLogger("fitsathi.companion")
+log = logging.getLogger("fitniti.companion")
 
 _provider: LLMProvider | None = None
 

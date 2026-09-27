@@ -118,7 +118,7 @@ export function ProfileForm({
               onClick={() => set('diet_type', d)}
               className={clsx(
                 'flex items-center justify-center gap-2 rounded-lg border px-3 py-2.5 text-sm font-medium transition',
-                draft.diet_type === d ? 'border-iris-500 bg-iris-500/15 text-white shadow-[0_0_16px_-2px_rgba(90,107,255,0.45)]' : 'border-line bg-ink-750/60 text-slate-300 hover:border-line-strong hover:text-white',
+                draft.diet_type === d ? 'border-iris-500 bg-iris-500/15 text-fg shadow-card' : 'border-line bg-ink-750/60 text-slate-300 hover:border-line-strong hover:text-fg',
               )}
             >
               <DietMark diet={d} /> {DIET_LABEL[d]}
@@ -140,15 +140,15 @@ export function ProfileForm({
               onClick={() => set('activity_level', a)}
               className={clsx(
                 'flex items-start justify-between gap-3 rounded-lg border p-3 text-left transition',
-                draft.activity_level === a ? 'border-iris-500 bg-iris-500/[0.08]' : 'border-line bg-white/[0.02] hover:border-white/20',
+                draft.activity_level === a ? 'border-iris-500 bg-iris-500/[0.08]' : 'border-line bg-veil/[0.02] hover:border-line-strong',
                 a === 'very_active' && 'sm:col-span-2',
               )}
             >
               <div>
-                <div className={clsx('text-sm font-semibold', draft.activity_level === a ? 'text-white' : 'text-slate-200')}>{ACTIVITY_LABEL[a].label}</div>
+                <div className={clsx('text-sm font-semibold', draft.activity_level === a ? 'text-fg' : 'text-slate-200')}>{ACTIVITY_LABEL[a].label}</div>
                 <div className="mt-0.5 text-xs text-slate-400">{ACTIVITY_LABEL[a].hint}</div>
               </div>
-              <span className={clsx('mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full', draft.activity_level === a ? 'border-2 border-iris-500' : 'border border-white/30')}>
+              <span className={clsx('mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full', draft.activity_level === a ? 'border-2 border-iris-500' : 'border border-line')}>
                 {draft.activity_level === a && <span className="h-2 w-2 rounded-full bg-iris-500" />}
               </span>
             </button>
@@ -178,7 +178,7 @@ export function ProfileForm({
 
   return (
     <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-12">
-      <section className="overflow-hidden rounded-xl border border-white/10 bg-ink-900/90 shadow-[0_8px_32px_rgba(0,0,0,0.65),0_0_0_1px_rgba(255,255,255,0.05)] lg:col-span-7">
+      <section className="overflow-hidden rounded-xl border border-line bg-ink-900/90 shadow-card lg:col-span-7">
         <div className="flex items-center justify-between border-b border-line bg-ink-850/60 px-5 py-3 font-mono text-[11px] text-slate-400">
           <span className="font-medium tracking-wider text-slate-300">CORE.NUTRITION_PROFILE</span>
           <span className={body ? 'text-iris-400' : 'text-slate-500'}>{body ? 'READY' : 'AWAITING INPUT'}</span>
@@ -198,8 +198,8 @@ export function ProfileForm({
 
 function EnginePreview({ targets, pending, fitness }: { targets: NutritionTargets | undefined; pending: boolean; fitness: Profile | null | undefined }) {
   return (
-    <aside className="rounded-2xl border border-line bg-ink-850/90 p-6 backdrop-blur-md lg:sticky lg:top-24 lg:col-span-5">
-      <div className="mb-5 flex items-center justify-between border-b border-white/[0.06] pb-4">
+    <aside className="rounded-2xl border border-line bg-ink-850/90 p-6 lg:sticky lg:top-24 lg:col-span-5">
+      <div className="mb-5 flex items-center justify-between border-b border-line pb-4">
         <div className="flex items-center gap-2">
           <span className="h-2 w-2 rounded-full bg-pulse" />
           <span className="text-xs font-bold uppercase tracking-wider text-slate-300">Nutrition engine preview</span>
@@ -209,7 +209,7 @@ function EnginePreview({ targets, pending, fitness }: { targets: NutritionTarget
       {fitness && (
         <div className="mb-5 rounded-xl border border-iris-500/25 bg-iris-500/[0.06] p-3.5">
           <MonoLabel tone="iris">Your category</MonoLabel>
-          <div className="mt-1 text-sm font-semibold text-white">
+          <div className="mt-1 text-sm font-semibold text-fg">
             {GOAL_LABEL[fitness.goal]} · {LEVEL_LABEL[fitness.level]}
           </div>
           <p className="mt-1 text-xs leading-relaxed text-slate-400">
@@ -231,10 +231,10 @@ function EnginePreview({ targets, pending, fitness }: { targets: NutritionTarget
           <MacroSplit targets={targets} />
           <div className="mt-5 grid grid-cols-2 gap-3 font-mono text-[11px]">
             <div className="rounded-lg border border-line bg-ink-950/60 p-2.5 text-slate-400">
-              FIBRE <span className="float-right text-white">{targets.fiber_g} g</span>
+              FIBRE <span className="float-right text-fg">{targets.fiber_g} g</span>
             </div>
             <div className="rounded-lg border border-line bg-ink-950/60 p-2.5 text-slate-400">
-              WATER <span className="float-right text-white">{(targets.water_ml / 1000).toFixed(2)} L</span>
+              WATER <span className="float-right text-fg">{(targets.water_ml / 1000).toFixed(2)} L</span>
             </div>
           </div>
         </>
@@ -248,9 +248,9 @@ function EnginePreview({ targets, pending, fitness }: { targets: NutritionTarget
   )
 }
 
-function MiniStat({ label, value, unit, hint, tone = 'text-white' }: { label: string; value: string; unit: string; hint: string; tone?: string }) {
+function MiniStat({ label, value, unit, hint, tone = 'text-fg' }: { label: string; value: string; unit: string; hint: string; tone?: string }) {
   return (
-    <div className="rounded-xl border border-white/[0.06] bg-ink-800/70 p-3">
+    <div className="rounded-xl border border-line bg-ink-800/70 p-3">
       <div className="text-[11px] font-medium text-slate-400">{label}</div>
       <div className={clsx('mt-1 font-mono text-lg font-bold', tone)}>
         {value} <span className="font-sans text-[10px] font-normal text-slate-400">{unit}</span>
@@ -284,7 +284,7 @@ export function MacroSplit({ targets }: { targets: NutritionTargets }) {
             <div className={clsx('font-semibold', p.text)}>
               {p.pct}% <span className="text-slate-500">{p.key}</span>
             </div>
-            <div className="text-white">{p.g} g</div>
+            <div className="text-fg">{p.g} g</div>
           </div>
         ))}
       </div>
@@ -301,7 +301,7 @@ function PreviewStrip({ targets, pending }: { targets: NutritionTargets | undefi
       </div>
       {targets ? (
         <>
-          <div className="mb-3 font-mono text-2xl font-bold text-white">
+          <div className="mb-3 font-mono text-2xl font-bold text-fg">
             {fmtInt(targets.calories)} <span className="font-sans text-xs font-normal text-slate-400">kcal / day</span>
           </div>
           <MacroSplit targets={targets} />

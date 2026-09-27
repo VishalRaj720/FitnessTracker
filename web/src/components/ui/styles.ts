@@ -28,15 +28,15 @@ export function buttonClass({
       xl: 'h-14 rounded-xl px-6 text-base',
     }[size],
     {
-      primary: 'bg-brand-500 text-ink-950 shadow-glow-brand hover:bg-brand-400',
-      signal: 'bg-brand-400 text-ink-950 shadow-glow-signal hover:bg-brand-300',
-      aqua: 'bg-aqua text-ink-950 shadow-glow-aqua hover:bg-white',
-      iris: 'bg-iris-500 text-white shadow-glow-iris hover:bg-iris-400',
-      secondary: 'border border-line bg-ink-800 text-slate-200 hover:border-line-strong hover:bg-ink-750 hover:text-white',
-      outline: 'border border-line-strong bg-transparent text-slate-200 hover:bg-white/[0.05] hover:text-white',
-      ghost: 'text-slate-400 hover:bg-white/[0.05] hover:text-white',
-      light: 'bg-white text-ink-950 hover:bg-volt',
-      danger: 'border border-rose-500/40 bg-rose-500/10 text-rose-200 hover:bg-rose-500/20 hover:text-white',
+      primary: 'bg-brand-500 text-ink-950 shadow-card hover:bg-brand-400',
+      signal: 'bg-brand-400 text-ink-950 shadow-card hover:bg-brand-300',
+      aqua: 'bg-aqua text-ink-950 shadow-card hover:opacity-90',
+      iris: 'bg-iris-500 text-ink-950 shadow-card hover:bg-iris-400',
+      secondary: 'border border-line bg-ink-800 text-slate-200 hover:border-line-strong hover:bg-ink-750 hover:text-fg',
+      outline: 'border border-line-strong bg-transparent text-slate-200 hover:bg-ink-800 hover:text-fg',
+      ghost: 'text-slate-400 hover:bg-ink-800 hover:text-fg',
+      light: 'bg-fg text-canvas hover:bg-volt',
+      danger: 'border border-rose-500/40 bg-rose-500/10 text-rose-200 hover:bg-rose-500/20 hover:text-fg',
     }[variant],
   )
 }
@@ -75,23 +75,23 @@ export const TONE_SOFT: Record<Tone, string> = {
 }
 
 export const TONE_STROKE: Record<Tone, string> = {
-  brand: '#00e599',
-  iris: '#7c8aff',
-  pulse: '#00f2fe',
-  volt: '#d2ff00',
-  flame: '#ffb800',
-  rose: '#fb7185',
-  aqua: '#00d2b4',
-  slate: '#64748b',
+  brand: 'var(--accent-success)',
+  iris: 'var(--accent-primary)',
+  pulse: 'var(--accent-primary)',
+  volt: 'var(--volt)',
+  flame: 'var(--flame)',
+  rose: '#e53e3e',
+  aqua: 'var(--aqua)',
+  slate: 'var(--text-secondary)',
 }
 
 export const TONE_GLOW: Record<Tone, string> = {
-  brand: 'shadow-[0_0_10px_rgba(0,229,153,0.55)]',
-  iris: 'shadow-[0_0_10px_rgba(90,107,255,0.6)]',
-  pulse: 'shadow-[0_0_10px_rgba(0,242,254,0.55)]',
-  volt: 'shadow-[0_0_10px_rgba(210,255,0,0.5)]',
-  flame: 'shadow-[0_0_10px_rgba(255,184,0,0.5)]',
-  rose: 'shadow-[0_0_10px_rgba(251,113,133,0.5)]',
-  aqua: 'shadow-[0_0_10px_rgba(0,210,180,0.55)]',
+  brand: '',
+  iris: '',
+  pulse: '',
+  volt: '',
+  flame: '',
+  rose: '',
+  aqua: '',
   slate: '',
 }

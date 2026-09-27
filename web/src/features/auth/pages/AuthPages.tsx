@@ -31,7 +31,7 @@ function AuthFrame({
         logoTo="/"
         width="max-w-5xl"
         right={
-          <Link to="/" className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-400 transition hover:text-white">
+          <Link to="/" className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-400 transition hover:text-fg">
             <Icon name="arrow-left" size={14} /> Back
           </Link>
         }
@@ -41,10 +41,10 @@ function AuthFrame({
           <div className="inline-flex items-center gap-1.5 rounded-md border border-brand-400/30 bg-brand-950/40 px-2.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider text-brand-400">
             <Icon name="shield-check" size={12} /> Secure session
           </div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">{title}</h1>
+          <h1 className="text-3xl font-extrabold tracking-tight text-fg sm:text-4xl">{title}</h1>
           <p className="text-sm leading-relaxed text-slate-400">{subtitle}</p>
         </div>
-        <section className="overflow-hidden rounded-xl border border-white/10 bg-ink-900/90 shadow-[0_8px_32px_rgba(0,0,0,0.65),0_0_0_1px_rgba(255,255,255,0.05)] backdrop-blur-xl">
+        <section className="overflow-hidden rounded-xl border border-line bg-ink-900/90 shadow-card">
           <div className="flex items-center justify-between border-b border-line bg-ink-850/60 px-5 py-3 font-mono text-[11px] text-slate-400">
             <span className="font-medium tracking-wider text-slate-300">{process}</span>
             <span className="text-brand-400">{status}</span>
@@ -80,7 +80,7 @@ export function LoginPage() {
       footer={
         <>
           New here?{' '}
-          <Link to="/register" className="font-semibold text-brand-400 transition hover:text-white">
+          <Link to="/register" className="font-semibold text-brand-400 transition hover:text-fg">
             Create an account
           </Link>
           <p className="mt-6 font-mono text-[11px] text-slate-600">Demo: demo@fitsathi.app / demo12345</p>
@@ -125,7 +125,7 @@ export function RegisterPage() {
       footer={
         <>
           Already have an account?{' '}
-          <Link to="/login" className="font-semibold text-brand-400 transition hover:text-white">
+          <Link to="/login" className="font-semibold text-brand-400 transition hover:text-fg">
             Log in
           </Link>
         </>

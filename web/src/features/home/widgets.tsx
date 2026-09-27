@@ -41,11 +41,11 @@ export function TodayPlanCard({
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line pb-5">
         <div className="space-y-1">
           <MonoLabel dot="volt">Session // {sessionTag}</MonoLabel>
-          <h2 className="text-lg font-bold uppercase tracking-tight text-white">Today&apos;s plan</h2>
+          <h2 className="text-lg font-bold uppercase tracking-tight text-fg">Today&apos;s plan</h2>
         </div>
         <div className="flex items-center gap-2 font-mono text-xs">
-          <span className="rounded border border-white/5 bg-ink-850 px-2 py-1 text-slate-400">
-            EST: <span className="text-white">~{plan?.estimated_minutes ?? '–'} MIN</span>
+          <span className="rounded border border-line bg-ink-850 px-2 py-1 text-slate-400">
+            EST: <span className="text-fg">~{plan?.estimated_minutes ?? '–'} MIN</span>
           </span>
           {offline ? (
             <span className="rounded border border-flame/30 bg-flame/10 px-2 py-1 text-flame">OFFLINE COPY</span>
@@ -90,18 +90,18 @@ export function TodayPlanCard({
               const cv = it.exercise.cv_supported
               const detail = it.focus_cue ?? it.exercise.muscle_groups.slice(0, 2).join(' · ')
               return (
-                <li key={it.id} className="group -mx-2 flex items-center justify-between gap-3 rounded px-2 py-4 transition-colors hover:bg-white/[0.015]">
+                <li key={it.id} className="group -mx-2 flex items-center justify-between gap-3 rounded px-2 py-4 transition-colors hover:bg-veil/[0.015]">
                   <div className="flex min-w-0 items-start gap-3.5">
                     <span className="mt-0.5 font-mono text-xs text-slate-400">{String(i + 1).padStart(2, '0')}</span>
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
-                        <h3 className={clsx('truncate text-sm font-semibold tracking-wide text-white transition-colors', cv ? 'group-hover:text-volt' : 'group-hover:text-pulse')}>
+                        <h3 className={clsx('truncate text-sm font-semibold tracking-wide text-fg transition-colors', cv ? 'group-hover:text-volt' : 'group-hover:text-pulse')}>
                           {it.exercise.name}
                         </h3>
                         {cv && <Dot tone="volt" />}
                       </div>
                       <p className="mt-0.5 truncate font-mono text-xs text-slate-400">
-                        {targetLabel(it)} <span className="text-white/20">|</span> <span className="capitalize">{detail}</span>
+                        {targetLabel(it)} <span className="text-fg/20">|</span> <span className="capitalize">{detail}</span>
                       </p>
                     </div>
                   </div>
@@ -129,7 +129,7 @@ export function TodayPlanCard({
               type="button"
               onClick={() => setShowWhy((v) => !v)}
               aria-expanded={showWhy}
-              className="inline-flex items-center gap-1.5 text-slate-400 underline decoration-slate-700 underline-offset-4 transition-colors hover:text-white"
+              className="inline-flex items-center gap-1.5 text-slate-400 underline decoration-slate-700 underline-offset-4 transition-colors hover:text-fg"
             >
               <Icon name="info" size={14} className="text-pulse" />
               {showWhy ? 'Hide the reasoning' : 'Why this plan? (Read the adaptive rationale)'}
@@ -156,7 +156,7 @@ export function TodayPlanCard({
             <button
               type="button"
               onClick={onStart}
-              className="group flex flex-1 items-center justify-center gap-3 rounded-md bg-aqua px-6 py-4 font-mono text-sm font-bold uppercase tracking-wide text-ink-950 shadow-glow-aqua transition-all duration-200 hover:bg-white"
+              className="group flex flex-1 items-center justify-center gap-3 rounded-md bg-aqua px-6 py-4 font-mono text-sm font-bold uppercase tracking-wide text-ink-950 shadow-glow-aqua transition-all duration-200 hover:opacity-90"
             >
               <Icon name="play" size={16} className="transition-transform group-hover:scale-110" />
               {done ? 'Train again' : 'Start workout & form tracking'}
@@ -167,7 +167,7 @@ export function TodayPlanCard({
               disabled={done || offline || regenerating}
               title={done ? 'Already completed today' : 'Shuffle today’s exercises'}
               aria-label="Shuffle today's exercises"
-              className="flex w-14 items-center justify-center rounded-md border border-line bg-ink-850 text-slate-400 transition-colors hover:bg-ink-800 hover:text-white disabled:opacity-40"
+              className="flex w-14 items-center justify-center rounded-md border border-line bg-ink-850 text-slate-400 transition-colors hover:bg-ink-800 hover:text-fg disabled:opacity-40"
             >
               <Icon name="refresh" className={clsx(regenerating && 'animate-spin')} />
             </button>
@@ -203,7 +203,7 @@ export function FormTraceCard({ progress, pending }: { progress: ProgressSummary
       <div className="flex items-center justify-between border-b border-line pb-4">
         <div className="space-y-0.5">
           <MonoLabel>Fig 0.3 // Form trace</MonoLabel>
-          <div className="flex items-center gap-2 font-mono text-xs font-semibold text-white">
+          <div className="flex items-center gap-2 font-mono text-xs font-semibold text-fg">
             <span>FORM SCORE · 30 DAYS</span>
             <span
               className={clsx(
@@ -218,10 +218,10 @@ export function FormTraceCard({ progress, pending }: { progress: ProgressSummary
         <span className="font-mono text-[11px] text-slate-400">{all.length} TRACKED SETS</span>
       </div>
 
-      <div className="relative my-3 h-48 w-full overflow-hidden rounded border border-white/5 bg-ink-950/70 bg-dot-fine">
+      <div className="relative my-3 h-48 w-full overflow-hidden rounded border border-line bg-ink-950/70 bg-dot-fine">
         <div className="pointer-events-none absolute inset-0">
           {[100, 85, 65].map((v) => (
-            <div key={v} className="absolute inset-x-3 border-b border-white/[0.07]" style={{ top: `${(yOf(v) / H) * 100}%` }}>
+            <div key={v} className="absolute inset-x-3 border-b border-line" style={{ top: `${(yOf(v) / H) * 100}%` }}>
               <span className="absolute -top-3.5 right-0 font-mono text-[9px] text-slate-500">{v === 100 ? 'MAX 100' : v === 85 ? 'CLEAN 85' : 'WORK ON IT 65'}</span>
             </div>
           ))}
@@ -233,18 +233,18 @@ export function FormTraceCard({ progress, pending }: { progress: ProgressSummary
         ) : primary ? (
           <>
             <svg className="absolute inset-0 h-full w-full" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" fill="none" role="img" aria-label={`Form score trend for ${primary.exercise_name}`}>
-              {p2.length > 1 && <path d={smoothPath(p2)} stroke="#d2ff00" strokeWidth="1.75" strokeDasharray="3 3" opacity="0.85" vectorEffect="non-scaling-stroke" />}
-              {p1.length > 1 && <path d={smoothPath(p1)} stroke="#00f2fe" strokeWidth="2" strokeLinecap="round" vectorEffect="non-scaling-stroke" />}
+              {p2.length > 1 && <path d={smoothPath(p2)} stroke="var(--volt)" strokeWidth="1.75" strokeDasharray="3 3" opacity="0.85" vectorEffect="non-scaling-stroke" />}
+              {p1.length > 1 && <path d={smoothPath(p1)} stroke="var(--accent-primary)" strokeWidth="2" strokeLinecap="round" vectorEffect="non-scaling-stroke" />}
             </svg>
-            {p1.length > 0 && <TraceDot x={p1[p1.length - 1][0] / W} y={p1[p1.length - 1][1] / H} color="#00f2fe" />}
-            {p2.length > 0 && <TraceDot x={p2[p2.length - 1][0] / W} y={p2[p2.length - 1][1] / H} color="#d2ff00" />}
-            <div className="pointer-events-none absolute left-4 top-4 flex items-center gap-1.5 rounded border border-line bg-ink-950/90 px-2 py-1 font-mono text-[10px] shadow-lg backdrop-blur">
+            {p1.length > 0 && <TraceDot x={p1[p1.length - 1][0] / W} y={p1[p1.length - 1][1] / H} color="var(--accent-primary)" />}
+            {p2.length > 0 && <TraceDot x={p2[p2.length - 1][0] / W} y={p2[p2.length - 1][1] / H} color="var(--volt)" />}
+            <div className="pointer-events-none absolute left-4 top-4 flex items-center gap-1.5 rounded border border-line bg-ink-950/90 px-2 py-1 font-mono text-[10px] shadow-lg">
               <Dot tone="pulse" />
               <span className="uppercase text-slate-400">{primary.exercise_name}:</span>
-              <span className="font-bold text-white">{Math.round(last ?? 0)}</span>
+              <span className="font-bold text-fg">{Math.round(last ?? 0)}</span>
             </div>
             {secondary && (
-              <div className="pointer-events-none absolute bottom-4 left-4 flex items-center gap-1.5 rounded border border-line bg-ink-950/90 px-2 py-1 font-mono text-[10px] shadow-lg backdrop-blur">
+              <div className="pointer-events-none absolute bottom-4 left-4 flex items-center gap-1.5 rounded border border-line bg-ink-950/90 px-2 py-1 font-mono text-[10px] shadow-lg">
                 <Dot tone="volt" />
                 <span className="uppercase text-slate-400">{secondary.exercise_name}:</span>
                 <span className="font-bold text-volt">{Math.round(secondary.points[secondary.points.length - 1].form_score)}</span>
@@ -309,14 +309,14 @@ export function ThisWeekCard({ progress, targetDays }: { progress: ProgressSumma
       </div>
       <div>
         <div className="flex items-baseline gap-1.5">
-          <span className="font-mono text-3xl font-extrabold text-white">{done}</span>
+          <span className="font-mono text-3xl font-extrabold text-fg">{done}</span>
           <span className="font-mono text-sm text-slate-400">/ {target} days</span>
         </div>
         <div className="mt-1 font-mono text-[11px] text-slate-400">{w?.verified_minutes ?? 0} verified camera min</div>
       </div>
       <div className="grid gap-1.5 pt-1" style={{ gridTemplateColumns: `repeat(${Math.max(1, target)}, minmax(0, 1fr))` }}>
         {Array.from({ length: target }, (_, i) => (
-          <div key={i} className={clsx('h-2 rounded-sm border', i < done ? 'border-brand-400/60 bg-brand-400 shadow-[0_0_8px_rgba(0,229,153,0.5)]' : 'border-white/10 bg-ink-800')} />
+          <div key={i} className={clsx('h-2 rounded-sm border', i < done ? 'border-brand-400/60 bg-brand-400' : 'border-line bg-ink-800')} />
         ))}
       </div>
       <div className="flex items-center gap-1.5 pt-1 font-mono text-[10px] text-slate-400">
@@ -339,7 +339,7 @@ export function SquadCard({ squad, board }: { squad: Squad | null | undefined; b
         {squad ? (
           <div className="mt-3">
             <div className="flex items-baseline gap-1.5">
-              <span className="font-mono text-3xl font-extrabold text-white">#{me?.rank ?? '–'}</span>
+              <span className="font-mono text-3xl font-extrabold text-fg">#{me?.rank ?? '–'}</span>
               <span className="font-mono text-sm text-slate-400">of {squad.member_count}</span>
             </div>
             <p className="mt-1 truncate text-xs text-slate-400">
@@ -348,12 +348,12 @@ export function SquadCard({ squad, board }: { squad: Squad | null | undefined; b
           </div>
         ) : (
           <div className="mt-3">
-            <div className="text-sm font-semibold text-white">No squad linked yet</div>
+            <div className="text-sm font-semibold text-fg">No squad linked yet</div>
             <p className="mt-1 text-xs text-slate-400">Compete on weekly verified minutes with 3–8 friends.</p>
           </div>
         )}
       </div>
-      <Link to="/squad" className="group inline-flex items-center gap-1.5 pt-2 font-mono text-xs text-pulse transition-colors hover:text-white">
+      <Link to="/squad" className="group inline-flex items-center gap-1.5 pt-2 font-mono text-xs text-pulse transition-colors hover:text-fg">
         {squad ? 'Open leaderboard' : 'Create or join squad'}
         <Icon name="arrow-right" size={13} className="transition-transform group-hover:translate-x-1" />
       </Link>
@@ -371,7 +371,7 @@ export function FuelCard({ day, pending }: { day: DailyNutrition | undefined; pe
     <Card radius="xl" pad="sm" className="sm:p-5">
       <div className="mb-4 flex items-center justify-between">
         <MonoLabel dot="brand">Fuel // today</MonoLabel>
-        <Link to="/nutrition" className="group inline-flex items-center gap-1 font-mono text-[11px] text-pulse hover:text-white">
+        <Link to="/nutrition" className="group inline-flex items-center gap-1 font-mono text-[11px] text-pulse hover:text-fg">
           Diet plan <Icon name="arrow-right" size={12} className="transition-transform group-hover:translate-x-0.5" />
         </Link>
       </div>
@@ -387,7 +387,7 @@ export function FuelCard({ day, pending }: { day: DailyNutrition | undefined; pe
       ) : t && c ? (
         <div className="flex items-center gap-5">
           <Ring value={c.calories} max={t.calories} size={104} stroke={9} tone="brand">
-            <span className="font-mono text-lg font-bold leading-none text-white">{fmtInt(c.calories)}</span>
+            <span className="font-mono text-lg font-bold leading-none text-fg">{fmtInt(c.calories)}</span>
             <span className="mt-1 font-mono text-[9px] uppercase tracking-wider text-slate-500">/ {fmtInt(t.calories)} kcal</span>
           </Ring>
           <div className="min-w-0 flex-1 space-y-2.5">
@@ -414,7 +414,7 @@ export function FuelCard({ day, pending }: { day: DailyNutrition | undefined; pe
       ) : (
         <div className="space-y-3">
           <p className="text-sm text-slate-300">Get daily calorie, protein and water targets built from your goal and body metrics.</p>
-          <Link to="/nutrition" className="inline-flex items-center gap-1.5 font-mono text-xs text-brand-400 hover:text-white">
+          <Link to="/nutrition" className="inline-flex items-center gap-1.5 font-mono text-xs text-brand-400 hover:text-fg">
             Set up nutrition <Icon name="arrow-right" size={13} />
           </Link>
         </div>
@@ -434,11 +434,11 @@ export function CampusBanner({ user, activeStudents }: { user: User; activeStude
       className="group flex items-center justify-between gap-3 rounded-xl border border-line bg-ink-900/85 p-4 transition-colors hover:border-slate-700"
     >
       <div className="flex min-w-0 items-center gap-3">
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded border border-white/10 bg-ink-800 text-slate-300 transition-colors group-hover:text-volt">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded border border-line bg-ink-800 text-slate-300 transition-colors group-hover:text-volt">
           <Icon name="building" />
         </span>
         <div className="min-w-0">
-          <div className="flex items-center gap-2 text-xs font-semibold text-white transition-colors group-hover:text-volt">
+          <div className="flex items-center gap-2 text-xs font-semibold text-fg transition-colors group-hover:text-volt">
             <span className="truncate">{user.institute.name} campus dashboard</span>
             <Badge mono size="sm" className="shrink-0">
               Campus mesh
@@ -449,7 +449,7 @@ export function CampusBanner({ user, activeStudents }: { user: User; activeStude
           </div>
         </div>
       </div>
-      <Icon name="arrow-right" size={14} className="shrink-0 text-slate-400 transition-all group-hover:translate-x-0.5 group-hover:text-white" />
+      <Icon name="arrow-right" size={14} className="shrink-0 text-slate-400 transition-all group-hover:translate-x-0.5 group-hover:text-fg" />
     </Link>
   )
 }
@@ -466,12 +466,12 @@ export function FeatureStrip() {
     <section className="border-t border-line pb-4 pt-8">
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
         {FEATURES.map((f) => (
-          <div key={f.key} className="space-y-2 border-l border-white/10 pl-4">
+          <div key={f.key} className="space-y-2 border-l border-line pl-4">
             <div className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.15em] text-slate-400">
               <span className={clsx('h-1.5 w-1.5 rounded-full', f.tone)} />
               {f.key}
             </div>
-            <h4 className="text-sm font-semibold text-white">{f.title}</h4>
+            <h4 className="text-sm font-semibold text-fg">{f.title}</h4>
             <p className="text-xs leading-relaxed text-slate-400">{f.body}</p>
           </div>
         ))}

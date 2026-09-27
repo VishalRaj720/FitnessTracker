@@ -37,7 +37,7 @@ export function CampusDashboardPage() {
             </ButtonLink>
           ) : (
             <ButtonLink to="/register" variant="signal" size="sm" iconRight="arrow-right">
-              Join FitSathi
+              Join Fitniti
             </ButtonLink>
           )
         }
@@ -50,7 +50,7 @@ export function CampusDashboardPage() {
           title={d?.institute.name ?? slug}
           subtitle={
             d
-              ? `${[d.institute.city, d.institute.state].filter(Boolean).join(', ')} · ${d.total_students} student${d.total_students === 1 ? '' : 's'} on FitSathi · camera-verified participation only`
+              ? `${[d.institute.city, d.institute.state].filter(Boolean).join(', ')} · ${d.total_students} student${d.total_students === 1 ? '' : 's'} on Fitniti · camera-verified participation only`
               : 'Fit India participation report'
           }
         />
@@ -136,7 +136,7 @@ export function CampusDashboardPage() {
                           {String(i + 1).padStart(2, '0')}
                         </span>
                         <div className="min-w-0">
-                          <div className="truncate text-sm font-semibold text-white">{s.name}</div>
+                          <div className="truncate text-sm font-semibold text-fg">{s.name}</div>
                           <div className="font-mono text-[11px] text-slate-500">
                             {s.members} member{s.members === 1 ? '' : 's'}
                           </div>
