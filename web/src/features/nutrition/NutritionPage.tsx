@@ -63,11 +63,11 @@ export function NutritionPage() {
                 aria-label="Previous day"
                 disabled={!shownDate || !serverToday || shownDate <= shiftIsoDate(serverToday, -MAX_BACK_DAYS)}
                 onClick={() => shownDate && setDate(shiftIsoDate(shownDate, -1))}
-                className="rounded-l-lg p-2.5 text-slate-400 transition hover:bg-white/[0.05] hover:text-white disabled:opacity-40"
+                className="rounded-l-lg p-2.5 text-slate-400 transition hover:bg-veil/[0.05] hover:text-fg disabled:opacity-40"
               >
                 <Icon name="chevron-left" />
               </button>
-              <span className="min-w-[110px] px-2 text-center font-mono text-xs uppercase tracking-wider text-white">{dayLabel}</span>
+              <span className="min-w-[110px] px-2 text-center font-mono text-xs uppercase tracking-wider text-fg">{dayLabel}</span>
               <button
                 type="button"
                 aria-label="Next day"
@@ -78,7 +78,7 @@ export function NutritionPage() {
                   // Stepping onto today returns to the live "today" query.
                   setDate(serverToday && next >= serverToday ? undefined : next)
                 }}
-                className="rounded-r-lg p-2.5 text-slate-400 transition hover:bg-white/[0.05] hover:text-white disabled:opacity-40"
+                className="rounded-r-lg p-2.5 text-slate-400 transition hover:bg-veil/[0.05] hover:text-fg disabled:opacity-40"
               >
                 <Icon name="chevron-right" />
               </button>
@@ -128,7 +128,7 @@ export function NutritionPage() {
               <Icon name="target" size={18} />
             </span>
             <div>
-              <h2 className="text-base font-semibold text-white">Calibrate your nutrition engine</h2>
+              <h2 className="text-base font-semibold text-fg">Calibrate your nutrition engine</h2>
               <p className="text-sm text-slate-400">
                 Your category ({user?.profile ? GOAL_LABEL[user.profile.goal] : 'goal'}) is already set from onboarding. Add a few body metrics and your diet type to get daily targets, meal ideas and an intake log.
               </p>

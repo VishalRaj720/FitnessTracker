@@ -15,7 +15,7 @@ export function RepCounter({ target }: { target: number }) {
   }, [reps])
   return (
     <div className="flex items-end gap-2">
-      <div className={clsx('font-mono text-7xl font-bold leading-none tabular-nums', pop && 'pop', reps >= target && target > 0 ? 'text-brand-400' : 'text-white')}>{reps}</div>
+      <div className={clsx('font-mono text-7xl font-bold leading-none tabular-nums', pop && 'pop', reps >= target && target > 0 ? 'text-brand-400' : 'text-fg')}>{reps}</div>
       <div className="mb-2 font-mono text-xl font-semibold text-slate-500">/ {target}</div>
     </div>
   )
@@ -27,7 +27,7 @@ export function HoldTimerDisplay({ targetSeconds }: { targetSeconds: number }) {
   const held = Math.floor(heldMs / 1000)
   return (
     <div className="flex items-end gap-2">
-      <div className={clsx('font-mono text-6xl font-bold leading-none tabular-nums', held >= targetSeconds ? 'text-brand-400' : inTol ? 'text-white' : 'text-flame')}>{fmtClock(held)}</div>
+      <div className={clsx('font-mono text-6xl font-bold leading-none tabular-nums', held >= targetSeconds ? 'text-brand-400' : inTol ? 'text-fg' : 'text-flame')}>{fmtClock(held)}</div>
       <div className="mb-1.5 font-mono text-lg font-semibold text-slate-500">/ {fmtClock(targetSeconds)}</div>
     </div>
   )
@@ -53,7 +53,7 @@ export function FormScoreRing() {
   const r = 24
   const c = 2 * Math.PI * r
   const dash = (score / 100) * c
-  const tone = score >= 85 ? '#00e599' : score >= 65 ? '#ffb800' : '#fb7185'
+  const tone = score >= 85 ? 'var(--accent-success)' : score >= 65 ? 'var(--flame)' : '#e53e3e'
   return (
     <div className="relative flex h-16 w-16 items-center justify-center">
       <svg viewBox="0 0 64 64" className="absolute inset-0 -rotate-90">
@@ -84,7 +84,7 @@ export function CueBanner() {
     <div
       className={clsx(
         'pointer-events-none rounded-2xl px-5 py-3 text-center text-2xl font-extrabold shadow-lg',
-        cue.tone === 'correction' && 'bg-rose-500 text-white',
+        cue.tone === 'correction' && 'bg-rose-500 text-fg',
         cue.tone === 'praise' && 'bg-brand-400 text-ink-950 shadow-glow-signal',
         cue.tone === 'info' && 'border border-line bg-ink-800/90 text-slate-100',
         cue.tone === 'coach' && 'bg-pulse text-ink-950 shadow-glow-pulse',

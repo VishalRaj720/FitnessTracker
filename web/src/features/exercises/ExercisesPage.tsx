@@ -76,7 +76,7 @@ export function ExercisesPage() {
               onClick={() => setCat(c)}
               className={clsx(
                 'flex shrink-0 items-center gap-1.5 rounded-md border px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.1em] transition',
-                cat === c ? 'border-pulse/40 bg-pulse/10 text-pulse' : 'border-transparent text-slate-400 hover:border-line hover:text-white',
+                cat === c ? 'border-pulse/40 bg-pulse/10 text-pulse' : 'border-transparent text-slate-400 hover:border-line hover:text-fg',
               )}
             >
               {c && <span className={clsx('h-1.5 w-1.5 rounded-full', CATEGORY_TONE[c] ?? 'bg-slate-500')} />}
@@ -123,7 +123,7 @@ export function ExercisesPage() {
                   </Badge>
                 )}
               </div>
-              <h3 className="text-lg font-bold tracking-tight text-white transition-colors group-hover:text-pulse">{ex.name}</h3>
+              <h3 className="text-lg font-bold tracking-tight text-fg transition-colors group-hover:text-pulse">{ex.name}</h3>
               <p className="mt-1 line-clamp-1 font-mono text-[11px] capitalize text-slate-400">{ex.muscle_groups.join(' · ')}</p>
               <div className="mt-auto flex items-end justify-between gap-3 pt-5">
                 <div>

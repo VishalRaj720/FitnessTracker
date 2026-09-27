@@ -54,7 +54,7 @@ export function ProfilePage() {
           </div>
           <div className="flex items-center gap-2 rounded-lg border border-line bg-ink-900 px-3 py-2">
             <Icon name="flame" size={16} className={user.stats.current_streak > 0 ? 'text-flame' : 'text-slate-500'} />
-            <span className="font-mono text-lg font-bold text-white">{user.stats.current_streak}</span>
+            <span className="font-mono text-lg font-bold text-fg">{user.stats.current_streak}</span>
             <span className="font-mono text-[10px] uppercase tracking-wider text-slate-400">day streak</span>
           </div>
         </div>
@@ -130,7 +130,7 @@ export function ProfilePage() {
         )}
         {install.canInstall ? (
           <button type="button" onClick={install.install} className="text-left">
-            <TileBody icon="smartphone" title="Install FitSathi" body="Works offline in the hostel" />
+            <TileBody icon="smartphone" title="Install Fitniti" body="Works offline in the hostel" />
           </button>
         ) : (
           <LinkTile to="/progress" icon="chart" title="Progress telemetry" body="Verified minutes and form trends" />
@@ -156,11 +156,11 @@ function TileBody({ icon, title, body }: { icon: IconName; title: string; body: 
           <Icon name={icon} />
         </span>
         <div className="min-w-0">
-          <div className="text-sm font-semibold text-white">{title}</div>
+          <div className="text-sm font-semibold text-fg">{title}</div>
           <div className="truncate text-xs text-slate-400">{body}</div>
         </div>
       </div>
-      <Icon name="arrow-right" size={14} className="shrink-0 text-slate-500 transition group-hover:translate-x-0.5 group-hover:text-white" />
+      <Icon name="arrow-right" size={14} className="shrink-0 text-slate-500 transition group-hover:translate-x-0.5 group-hover:text-fg" />
     </div>
   )
 }

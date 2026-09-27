@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { Navigate } from 'react-router-dom'
 import { clsx } from 'clsx'
 import { Logo } from '@/components/brand/Logo'
+import { ThemeToggle } from '@/components/theme/ThemeToggle'
 import { Backdrop } from '@/components/layout/Backdrop'
 import { ButtonLink, Button, Icon, type IconName } from '@/components/ui'
 import { useAuthStore } from '@/features/auth/authStore'
@@ -18,7 +19,7 @@ const FEATURES: { fig: string; icon: IconName; title: string; body: ReactNode; t
     title: 'Local vision rep counter',
     body: (
       <>
-        Your phone camera counts reps and corrects your form — <span className="font-medium text-white">on-device, video never uploaded.</span>
+        Your phone camera counts reps and corrects your form — <span className="font-medium text-fg">on-device, video never uploaded.</span>
       </>
     ),
     tone: 'brand',
@@ -29,7 +30,7 @@ const FEATURES: { fig: string; icon: IconName; title: string; body: ReactNode; t
     title: 'Adaptive daily rhythm',
     body: (
       <>
-        A <span className="font-medium text-white">10–30 minute plan</span> that adapts to what the camera saw yesterday.
+        A <span className="font-medium text-fg">10–30 minute plan</span> that adapts to what the camera saw yesterday.
       </>
     ),
     tone: 'pulse',
@@ -40,7 +41,7 @@ const FEATURES: { fig: string; icon: IconName; title: string; body: ReactNode; t
     title: 'Fraud-proof campus board',
     body: (
       <>
-        Camera-verified minutes on squad and campus leaderboards <span className="font-medium text-white">nobody can fake</span>.
+        Camera-verified minutes on squad and campus leaderboards <span className="font-medium text-fg">nobody can fake</span>.
       </>
     ),
     tone: 'volt',
@@ -51,7 +52,7 @@ const FEATURES: { fig: string; icon: IconName; title: string; body: ReactNode; t
     title: 'Fuel that fits your goal',
     body: (
       <>
-        Daily calorie, protein and water targets from your goal and diet — <span className="font-medium text-white">veg, egg or non-veg</span>.
+        Daily calorie, protein and water targets from your goal and diet — <span className="font-medium text-fg">veg, egg or non-veg</span>.
       </>
     ),
     tone: 'iris',
@@ -74,13 +75,16 @@ export function WelcomePage() {
     <div className="relative flex min-h-full flex-col">
       <Backdrop variant="tech" />
       <div className="relative z-10 mx-auto flex min-h-full w-full max-w-[430px] flex-col border-x border-line/40 bg-ink-950/60 md:max-w-2xl lg:max-w-6xl lg:border-x-0 lg:bg-transparent">
-        <header className="sticky top-0 z-50 flex items-center justify-between border-b border-line bg-ink-950/85 px-4 py-3 backdrop-blur-md lg:px-8" style={{ paddingTop: 'calc(var(--safe-top) + 12px)' }}>
+        <header className="sticky top-0 z-50 flex items-center justify-between border-b border-line bg-ink-950 px-4 py-3 lg:px-8" style={{ paddingTop: 'calc(var(--safe-top) + 12px)' }}>
           <Logo live />
-          <div className="flex items-center gap-2 rounded-full border border-line bg-ink-900/90 px-2.5 py-1 font-mono text-[10px] text-slate-400">
-            <span className="h-1.5 w-1.5 animate-pulse-slow rounded-full bg-brand-400" />
-            <span className="font-medium text-slate-300">ON-DEVICE</span>
-            <span className="text-slate-600">|</span>
-            <span className="text-pulse">OFFLINE-READY</span>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <div className="flex items-center gap-2 rounded-full border border-line bg-ink-900 px-2.5 py-1 font-mono text-[10px] text-slate-400">
+              <span className="h-1.5 w-1.5 animate-pulse-slow rounded-full bg-brand-400" />
+              <span className="font-medium text-slate-300">ON-DEVICE</span>
+              <span className="text-slate-600">|</span>
+              <span className="text-pulse">OFFLINE-READY</span>
+            </div>
           </div>
         </header>
 
@@ -90,7 +94,7 @@ export function WelcomePage() {
               <Icon name="activity" size={12} strokeWidth={2.5} />
               Camera-first recognition
             </div>
-            <h1 className="text-3xl font-extrabold leading-[1.18] tracking-tight text-white sm:text-4xl lg:text-6xl lg:leading-[1.05]">
+            <h1 className="text-3xl font-extrabold leading-[1.18] tracking-tight text-fg sm:text-4xl lg:text-6xl lg:leading-[1.05]">
               A coach that <span className="bg-gradient-to-r from-brand-400 via-emerald-400 to-pulse bg-clip-text text-transparent">sees</span> you.
               <br />A campus that notices.
             </h1>
@@ -114,7 +118,7 @@ export function WelcomePage() {
                   </span>
                   <div className="min-w-0 flex-1 space-y-1">
                     <div className="flex items-center justify-between gap-2">
-                      <h2 className="text-sm font-semibold text-white">{f.title}</h2>
+                      <h2 className="text-sm font-semibold text-fg">{f.title}</h2>
                       <span className="shrink-0 rounded bg-ink-700 px-1.5 py-0.5 font-mono text-[9px] text-slate-300">{f.fig}</span>
                     </div>
                     <p className="text-xs leading-relaxed text-slate-300">{f.body}</p>
@@ -158,7 +162,7 @@ export function WelcomePage() {
           </section>
         </main>
 
-        <footer className="mt-auto flex items-center justify-between border-t border-line/60 bg-ink-900/60 px-4 py-3.5 font-mono text-[10px] text-slate-500 backdrop-blur lg:px-8" style={{ paddingBottom: 'calc(var(--safe-bottom) + 14px)' }}>
+        <footer className="mt-auto flex items-center justify-between border-t border-line/60 bg-ink-900/60 px-4 py-3.5 font-mono text-[10px] text-slate-500 lg:px-8" style={{ paddingBottom: 'calc(var(--safe-bottom) + 14px)' }}>
           <div className="flex items-center gap-1.5">
             <span className="h-1.5 w-1.5 rounded-full bg-brand-400" />
             ENGINE: POSE_ON_DEVICE
@@ -176,7 +180,7 @@ function BoardRow({ rank, name, meta, score, lead }: { rank: string; name: strin
       <div className="flex items-center gap-2.5">
         <span className={clsx('flex h-5 w-5 items-center justify-center rounded text-[10px] font-bold', lead ? 'bg-volt text-ink-950' : 'bg-slate-800 text-slate-300')}>{rank}</span>
         <div>
-          <span className={clsx('block font-sans text-xs', lead ? 'font-semibold text-white' : 'font-medium text-slate-200')}>{name}</span>
+          <span className={clsx('block font-sans text-xs', lead ? 'font-semibold text-fg' : 'font-medium text-slate-200')}>{name}</span>
           <span className="text-[10px] text-slate-400">{meta}</span>
         </div>
       </div>
@@ -227,8 +231,8 @@ function PoseHud() {
         <div className="absolute inset-0 bg-dot-signal opacity-40" />
         <div className="pointer-events-none absolute inset-x-0 h-16 animate-scanline bg-gradient-to-b from-transparent via-brand-400/10 to-transparent" />
         <svg className="pointer-events-none absolute inset-0 h-full w-full p-4" viewBox="0 0 320 180" fill="none" aria-hidden>
-          <path d="M 20,90 Q 70,20 140,85 T 260,80 T 300,100" opacity="0.4" stroke="#00f2fe" strokeDasharray="3 3" strokeWidth="1.5" />
-          <path d="M 20,110 Q 90,160 160,95 T 300,60" opacity="0.7" stroke="#00e599" strokeWidth="1.8" />
+          <path d="M 20,90 Q 70,20 140,85 T 260,80 T 300,100" opacity="0.4" stroke="var(--accent-primary)" strokeDasharray="3 3" strokeWidth="1.5" />
+          <path d="M 20,110 Q 90,160 160,95 T 300,60" opacity="0.7" stroke="var(--accent-success)" strokeWidth="1.8" />
         </svg>
         {clip && (
           <div className="absolute inset-0">
@@ -240,11 +244,11 @@ function PoseHud() {
         <span className="pointer-events-none absolute bottom-2 left-2 font-mono text-[9px] text-slate-600">┗ VIDEO SENT: 0 B</span>
         <span className="pointer-events-none absolute bottom-2 right-2 font-mono text-[9px] text-brand-400">REP_COUNT: {reading?.reps ?? 0} ┛</span>
         {reading && (
-          <div className="pointer-events-none absolute bottom-7 left-3 flex items-center gap-2 rounded-lg border border-line bg-ink-850/90 px-2.5 py-1.5 backdrop-blur">
+          <div className="pointer-events-none absolute bottom-7 left-3 flex items-center gap-2 rounded-lg border border-line bg-ink-850/90 px-2.5 py-1.5">
             <span className={clsx('h-2 w-2 rounded-full', deep ? 'bg-brand-400' : 'animate-pulse bg-pulse')} />
             <div className="font-mono text-[10px] leading-tight">
               <span className="text-slate-400">KNEE ANGLE</span>
-              <span className="block font-bold text-white">
+              <span className="block font-bold text-fg">
                 {reading.knee}° {deep ? 'DEPTH OK' : 'TRACKING'}
               </span>
             </div>
@@ -262,7 +266,7 @@ function PoseHud() {
   )
 }
 
-function HudMetric({ label, value, tone = 'text-white' }: { label: string; value: string; tone?: string }) {
+function HudMetric({ label, value, tone = 'text-fg' }: { label: string; value: string; tone?: string }) {
   return (
     <div className="rounded border border-line/60 bg-ink-800 p-1.5">
       <div className="text-[9px] uppercase text-slate-500">{label}</div>

@@ -177,7 +177,7 @@ export function TutorialPage() {
         tag="tutorial"
         width="max-w-5xl"
         right={
-          <button type="button" aria-label="Close tutorial" onClick={() => nav('/exercises')} className="rounded-lg p-2 text-slate-400 transition hover:bg-white/[0.05] hover:text-white">
+          <button type="button" aria-label="Close tutorial" onClick={() => nav('/exercises')} className="rounded-lg p-2 text-slate-400 transition hover:bg-veil/[0.05] hover:text-fg">
             <Icon name="x" size={20} />
           </button>
         }
@@ -186,7 +186,7 @@ export function TutorialPage() {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div className="space-y-2">
             <MonoLabel dot="pulse">Tutorial // {stageLabel}</MonoLabel>
-            <h1 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">{exercise.name}</h1>
+            <h1 className="text-3xl font-extrabold tracking-tight text-fg sm:text-4xl">{exercise.name}</h1>
           </div>
           <Badge tone="volt" mono icon="scan">
             {clip.view === 'side' ? 'Side view' : 'Front view'}
@@ -212,7 +212,7 @@ export function TutorialPage() {
                 <MonoLabel>
                   Step {stepIndex + 1} of {tutorial.steps.length}
                 </MonoLabel>
-                <div className="mt-2 text-lg font-bold text-white">{t(step.title)}</div>
+                <div className="mt-2 text-lg font-bold text-fg">{t(step.title)}</div>
                 <p className="mt-1 text-sm leading-relaxed text-slate-300">{t(step.body)}</p>
                 <SegmentBar total={tutorial.steps.length} filled={stepIndex + 1} tone="pulse" height="h-1" className="mt-4" />
                 <div className="mt-4 flex gap-2">
@@ -232,7 +232,7 @@ export function TutorialPage() {
               </Card>
 
               <Card radius="xl" pad="md">
-                <div className="mb-3 text-sm font-semibold text-white">What matters</div>
+                <div className="mb-3 text-sm font-semibold text-fg">What matters</div>
                 <ul className="space-y-2">
                   {tutorial.keyPoints.map((k, i) => (
                     <li key={i} className="flex gap-2.5 text-sm text-slate-300">
@@ -244,7 +244,7 @@ export function TutorialPage() {
               </Card>
 
               <Card radius="xl" pad="md">
-                <div className="mb-3 text-sm font-semibold text-white">What usually goes wrong</div>
+                <div className="mb-3 text-sm font-semibold text-fg">What usually goes wrong</div>
                 <ul className="space-y-2">
                   {Object.entries(tutorial.commonMistakes).map(([id, m]) => (
                     <li key={id} className="flex gap-2.5 text-sm text-slate-400">
@@ -285,7 +285,7 @@ export function TutorialPage() {
                   <div
                     className={clsx(
                       'rounded-2xl px-4 py-2 text-center text-xl font-extrabold shadow-lg',
-                      cue.tone === 'correction' && 'bg-rose-500 text-white',
+                      cue.tone === 'correction' && 'bg-rose-500 text-fg',
                       cue.tone === 'praise' && 'bg-brand-400 text-ink-950',
                       cue.tone === 'info' && 'border border-line bg-ink-800/90 text-slate-100',
                     )}
@@ -306,7 +306,7 @@ export function TutorialPage() {
 
             {stage === 'position' ? (
               <Card radius="xl" pad="md" className="self-start">
-                <div className="mb-3 text-sm font-semibold text-white">{clip.view === 'side' ? 'Stand side-on, whole body visible' : 'Face the camera, whole body visible'}</div>
+                <div className="mb-3 text-sm font-semibold text-fg">{clip.view === 'side' ? 'Stand side-on, whole body visible' : 'Face the camera, whole body visible'}</div>
                 <SetupChecklist framing={runner.framing} orientation={def.orientation} />
                 <p className="mt-3 text-xs leading-relaxed text-slate-400">Line yourself up with the glowing figure. Tracking starts on its own.</p>
                 <div className="mt-4 flex flex-wrap gap-2">
@@ -321,14 +321,14 @@ export function TutorialPage() {
             ) : (
               <Card radius="xl" pad="md" className="self-start">
                 <MonoLabel tone="pulse">{t(tutorial.shadowCue)}</MonoLabel>
-                <div className="mt-2 font-mono text-2xl font-bold text-white">
+                <div className="mt-2 font-mono text-2xl font-bold text-fg">
                   {isHold ? `${Math.floor(heldMs / 1000)}s / ${HOLD_TARGET_MS / 1000}s` : `${cleanStreak} / ${CLEAN_REPS_TARGET}`}
                 </div>
                 <div className="font-mono text-[11px] text-slate-400">{isHold ? 'held steady' : `clean reps in a row · ${reps} total`}</div>
                 {!isHold && (
                   <div className="mt-3 flex gap-1.5">
                     {Array.from({ length: CLEAN_REPS_TARGET }, (_, i) => (
-                      <span key={i} className={clsx('h-2 flex-1 rounded-full', i < cleanStreak ? 'bg-brand-400 shadow-[0_0_8px_rgba(0,229,153,0.5)]' : 'bg-ink-700')} />
+                      <span key={i} className={clsx('h-2 flex-1 rounded-full', i < cleanStreak ? 'bg-brand-400' : 'bg-ink-700')} />
                     ))}
                   </div>
                 )}
@@ -351,14 +351,14 @@ export function TutorialPage() {
               <span className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full border border-brand-400/40 bg-brand-400/10 text-brand-400 shadow-glow-signal">
                 <Icon name="check" size={26} strokeWidth={2.5} />
               </span>
-              <div className="text-xl font-bold text-white">You've got the shape of it</div>
+              <div className="text-xl font-bold text-fg">You've got the shape of it</div>
               <div className="mt-1 font-mono text-xs text-slate-400">
                 {outcome.reps} rep{outcome.reps === 1 ? '' : 's'} practised · form score {outcome.formScore}
               </div>
             </Card>
 
             <Card radius="xl" pad="md">
-              <div className="mb-3 text-sm font-semibold text-white">{Object.keys(outcome.flags).length ? 'Watch these next time' : 'Nothing to correct — that was clean'}</div>
+              <div className="mb-3 text-sm font-semibold text-fg">{Object.keys(outcome.flags).length ? 'Watch these next time' : 'Nothing to correct — that was clean'}</div>
               <ul className="space-y-2">
                 {Object.keys(outcome.flags).length
                   ? Object.entries(outcome.flags)
@@ -421,7 +421,7 @@ function StageBar({ stage }: { stage: Stage }) {
     <div className="grid grid-cols-4 gap-2">
       {stages.map((s, i) => (
         <div key={s.id}>
-          <div className={clsx('h-1 rounded-full transition-colors', i <= current ? 'bg-pulse' : 'bg-white/[0.08]', i === current && 'shadow-[0_0_10px_rgba(0,242,254,0.55)]')} />
+          <div className={clsx('h-1 rounded-full transition-colors', i <= current ? 'bg-pulse' : 'bg-veil/[0.08]', i === current && '')} />
           <div className={clsx('mt-1.5 font-mono text-[10px] uppercase tracking-[0.12em]', i <= current ? 'text-pulse' : 'text-slate-600')}>
             0{i + 1} {s.label}
           </div>

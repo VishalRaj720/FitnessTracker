@@ -2,6 +2,7 @@ import { useEffect, useId, useState, type ReactNode } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { clsx } from 'clsx'
 import { Logo } from '@/components/brand/Logo'
+import { ThemeToggle } from '@/components/theme/ThemeToggle'
 import { Button, Icon, type IconName } from '@/components/ui'
 import { targetLabel } from '@/lib/format'
 import { useSessionStore } from '@/features/workout/store/sessionStore'
@@ -70,17 +71,20 @@ export function WorkoutPreviewPage() {
 
   return (
     <div className="flex min-h-full flex-col bg-ink-900">
-      <header className="sticky top-0 z-50 w-full border-b border-line bg-ink-900/80 backdrop-blur-md" style={{ paddingTop: 'var(--safe-top)' }}>
+      <header className="sticky top-0 z-50 w-full border-b border-line bg-ink-900" style={{ paddingTop: 'var(--safe-top)' }}>
         <div className="mx-auto flex h-16 max-w-4xl items-center justify-between px-4 sm:px-6">
           <Logo tag="beta" />
-          <button
-            type="button"
-            aria-label="Close workout preview"
-            onClick={() => nav(-1)}
-            className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-ink-750 hover:text-white focus:outline-none focus-visible:ring-1 focus-visible:ring-slate-500"
-          >
-            <Icon name="x" size={20} />
-          </button>
+          <div className="flex items-center gap-1">
+            <ThemeToggle />
+            <button
+              type="button"
+              aria-label="Close workout preview"
+              onClick={() => nav(-1)}
+              className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-ink-750 hover:text-fg focus:outline-none focus-visible:ring-1 focus-visible:ring-slate-500"
+            >
+              <Icon name="x" size={20} />
+            </button>
+          </div>
         </div>
       </header>
 
@@ -89,7 +93,7 @@ export function WorkoutPreviewPage() {
           <span className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-brand-500/20 bg-brand-500/10 px-2.5 py-0.5 text-xs font-medium text-brand-400">
             <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-brand-400" /> Ready to train
           </span>
-          <h1 className="mb-2 text-2xl font-bold tracking-tight text-white sm:text-3xl">{state.title ?? "Today's workout"}</h1>
+          <h1 className="mb-2 text-2xl font-bold tracking-tight text-fg sm:text-3xl">{state.title ?? "Today's workout"}</h1>
           <p className="flex items-center gap-2 text-sm font-medium text-slate-400">
             <span>
               {items.length} exercise{items.length === 1 ? '' : 's'}
@@ -106,7 +110,7 @@ export function WorkoutPreviewPage() {
                 <Icon name="sparkles" />
               </span>
               <div>
-                <div className="text-sm font-semibold text-white">First time with {unlearned[0].exercise.name}?</div>
+                <div className="text-sm font-semibold text-fg">First time with {unlearned[0].exercise.name}?</div>
                 <p className="mt-0.5 text-xs leading-relaxed text-slate-400">A two-minute camera tutorial shows the movement and checks your form before it counts for anything.</p>
               </div>
             </div>
@@ -130,11 +134,11 @@ export function WorkoutPreviewPage() {
                 className="group flex items-center justify-between gap-3 rounded-xl border border-line bg-ink-800 p-4 transition-colors duration-150 hover:border-line-strong hover:bg-ink-750"
               >
                 <div className="flex min-w-0 items-center gap-4">
-                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-line bg-ink-750 text-sm font-semibold text-slate-300 transition-colors group-hover:text-white">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-line bg-ink-750 text-sm font-semibold text-slate-300 transition-colors group-hover:text-fg">
                     {i + 1}
                   </span>
                   <div className="min-w-0">
-                    <h3 className="truncate text-sm font-semibold text-white transition-colors group-hover:text-brand-400">{it.exercise.name}</h3>
+                    <h3 className="truncate text-sm font-semibold text-fg transition-colors group-hover:text-brand-400">{it.exercise.name}</h3>
                     <p className="mt-0.5 truncate text-xs font-medium text-slate-400">
                       {targetLabel(it)}
                       {it.focus_cue ? ` · ${it.focus_cue}` : ''}
@@ -158,7 +162,7 @@ export function WorkoutPreviewPage() {
         <section className="mb-8 rounded-2xl border border-line bg-ink-800 p-5 sm:p-6" aria-labelledby="coach-mode-title">
           <div className="mb-4 flex items-start justify-between gap-3">
             <div>
-              <h2 id="coach-mode-title" className="text-base font-semibold text-white">
+              <h2 id="coach-mode-title" className="text-base font-semibold text-fg">
                 How do you want to be coached?
               </h2>
               <p className="mt-0.5 text-xs text-slate-400">Select your preferred guidance mode for this session.</p>
@@ -195,7 +199,7 @@ export function WorkoutPreviewPage() {
         </section>
       </main>
 
-      <footer className="sticky bottom-0 z-50 w-full border-t border-line bg-ink-900/95 py-4 backdrop-blur-md" style={{ paddingBottom: 'calc(var(--safe-bottom) + 16px)' }}>
+      <footer className="sticky bottom-0 z-50 w-full border-t border-line bg-ink-900/95 py-4" style={{ paddingBottom: 'calc(var(--safe-bottom) + 16px)' }}>
         <div className="mx-auto flex max-w-4xl items-center justify-between gap-4 px-4 sm:px-6">
           <Button variant="secondary" size="md" onClick={() => nav(-1)} className="w-28 sm:w-32">
             Back
@@ -230,7 +234,7 @@ function ModeCard({ active, onClick, icon, title, body }: { active: boolean; onC
       onClick={onClick}
       className={clsx(
         'relative flex flex-col justify-between rounded-xl p-4 text-left transition-all duration-200',
-        active ? 'border-2 border-brand-500/80 bg-brand-500/[0.06] shadow-[0_0_15px_rgba(16,185,129,0.07)]' : 'border border-line bg-ink-750 hover:border-line-strong',
+        active ? 'border-2 border-brand-500/80 bg-brand-500/[0.06] shadow-card' : 'border border-line bg-ink-750 hover:border-line-strong',
       )}
     >
       <div className="mb-3 flex items-start justify-between">
@@ -238,7 +242,7 @@ function ModeCard({ active, onClick, icon, title, body }: { active: boolean; onC
           <span className={clsx('flex h-8 w-8 items-center justify-center rounded-lg', active ? 'bg-brand-500/20 text-brand-400' : 'bg-ink-700 text-slate-400')}>
             <Icon name={icon} />
           </span>
-          <h3 id={`${id}-t`} className={clsx('text-sm font-semibold', active ? 'text-white' : 'text-slate-200')}>
+          <h3 id={`${id}-t`} className={clsx('text-sm font-semibold', active ? 'text-fg' : 'text-slate-200')}>
             {title}
           </h3>
         </div>

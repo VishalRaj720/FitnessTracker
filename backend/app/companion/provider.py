@@ -8,7 +8,7 @@ from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures import TimeoutError as FutureTimeout
 from typing import Protocol
 
-log = logging.getLogger("fitsathi.companion")
+log = logging.getLogger("fitniti.companion")
 
 #: Total tries, not extra ones. Two is enough to absorb the common single 503.
 MAX_ATTEMPTS = 2

@@ -6,8 +6,8 @@ import type { CapacitorConfig } from '@capacitor/cli'
 // The WebView serves the app from https://localhost (secure context) so getUserMedia works;
 // add <uses-permission android:name="android.permission.CAMERA" /> to AndroidManifest.xml.
 const config: CapacitorConfig = {
-  appId: 'app.fitsathi.mobile',
-  appName: 'FitSathi',
+  appId: 'app.fitniti.mobile',
+  appName: 'Fitniti',
   webDir: 'dist',
   android: { allowMixedContent: false },
   server: { androidScheme: 'https' },

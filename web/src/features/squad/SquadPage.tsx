@@ -45,7 +45,7 @@ export function SquadPage() {
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `fitsathi-${board.data.squad.name.replace(/\W+/g, '-').toLowerCase()}-${board.data.week}.csv`
+    a.download = `fitniti-${board.data.squad.name.replace(/\W+/g, '-').toLowerCase()}-${board.data.week}.csv`
     a.click()
     URL.revokeObjectURL(url)
   }
@@ -93,7 +93,7 @@ export function SquadPage() {
       {/* Left: squad context */}
       <aside className="flex flex-col overflow-hidden rounded-2xl border border-line bg-ink-900/60 lg:sticky lg:top-24 lg:max-h-[calc(100dvh-8rem)]">
         <div className="border-b border-line p-5">
-          <h1 className="mb-1.5 text-xl font-bold tracking-tight text-white">Squads</h1>
+          <h1 className="mb-1.5 text-xl font-bold tracking-tight text-fg">Squads</h1>
           <p className="text-xs leading-relaxed text-slate-400">Turn peer accountability into consistent, camera-verified weekly streaks.</p>
         </div>
         <nav className="no-scrollbar flex gap-1 overflow-x-auto p-3 lg:flex-1 lg:flex-col lg:overflow-y-auto" aria-label="Squad sections">
@@ -108,12 +108,12 @@ export function SquadPage() {
                 <div className="min-w-0 space-y-0.5">
                   <div className="flex items-center gap-2">
                     {n.active && <span className="h-1.5 w-1.5 animate-pulse-slow rounded-full bg-pulse" />}
-                    <span className={clsx('text-xs font-semibold tracking-wide', n.active ? 'text-white' : 'text-slate-300')}>{n.title}</span>
+                    <span className={clsx('text-xs font-semibold tracking-wide', n.active ? 'text-fg' : 'text-slate-300')}>{n.title}</span>
                   </div>
                   <p className={clsx('truncate text-[11px] text-slate-500', n.active && 'pl-3.5 text-slate-400')}>{n.hint}</p>
                 </div>
                 {n.active && n.badge && <span className="shrink-0 rounded border border-pulse/20 bg-pulse/10 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wider text-pulse">{n.badge}</span>}
-                {n.to && <Icon name="arrow-up-right" size={13} className="shrink-0 text-slate-500 group-hover:text-white" />}
+                {n.to && <Icon name="arrow-up-right" size={13} className="shrink-0 text-slate-500 group-hover:text-fg" />}
               </>
             )
             return n.to ? (
@@ -155,7 +155,7 @@ export function SquadPage() {
         <div className="mx-auto w-full max-w-3xl space-y-6">
           <div className="flex flex-col justify-between gap-4 pb-2 md:flex-row md:items-end">
             <div>
-              <h2 className="text-3xl font-extrabold tracking-tight text-white">{s ? s.name : 'Squad'}</h2>
+              <h2 className="text-3xl font-extrabold tracking-tight text-fg">{s ? s.name : 'Squad'}</h2>
               <p className="mt-1 text-sm text-slate-400">3–8 friends. Weekly leaderboard on verified minutes.</p>
             </div>
             <div className="shrink-0 text-left font-mono md:text-right">
@@ -222,7 +222,7 @@ export function SquadPage() {
       <aside className="flex flex-col rounded-2xl border border-line bg-ink-900/60 lg:col-span-2 xl:sticky xl:top-24 xl:col-span-1 xl:max-h-[calc(100dvh-8rem)]">
         <div className="space-y-6 overflow-y-auto p-6">
           <div>
-            <h3 className="text-base font-bold tracking-tight text-white">Configuration</h3>
+            <h3 className="text-base font-bold tracking-tight text-fg">Configuration</h3>
             <p className="mt-0.5 text-xs text-slate-500">Verification rules &amp; ranking</p>
           </div>
           <div className="space-y-3">
@@ -315,7 +315,7 @@ function MetricCard({ label, value, unit, flag, flagTone, bar, foot }: { label: 
     <div className="space-y-2 rounded-xl border border-line bg-ink-900/40 p-5">
       <span className="font-mono text-[11px] uppercase tracking-wider text-slate-400">{label}</span>
       <div className="flex items-baseline justify-between">
-        <div className="font-mono text-2xl font-bold text-white">
+        <div className="font-mono text-2xl font-bold text-fg">
           {value}
           <span className="ml-1 font-sans text-sm font-normal text-slate-400">{unit}</span>
         </div>
@@ -336,13 +336,13 @@ function UnpairedHub({ createRef }: { createRef: RefObject<HTMLInputElement | nu
   const [code, setCode] = useState('')
   return (
     <>
-      <section className="relative overflow-hidden rounded-xl border border-line bg-ink-900/80 p-8 shadow-2xl backdrop-blur-sm">
+      <section className="relative overflow-hidden rounded-xl border border-line bg-ink-900/80 p-8 shadow-2xl">
         <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-pulse/5 blur-3xl" />
         <div className="relative mx-auto max-w-xl space-y-3 py-2 text-center">
           <span className="mb-2 inline-flex h-12 w-12 items-center justify-center rounded-full border border-line-strong bg-ink-800 text-pulse shadow-inner">
             <Icon name="users" size={24} strokeWidth={1.8} />
           </span>
-          <h3 className="text-xl font-bold tracking-tight text-white">You&apos;re not in a squad yet</h3>
+          <h3 className="text-xl font-bold tracking-tight text-fg">You&apos;re not in a squad yet</h3>
           <p className="mx-auto max-w-lg text-sm leading-relaxed text-slate-400">Roommates, batchmates, hostel block — accountability works best with people who&apos;ll notice.</p>
         </div>
       </section>
@@ -430,9 +430,9 @@ function PairedHub({
   const top = Math.max(1, ...rows.map((r) => (rankBy === 'sessions' ? r.sessions : rankBy === 'form' ? (r.avg_form ?? 0) : r.verified_minutes)))
 
   const share = async () => {
-    const text = `Join my FitSathi squad "${squad.name}" with code ${squad.invite_code}`
+    const text = `Join my Fitniti squad "${squad.name}" with code ${squad.invite_code}`
     try {
-      if (navigator.share) await navigator.share({ title: 'FitSathi squad', text })
+      if (navigator.share) await navigator.share({ title: 'Fitniti squad', text })
       else {
         await navigator.clipboard.writeText(squad.invite_code)
         setCopied(true)
@@ -450,7 +450,7 @@ function PairedHub({
         <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <div className="mb-1 font-mono text-[11px] uppercase tracking-wider text-slate-400">Invite code</div>
-            <div className="font-mono text-3xl font-black tracking-[0.3em] text-white">{squad.invite_code}</div>
+            <div className="font-mono text-3xl font-black tracking-[0.3em] text-fg">{squad.invite_code}</div>
             <p className="mt-1 text-xs text-slate-400">
               {squad.member_count} of 12 spots used{squad.institute ? ` · ${squad.institute.name}` : ''}
             </p>
@@ -499,7 +499,7 @@ function PairedHub({
                     {String(i + 1).padStart(2, '0')}
                   </span>
                   <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2 text-sm font-semibold text-white">
+                    <div className="flex items-center gap-2 text-sm font-semibold text-fg">
                       <span className="truncate">{r.name}</span>
                       {r.is_me && <span className="shrink-0 rounded border border-pulse/25 bg-pulse/10 px-1.5 font-mono text-[10px] text-pulse">YOU</span>}
                     </div>
@@ -512,7 +512,7 @@ function PairedHub({
                     </div>
                   </div>
                   <div className="shrink-0 text-right">
-                    <div className="font-mono text-lg font-bold text-white">{r.verified_minutes}</div>
+                    <div className="font-mono text-lg font-bold text-fg">{r.verified_minutes}</div>
                     <div className="font-mono text-[10px] uppercase tracking-wide text-slate-500">min</div>
                   </div>
                 </li>

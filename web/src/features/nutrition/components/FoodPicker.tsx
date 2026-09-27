@@ -103,12 +103,12 @@ export function FoodPicker({
               <div className="rounded-xl border border-brand-400/30 bg-brand-400/[0.05] p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <div className="flex items-center gap-2 text-sm font-semibold text-white">
+                    <div className="flex items-center gap-2 text-sm font-semibold text-fg">
                       <DietMark diet={picked.diet} /> <span className="truncate">{picked.name}</span>
                     </div>
                     <div className="mt-0.5 font-mono text-[11px] text-slate-400">per {picked.serving}</div>
                   </div>
-                  <button type="button" onClick={() => setPicked(null)} className="text-xs text-slate-400 underline-offset-2 hover:text-white hover:underline">
+                  <button type="button" onClick={() => setPicked(null)} className="text-xs text-slate-400 underline-offset-2 hover:text-fg hover:underline">
                     Change
                   </button>
                 </div>
@@ -117,13 +117,13 @@ export function FoodPicker({
                     <Button variant="secondary" size="sm" icon="minus" aria-label="Less" disabled={servings <= 0.5} onClick={() => setServings((s) => Math.max(0.5, s - 0.5))}>
                       <span className="sr-only">Less</span>
                     </Button>
-                    <span className="w-16 text-center font-mono text-lg font-bold text-white">{fmtServings(servings)}×</span>
+                    <span className="w-16 text-center font-mono text-lg font-bold text-fg">{fmtServings(servings)}×</span>
                     <Button variant="secondary" size="sm" icon="plus" aria-label="More" disabled={servings >= 10} onClick={() => setServings((s) => Math.min(10, s + 0.5))}>
                       <span className="sr-only">More</span>
                     </Button>
                   </div>
                   <div className="text-right font-mono text-xs text-slate-300">
-                    <div className="text-lg font-bold text-white">{fmtNum(picked.nutrients.calories * servings, 0)} kcal</div>
+                    <div className="text-lg font-bold text-fg">{fmtNum(picked.nutrients.calories * servings, 0)} kcal</div>
                     P {fmtNum(picked.nutrients.protein_g * servings)} · C {fmtNum(picked.nutrients.carbs_g * servings)} · F {fmtNum(picked.nutrients.fat_g * servings)}
                   </div>
                 </div>
@@ -155,7 +155,7 @@ export function FoodPicker({
                           setPicked(f)
                           setServings(1)
                         }}
-                        className={clsx('flex w-full items-center justify-between gap-3 px-3.5 py-2.5 text-left transition', picked?.id === f.id ? 'bg-brand-400/[0.07]' : 'hover:bg-white/[0.03]')}
+                        className={clsx('flex w-full items-center justify-between gap-3 px-3.5 py-2.5 text-left transition', picked?.id === f.id ? 'bg-brand-400/[0.07]' : 'hover:bg-veil/[0.03]')}
                       >
                         <div className="flex min-w-0 items-center gap-2.5">
                           <DietMark diet={f.diet} />
@@ -172,7 +172,7 @@ export function FoodPicker({
                           </div>
                         </div>
                         <div className="shrink-0 text-right font-mono text-[11px] text-slate-400">
-                          <div className="text-xs font-semibold text-white">{fmtNum(f.nutrients.calories, 0)} kcal</div>P {fmtNum(f.nutrients.protein_g)}g
+                          <div className="text-xs font-semibold text-fg">{fmtNum(f.nutrients.calories, 0)} kcal</div>P {fmtNum(f.nutrients.protein_g)}g
                         </div>
                       </button>
                     </li>

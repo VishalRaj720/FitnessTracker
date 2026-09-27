@@ -1,8 +1,8 @@
-# FitSathi — Technical Blueprint
+# Fitniti — Technical Blueprint
 
 **SIH 2026 · PS 26196 · AICTE MIC Student Innovation · Theme: Fitness & Sports · Category: Software**
 
-> **Working name:** FitSathi (*sathi* = companion). Rename freely; nothing below depends on the name.
+> **Working name:** Fitniti (*sathi* = companion). Rename freely; nothing below depends on the name.
 >
 > **One line:** An offline-first PWA that turns a hostel room into a coached gym — the phone camera counts reps and corrects form on-device, a rules engine adapts tomorrow's workout, and camera-verified minutes feed squad and institute leaderboards nobody can fake.
 >
@@ -54,7 +54,7 @@ The statement is a bucket, not a spec. MIC's Student Innovation track is judged 
 
 | | |
 |---|---|
-| **Concept** | FitSathi: AI form coach for hostel-room bodyweight workouts, with an adaptive daily plan and campus-verified accountability. |
+| **Concept** | Fitniti: AI form coach for hostel-room bodyweight workouts, with an adaptive daily plan and campus-verified accountability. |
 | **Target users** | Students aged 17–25 in Indian technical institutes; primary persona lives in a hostel, owns a ₹10–20k Android phone, has no gym access, and has quit at least one fitness app. Secondary: institute sports/physical-education office wanting Fit India participation numbers. |
 | **User problem** | "I don't know if I'm doing it right, I have no equipment, and I stop after two weeks because nobody notices." |
 | **Solution** | (1) Open app → today's 15-minute plan, with a one-line reason. (2) Prop phone against a wall → camera counts reps and speaks corrections in real time. (3) Session saved as *verified* minutes → streak, squad leaderboard, institute dashboard. (4) Tomorrow's plan adjusts from today's completion, form score, and effort. |
@@ -1061,7 +1061,7 @@ Rule: **Phase 1 is a gate.** If squat counting isn't reliable by day 6, drop to 
 ## Part 26 — Final blueprint
 
 ### 1. Product
-FitSathi is an offline-first PWA (plus Capacitor APK) that gives Indian college students a coach in their hostel room: the phone camera counts reps and corrects form on-device for bodyweight exercises, an explainable rules engine adapts tomorrow's 10–30-minute plan from what the camera saw, and camera-verified minutes drive squad leaderboards and an institute-level Fit India dashboard — with no equipment, no video upload, and ₹0 per user.
+Fitniti is an offline-first PWA (plus Capacitor APK) that gives Indian college students a coach in their hostel room: the phone camera counts reps and corrects form on-device for bodyweight exercises, an explainable rules engine adapts tomorrow's 10–30-minute plan from what the camera saw, and camera-verified minutes drive squad leaderboards and an institute-level Fit India dashboard — with no equipment, no video upload, and ₹0 per user.
 
 ### 2. Target users
 - Hostel students (17–25) in AICTE institutes with a mid-range Android phone and no gym.
@@ -1069,7 +1069,7 @@ FitSathi is an offline-first PWA (plus Capacitor APK) that gives Indian college 
 - Institute physical-education/sports offices wanting participation data (read-only in MVP).
 
 ### 3. Core problem
-Students don't fail fitness for lack of exercise content; they fail because no one tells them if they're doing it right, they have no equipment or space, and nothing notices when they stop. Existing apps deliver videos and manual logs — both blind. FitSathi supplies correction (camera), adaptation (plan), and accountability (verified leaderboards) in one loop.
+Students don't fail fitness for lack of exercise content; they fail because no one tells them if they're doing it right, they have no equipment or space, and nothing notices when they stop. Existing apps deliver videos and manual logs — both blind. Fitniti supplies correction (camera), adaptation (plan), and accountability (verified leaderboards) in one loop.
 
 ### 4. MVP features (prioritized)
 - [ ] P0 Auth + onboarding (goal, level, minutes, institute)

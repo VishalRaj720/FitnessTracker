@@ -1,7 +1,7 @@
 [project]
-name = "fitsathi-backend"
+name = "fitniti-backend"
 version = "0.1.0"
-description = "FitSathi API — FastAPI backend for the campus AI fitness coach"
+description = "Fitniti API — FastAPI backend for the campus AI fitness coach"
 requires-python = ">=3.12,<3.14"
 dependencies = [
     "fastapi>=0.115",

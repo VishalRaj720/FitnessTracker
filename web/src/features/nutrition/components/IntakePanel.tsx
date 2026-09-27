@@ -45,7 +45,7 @@ export function IntakePanel({ day, dateKey, dayLabel }: { day: DailyNutrition; d
         <div className="flex flex-col items-center gap-4">
           <Ring value={c.calories} max={t.calories} size={184} stroke={13} tone="brand">
             <span className="label-mono text-slate-500">Calories</span>
-            <span className="mt-1 font-mono text-3xl font-bold leading-none text-white">{fmtInt(c.calories)}</span>
+            <span className="mt-1 font-mono text-3xl font-bold leading-none text-fg">{fmtInt(c.calories)}</span>
             <span className="mt-1 font-mono text-[11px] text-slate-400">/ {fmtInt(t.calories)} kcal</span>
             <span className={clsx('mt-2 font-mono text-[11px] font-semibold', left >= 0 ? 'text-brand-400' : 'text-flame')}>
               {left >= 0 ? `${fmtInt(left)} left` : `${fmtInt(-left)} over`}
@@ -73,7 +73,7 @@ export function IntakePanel({ day, dateKey, dayLabel }: { day: DailyNutrition; d
   )
 }
 
-function MiniTile({ label, value, tone = 'text-white' }: { label: string; value: string; tone?: string }) {
+function MiniTile({ label, value, tone = 'text-fg' }: { label: string; value: string; tone?: string }) {
   return (
     <div className="rounded-lg border border-line bg-ink-850 px-2 py-1.5">
       <div className="text-[9px] uppercase tracking-wider text-slate-500">{label}</div>
@@ -87,9 +87,9 @@ function MacroRow({ label, unit, tone, value, target }: { label: string; unit: s
   return (
     <div>
       <div className="mb-2 flex items-baseline justify-between gap-3">
-        <span className="text-sm font-semibold text-white">{label}</span>
+        <span className="text-sm font-semibold text-fg">{label}</span>
         <span className="font-mono text-xs tabular-nums text-slate-300">
-          <span className="text-base font-bold text-white">{fmtNum(value, 0)}</span> / {fmtInt(target)} {unit}
+          <span className="text-base font-bold text-fg">{fmtNum(value, 0)}</span> / {fmtInt(target)} {unit}
           <span className={clsx('ml-2 text-[11px]', left >= 0 ? 'text-slate-500' : 'text-flame')}>{left >= 0 ? `${fmtNum(left, 0)} ${unit} left` : `+${fmtNum(-left, 0)} ${unit}`}</span>
         </span>
       </div>
@@ -109,7 +109,7 @@ function WaterTracker({ consumed, target, dateKey }: { consumed: number; target:
       <div className="mb-3 flex items-center justify-between">
         <MonoLabel dot="iris">Hydration</MonoLabel>
         <span className="font-mono text-xs text-slate-300">
-          <span className="text-base font-bold text-white">{(consumed / 1000).toFixed(2)}</span> / {(target / 1000).toFixed(2)} L
+          <span className="text-base font-bold text-fg">{(consumed / 1000).toFixed(2)}</span> / {(target / 1000).toFixed(2)} L
         </span>
       </div>
       <div className="mb-4 grid grid-cols-8 gap-1.5" aria-label={`${filled} of ${glasses} glasses`}>
@@ -118,7 +118,7 @@ function WaterTracker({ consumed, target, dateKey }: { consumed: number; target:
             key={i}
             className={clsx(
               'flex h-8 items-center justify-center rounded-md border transition-colors',
-              i < filled ? 'border-iris-500/60 bg-iris-500/20 text-iris-300 shadow-[0_0_10px_-2px_rgba(90,107,255,0.6)]' : 'border-line bg-ink-950/60 text-slate-700',
+              i < filled ? 'border-iris-500/60 bg-iris-500/20 text-iris-300 shadow-card' : 'border-line bg-ink-950/60 text-slate-700',
             )}
           >
             <Icon name="droplet" size={14} />

@@ -1,4 +1,4 @@
-# FitSathi — AI form coach + campus fitness squads
+# Fitniti — AI form coach + campus fitness squads
 
 **Smart India Hackathon 2026 · Problem Statement 26196 (AICTE, MIC Student Innovation)**
 *"Ideas that can boost fitness activities and assist in keeping fit"*
@@ -104,7 +104,7 @@ You need **two terminals**, both left running.
 cd backend && uv run uvicorn app.main:app --reload --port 8000
 ```
 
-On first start it creates `backend/fitsathi.db` and seeds 14 exercises + 26 institutes automatically. You should see `FitSathi API started`.
+On first start it creates `backend/fitsathi.db` and seeds 14 exercises + 26 institutes automatically. You should see `Fitniti API started`.
 
 **Terminal 2 — the web app:**
 

@@ -8,7 +8,7 @@ class Settings(BaseSettings):
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
-    app_name: str = "FitSathi API"
+    app_name: str = "Fitniti API"
     environment: str = "development"
 
     # SQLite by default so the project runs with zero setup.

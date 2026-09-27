@@ -17,8 +17,8 @@ export interface StickFigure3DOptions {
 
 const FOCAL = 2.2
 const CAMERA_DIST = 4.2
-const BONE_NEAR = '#5eead4'
-const BONE_FAR = '#0f766e'
+const BONE_NEAR = '#3f8f72'
+const BONE_FAR = '#1f6b45'
 
 /**
  * Draws the demo figure as a rotatable 3D stick figure on a plain 2D canvas.
@@ -258,7 +258,7 @@ export class StickFigure3D {
     ctx.moveTo(neckX, neckY)
     ctx.lineTo(hx, hy)
     ctx.stroke()
-    ctx.fillStyle = '#134e4a'
+    ctx.fillStyle = '#1a3c34'
     ctx.beginPath()
     ctx.arc(hx, hy, r, 0, Math.PI * 2)
     ctx.fill()

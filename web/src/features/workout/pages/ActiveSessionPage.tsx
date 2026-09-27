@@ -236,7 +236,7 @@ export function ActiveSessionPage() {
                   <div className="font-mono text-[10.5px] uppercase tracking-[0.14em] text-slate-400">
                     Exercise {currentIndex + 1} of {items.length} · Set {currentSet}/{item.targetSets}
                   </div>
-                  <div className="mt-1 truncate text-2xl font-extrabold tracking-tight text-white">{item.exercise.name}</div>
+                  <div className="mt-1 truncate text-2xl font-extrabold tracking-tight text-fg">{item.exercise.name}</div>
                   {item.focusCue && <div className="mt-0.5 text-xs text-pulse">{item.focusCue}</div>}
                 </div>
                 {tracking && runner.stage === 'tracking' && (
@@ -249,7 +249,7 @@ export function ActiveSessionPage() {
 
               {tracking && (runner.stage === 'framing' || runner.stage === 'countdown') ? (
                 <div className="rounded-xl border border-line bg-ink-900/85 p-4">
-                  <div className="mb-3 text-sm font-semibold text-white">
+                  <div className="mb-3 text-sm font-semibold text-fg">
                     {orientation === 'side' ? 'Stand side-on, whole body visible' : orientation === 'front' ? 'Face the camera, whole body visible' : 'Get into position'}
                   </div>
                   <SetupChecklist framing={runner.framing} orientation={orientation} />
@@ -309,9 +309,9 @@ function RestPanel({ seconds, next, set, onSkip }: { seconds: number; next?: str
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-3 py-6 text-center">
       <div className="label-mono text-slate-400">Rest // recovery window</div>
-      <div className="font-mono text-7xl font-bold tabular-nums text-white">{fmtClock(seconds)}</div>
+      <div className="font-mono text-7xl font-bold tabular-nums text-fg">{fmtClock(seconds)}</div>
       <div className="text-sm text-slate-300">
-        Next: <span className="font-semibold text-white">{next}</span> · set {set}
+        Next: <span className="font-semibold text-fg">{next}</span> · set {set}
       </div>
       {note && (
         <div className="mt-2 max-w-sm rounded-xl border border-pulse/25 bg-pulse/[0.06] px-4 py-3 text-left">

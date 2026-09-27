@@ -116,7 +116,7 @@ export function ProgressPage() {
                   </Chip>
                 ))}
               </div>
-              <div className="h-44 rounded-lg border border-white/5 bg-ink-950/60 bg-dot-fine">
+              <div className="h-44 rounded-lg border border-line bg-ink-950/60 bg-dot-fine">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={pts.map((pt) => ({ ...pt, label: fmtDate(pt.date) }))} margin={{ top: 12, right: 12, left: 0, bottom: 4 }}>
                     <CartesianGrid vertical={false} stroke={GRID_STROKE} />
@@ -166,10 +166,10 @@ export function ProgressPage() {
                 <li key={s.id}>
                   <Link
                     to={`/workout/summary/${s.id}`}
-                    className="grid grid-cols-[1fr_auto] items-center gap-3 px-4 py-3 transition hover:bg-white/[0.02] sm:grid-cols-[1.6fr_1fr_1fr_0.8fr_0.9fr_24px]"
+                    className="grid grid-cols-[1fr_auto] items-center gap-3 px-4 py-3 transition hover:bg-veil/[0.02] sm:grid-cols-[1.6fr_1fr_1fr_0.8fr_0.9fr_24px]"
                   >
                     <div>
-                      <div className="text-sm font-medium text-white">{fmtDateTime(s.started_at)}</div>
+                      <div className="text-sm font-medium text-fg">{fmtDateTime(s.started_at)}</div>
                       <div className="font-mono text-[11px] text-slate-500 sm:hidden">
                         {s.total_reps} reps · {fmtMinutes(s.duration_seconds)}
                         {s.avg_form_score != null && ` · form ${Math.round(s.avg_form_score)}`}
@@ -201,7 +201,7 @@ export function ProgressPage() {
   )
 }
 
-function MiniMetric({ label, value, tone = 'text-white' }: { label: string; value: string; tone?: string }) {
+function MiniMetric({ label, value, tone = 'text-fg' }: { label: string; value: string; tone?: string }) {
   return (
     <div className="rounded-lg border border-line bg-ink-850 px-3 py-2">
       <div className="font-mono text-[9px] uppercase tracking-[0.14em] text-slate-500">{label}</div>

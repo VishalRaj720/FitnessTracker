@@ -89,7 +89,7 @@ export function SessionSummaryPage() {
         tag="session complete"
         width="max-w-4xl"
         right={
-          <button type="button" aria-label="Close summary" onClick={() => nav('/home', { replace: true })} className="rounded-lg p-2 text-slate-400 transition hover:bg-white/[0.05] hover:text-white">
+          <button type="button" aria-label="Close summary" onClick={() => nav('/home', { replace: true })} className="rounded-lg p-2 text-slate-400 transition hover:bg-veil/[0.05] hover:text-fg">
             <Icon name="x" size={20} />
           </button>
         }
@@ -98,14 +98,14 @@ export function SessionSummaryPage() {
         <section className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
           <div className="space-y-3">
             <StatusPill tone={status.tone}>{status.text}</StatusPill>
-            <h1 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">Workout done</h1>
+            <h1 className="text-3xl font-extrabold tracking-tight text-fg sm:text-4xl">Workout done</h1>
             <p className="text-sm text-slate-400">Tomorrow's plan adapts from these numbers and the effort you rate below.</p>
           </div>
           {streak && (
             <div className="flex items-center gap-3 rounded-xl border border-flame/30 bg-flame/[0.07] px-4 py-3">
               <Icon name="flame" size={22} className="text-flame" />
               <div>
-                <div className="font-mono text-2xl font-extrabold leading-none text-white">{streak.current}</div>
+                <div className="font-mono text-2xl font-extrabold leading-none text-fg">{streak.current}</div>
                 <div className="font-mono text-[10px] uppercase tracking-wider text-amber-200/80">day streak{streak.changed ? ' · +1' : ''}</div>
               </div>
             </div>
@@ -131,7 +131,7 @@ export function SessionSummaryPage() {
                   <div className="flex min-w-0 items-start gap-3">
                     <span className="mt-0.5 font-mono text-xs text-slate-500">{String(i + 1).padStart(2, '0')}</span>
                     <div className="min-w-0">
-                      <div className="truncate text-sm font-semibold text-white">{r.name}</div>
+                      <div className="truncate text-sm font-semibold text-fg">{r.name}</div>
                       <div className="mt-0.5 flex flex-wrap items-center gap-2 font-mono text-[11px] text-slate-400">
                         {r.targetReps > 0 ? `${r.reps}/${r.targetReps} reps` : `${r.held}/${r.targetSeconds}s held`}
                         {topFlag && topFlag[1] > 0 && (
@@ -143,7 +143,7 @@ export function SessionSummaryPage() {
                     </div>
                   </div>
                   <div className="flex shrink-0 items-center gap-3">
-                    {r.form != null && <span className={clsx('font-mono text-lg font-bold', r.form >= 85 ? 'text-brand-400' : 'text-white')}>{Math.round(r.form)}</span>}
+                    {r.form != null && <span className={clsx('font-mono text-lg font-bold', r.form >= 85 ? 'text-brand-400' : 'text-fg')}>{Math.round(r.form)}</span>}
                     {r.verified ? (
                       <Badge tone="brand" mono dot>
                         Verified
@@ -176,7 +176,7 @@ export function SessionSummaryPage() {
                     }}
                     className={clsx(
                       'rounded-lg border py-3 text-xs font-medium transition',
-                      on ? 'border-iris-500 bg-iris-500/15 text-white shadow-[0_0_16px_-2px_rgba(90,107,255,0.45)]' : 'border-line bg-ink-800 text-slate-300 hover:border-line-strong',
+                      on ? 'border-iris-500 bg-iris-500/15 text-fg shadow-card' : 'border-line bg-ink-800 text-slate-300 hover:border-line-strong',
                     )}
                   >
                     <div className="font-mono text-lg font-bold">{o.v}</div>

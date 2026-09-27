@@ -25,7 +25,7 @@ export function TelemetryTooltip({
 }) {
   if (!active || !payload?.length) return null
   return (
-    <div className="rounded-lg border border-line-strong bg-ink-900/95 px-3 py-2 shadow-2xl backdrop-blur-md">
+    <div className="rounded-lg border border-line-strong bg-ink-900/95 px-3 py-2 shadow-2xl">
       {label != null && <div className="mb-1.5 font-mono text-[10px] uppercase tracking-[0.12em] text-slate-400">{labelFormat ? labelFormat(label) : label}</div>}
       <div className="space-y-1">
         {payload.map((p, i) => {
@@ -37,7 +37,7 @@ export function TelemetryTooltip({
                 <span className="h-1.5 w-1.5 rounded-full" style={{ background: p.color }} />
                 {p.name}
               </span>
-              <span className="font-semibold text-white">
+              <span className="font-semibold text-fg">
                 {typeof v === 'number' ? Math.round(v * 10) / 10 : v}
                 {units[key] ? ` ${units[key]}` : ''}
               </span>

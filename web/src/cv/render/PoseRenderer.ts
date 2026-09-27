@@ -12,8 +12,8 @@ export interface PoseRendererOptions {
 }
 
 const MIN_VISIBILITY = 0.3
-const COLOR_OK = '#34d399'
-const COLOR_GATED = '#f59e0b'
+const COLOR_OK = '#38a169'
+const COLOR_GATED = '#c05621'
 
 /**
  * Draws the skeleton on its OWN requestAnimationFrame loop, independent of inference.

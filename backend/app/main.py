@@ -13,7 +13,7 @@ from app.core.exceptions import register_exception_handlers
 from app.core.limiter import limiter
 from app.core.logging import configure_logging
 
-log = logging.getLogger("fitsathi")
+log = logging.getLogger("fitniti")
 
 
 def init_db() -> None:
@@ -46,7 +46,7 @@ def create_app() -> FastAPI:
     app = FastAPI(
         title=settings.app_name,
         version="0.1.0",
-        description="Backend for FitSathi: on-device AI form coach, adaptive plans, campus squads.",
+        description="Backend for Fitniti: on-device AI form coach, adaptive plans, campus squads.",
         lifespan=lifespan,
     )
     app.state.limiter = limiter

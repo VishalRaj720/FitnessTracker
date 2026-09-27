@@ -102,12 +102,12 @@ export function OnboardingPage({ edit = false }: { edit?: boolean }) {
                 aria-current={i === step ? 'step' : undefined}
                 className={clsx(
                   'relative flex items-center gap-2 px-2 font-medium transition-colors disabled:cursor-not-allowed',
-                  i === step ? 'text-white' : i <= reached ? 'text-slate-400 hover:text-slate-200' : 'text-slate-600',
+                  i === step ? 'text-fg' : i <= reached ? 'text-slate-400 hover:text-slate-200' : 'text-slate-600',
                 )}
               >
                 <span className="font-mono text-[11px] text-slate-500">0{i + 1}</span>
                 {s.long}
-                {i === step && <span className="absolute inset-x-1 -bottom-px h-0.5 rounded-full bg-iris-500 shadow-[0_0_10px_rgba(90,107,255,0.7)]" />}
+                {i === step && <span className="absolute inset-x-1 -bottom-px h-0.5 rounded-full bg-iris-500" />}
               </button>
             ))}
           </nav>
@@ -121,7 +121,7 @@ export function OnboardingPage({ edit = false }: { edit?: boolean }) {
             </span>
             <span className="hidden items-center gap-2 rounded-full border border-line bg-ink-900/60 px-3 py-1.5 font-mono text-xs text-slate-400 sm:flex">
               <span className="h-2 w-2 animate-pulse-slow rounded-full bg-brand-400" />
-              USER: <span className="font-semibold text-white">{name || 'you'}</span>
+              USER: <span className="font-semibold text-fg">{name || 'you'}</span>
             </span>
             {edit ? (
               <Button variant="ghost" size="sm" onClick={() => nav(-1)}>
@@ -215,16 +215,16 @@ function StepGoal({
   return (
     <div className="animate-fade-up">
       <section className="mb-12 max-w-3xl text-center md:text-left">
-        <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-xs font-medium text-iris-400">
+        <span className="inline-flex items-center gap-2 rounded-full border border-line bg-veil/[0.03] px-3 py-1 text-xs font-medium text-iris-400">
           <span className="h-1.5 w-1.5 rounded-full bg-iris-500" /> Setup sequence
         </span>
-        <h1 className="mt-4 text-4xl font-extrabold leading-tight tracking-tight text-white md:text-5xl lg:text-6xl">{title}</h1>
+        <h1 className="mt-4 text-4xl font-extrabold leading-tight tracking-tight text-fg md:text-5xl lg:text-6xl">{title}</h1>
         <p className="mt-4 text-base leading-relaxed text-slate-400 md:text-lg">
-          FitSathi shapes your plan from your goal, your level today and what the camera sees in every session.
+          Fitniti shapes your plan from your goal, your level today and what the camera sees in every session.
         </p>
         <div className="mx-auto mt-8 max-w-xl md:mx-0">
           <div className="mb-2.5 flex items-center justify-between text-xs font-medium uppercase tracking-wide text-slate-400">
-            <span className="font-semibold text-white">
+            <span className="font-semibold text-fg">
               Step 1 of 3 <span className="mx-1 text-slate-500">·</span> <span className="text-iris-400">Goal &amp; baseline</span>
             </span>
             <span className="text-slate-500">33% complete</span>
@@ -268,11 +268,11 @@ function StepGoal({
 
 function OptionSection({ index, title, children }: { index: string; title: string; children: ReactNode }) {
   return (
-    <section className="relative overflow-hidden rounded-2xl border border-line bg-ink-850/70 p-6 backdrop-blur-sm md:p-7">
+    <section className="relative overflow-hidden rounded-2xl border border-line bg-ink-850/70 p-6 md:p-7">
       <div className="mb-5 flex items-center justify-between">
         <div>
           <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">Section {index}</span>
-          <h2 className="mt-0.5 text-xl font-bold tracking-tight text-white">{title}</h2>
+          <h2 className="mt-0.5 text-xl font-bold tracking-tight text-fg">{title}</h2>
         </div>
         <span className="text-xs font-medium text-slate-500">Required</span>
       </div>
@@ -316,11 +316,11 @@ function EnginePreview({ goal, level, minutes, days }: { goal: Goal; level: Leve
 
   return (
     <aside className="lg:col-span-5">
-      <div className="relative overflow-hidden rounded-2xl border border-line bg-ink-850/90 p-6 backdrop-blur-md">
-        <div className="mb-5 flex items-center justify-between border-b border-white/[0.06] pb-4">
+      <div className="relative overflow-hidden rounded-2xl border border-line bg-ink-850/90 p-6">
+        <div className="mb-5 flex items-center justify-between border-b border-line pb-4">
           <div className="flex items-center gap-2">
             <span className="h-2 w-2 rounded-full bg-pulse" />
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-300">FitSathi engine preview</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-300">Fitniti engine preview</span>
           </div>
           <span className="font-mono text-[11px] text-slate-500">live · updates as you pick</span>
         </div>
@@ -331,7 +331,7 @@ function EnginePreview({ goal, level, minutes, days }: { goal: Goal; level: Leve
           <Micro label="Readiness" value={r.label} hint={r.hint} hintClass={r.tone} />
         </div>
 
-        <div className="mb-6 rounded-xl border border-white/[0.06] bg-ink-800/50 p-4">
+        <div className="mb-6 rounded-xl border border-line bg-ink-800/50 p-4">
           <div className="mb-3 flex items-center justify-between gap-2">
             <span className="text-xs font-semibold tracking-tight text-slate-300">Projected workload · {GOAL_LABEL[goal]}</span>
             <div className="flex items-center gap-3 font-mono text-[11px]">
@@ -343,10 +343,10 @@ function EnginePreview({ goal, level, minutes, days }: { goal: Goal; level: Leve
               </span>
             </div>
           </div>
-          <div className="relative h-44 w-full overflow-hidden rounded-lg border border-white/[0.04] bg-ink-950/60">
+          <div className="relative h-44 w-full overflow-hidden rounded-lg border border-line bg-ink-950/60">
             <div className="pointer-events-none absolute inset-0 grid grid-cols-6 grid-rows-4 opacity-20">
               {Array.from({ length: 24 }, (_, i) => (
-                <div key={i} className="border-b border-r border-white/10" />
+                <div key={i} className="border-b border-r border-line" />
               ))}
             </div>
             <svg className="h-full w-full" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" fill="none" aria-label="Projected weekly workload over eight weeks" role="img">
@@ -369,12 +369,12 @@ function EnginePreview({ goal, level, minutes, days }: { goal: Goal; level: Leve
           </div>
         </div>
 
-        <div className="flex items-start gap-3.5 rounded-xl border border-line bg-white/[0.02] p-4">
+        <div className="flex items-start gap-3.5 rounded-xl border border-line bg-veil/[0.02] p-4">
           <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-flame/25 bg-flame/10 text-flame">
             <Icon name="alert" />
           </span>
           <div>
-            <div className="text-xs font-semibold text-white">How your plan will recover you</div>
+            <div className="text-xs font-semibold text-fg">How your plan will recover you</div>
             <p className="mt-1 text-xs leading-relaxed text-slate-400">
               {GOAL_ADVICE[goal]} {LEVEL_ADVICE[level]}
             </p>
@@ -387,9 +387,9 @@ function EnginePreview({ goal, level, minutes, days }: { goal: Goal; level: Leve
 
 function Micro({ label, value, unit, hint, hintClass = 'text-slate-400' }: { label: string; value: ReactNode; unit?: string; hint: string; hintClass?: string }) {
   return (
-    <div className="rounded-xl border border-white/[0.06] bg-ink-800/70 p-3">
+    <div className="rounded-xl border border-line bg-ink-800/70 p-3">
       <div className="text-[11px] font-medium text-slate-400">{label}</div>
-      <div className="mt-1 text-xl font-bold text-white">
+      <div className="mt-1 text-xl font-bold text-fg">
         {value} {unit && <span className="text-xs font-normal text-slate-400">{unit}</span>}
       </div>
       <div className={clsx('mt-1 text-[10px] font-medium', hintClass)}>{hint}</div>
@@ -442,13 +442,13 @@ function StepTime({
     <div className="mx-auto flex w-full max-w-5xl animate-fade-up flex-col items-center">
       <section className="mb-8 w-full text-center">
         <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-line bg-ink-800 px-3 py-1 text-xs font-medium text-slate-400">
-          <span className="font-semibold text-white">Step 2 of 3</span>
+          <span className="font-semibold text-fg">Step 2 of 3</span>
           <span className="text-slate-600">·</span>
           <span>Time &amp; frequency</span>
         </div>
-        <h1 className="mb-3 text-3xl font-extrabold tracking-tight text-white sm:text-4xl md:text-5xl">{title}</h1>
+        <h1 className="mb-3 text-3xl font-extrabold tracking-tight text-fg sm:text-4xl md:text-5xl">{title}</h1>
         <p className="mx-auto max-w-xl text-sm leading-relaxed text-slate-400 sm:text-base">
-          Configure your baseline rhythm. FitSathi fits each week's progressive volume around your real timetable.
+          Configure your baseline rhythm. Fitniti fits each week's progressive volume around your real timetable.
         </p>
         <div className="mx-auto mt-6 max-w-xs">
           <SegmentBar total={3} filled={2} tone="iris" height="h-1" />
@@ -513,7 +513,7 @@ function ParamCard({ kicker, title, badge, note, children }: { kicker: string; t
       <div className="mb-4 flex items-start justify-between gap-3">
         <div>
           <span className="label-mono mb-1 block text-slate-500">{kicker}</span>
-          <h2 className="text-lg font-bold tracking-tight text-white">{title}</h2>
+          <h2 className="text-lg font-bold tracking-tight text-fg">{title}</h2>
         </div>
         {badge}
       </div>
@@ -541,7 +541,7 @@ function VolumeProjection({ minutes, days, level }: { minutes: number; days: num
         <div className="flex items-center justify-between border-b border-line pb-4">
           <div className="flex items-center gap-2">
             <span className="h-2 w-2 animate-pulse-slow rounded-full bg-brand-400" />
-            <span className="text-xs font-semibold tracking-wide text-white">Weekly volume projection</span>
+            <span className="text-xs font-semibold tracking-wide text-fg">Weekly volume projection</span>
           </div>
           <span className="font-mono text-[11px] text-slate-400">Adaptive model</span>
         </div>
@@ -549,7 +549,7 @@ function VolumeProjection({ minutes, days, level }: { minutes: number; days: num
         <div className="mt-5 grid grid-cols-2 gap-4">
           <div className="rounded-lg border border-line bg-ink-950 p-3.5">
             <span className="label-mono mb-1 block text-slate-500">Total target</span>
-            <div className="font-mono text-2xl font-bold tracking-tight text-white">
+            <div className="font-mono text-2xl font-bold tracking-tight text-fg">
               {weekly} <span className="font-sans text-xs font-normal text-slate-400">min/wk</span>
             </div>
             <span className="mt-0.5 inline-block font-mono text-[11px] text-brand-400">{who}% of WHO's 150 min</span>
@@ -564,7 +564,7 @@ function VolumeProjection({ minutes, days, level }: { minutes: number; days: num
         <div className="mt-6">
           <div className="mb-2 flex items-center justify-between">
             <span className="label-mono text-slate-500">Weekly load distribution</span>
-            <span className="font-mono text-[11px] text-white">{days} sessions</span>
+            <span className="font-mono text-[11px] text-fg">{days} sessions</span>
           </div>
           <div className="flex h-28 items-end justify-between gap-2 rounded-lg border border-line bg-ink-950/60 px-1.5 pt-4">
             {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((d, i) => {
@@ -575,12 +575,12 @@ function VolumeProjection({ minutes, days, level }: { minutes: number; days: num
                   <div
                     className={clsx(
                       'w-full rounded-t-sm transition-all duration-300',
-                      on ? (isToday ? 'bg-iris-500 shadow-[0_0_12px_rgba(90,107,255,0.6)]' : 'bg-iris-500/80') : 'bg-ink-600/40',
+                      on ? (isToday ? 'bg-iris-500' : 'bg-iris-500/80') : 'bg-ink-600/40',
                     )}
                     style={{ height: `${on ? barHeight : 10}%` }}
                     title={on ? `${minutes} min session` : 'Rest'}
                   />
-                  <span className={clsx('pb-1 font-mono text-[10px]', isToday ? 'font-semibold text-white' : 'text-slate-500')}>{d}</span>
+                  <span className={clsx('pb-1 font-mono text-[10px]', isToday ? 'font-semibold text-fg' : 'text-slate-500')}>{d}</span>
                 </div>
               )
             })}
@@ -662,13 +662,13 @@ function StepCampus({
       </div>
 
       <div className="mb-9 max-w-2xl text-center">
-        <h1 className="mb-3 text-3xl font-semibold tracking-tight text-white sm:text-4xl lg:text-5xl">{title}</h1>
+        <h1 className="mb-3 text-3xl font-semibold tracking-tight text-fg sm:text-4xl lg:text-5xl">{title}</h1>
         <p className="mx-auto max-w-lg text-sm leading-relaxed text-slate-400 sm:text-base">
           Personalise your campus profile and unlock your collegiate leaderboard telemetry.
         </p>
       </div>
 
-      <section className="relative w-full max-w-3xl overflow-hidden rounded-xl border border-white/10 bg-ink-900/90 shadow-[0_8px_32px_rgba(0,0,0,0.65),0_0_0_1px_rgba(255,255,255,0.05)] backdrop-blur-xl">
+      <section className="relative w-full max-w-3xl overflow-hidden rounded-xl border border-line bg-ink-900/90 shadow-card">
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line bg-ink-850/60 px-5 py-3 font-mono text-[11px] text-slate-400">
           <div className="flex items-center gap-3">
             <span className="font-medium tracking-wider text-slate-300">CORE.CAMPUS_LINK</span>
@@ -724,13 +724,13 @@ function StepCampus({
                         <button
                           key={i.id}
                           type="button"
-                          className="block w-full border-b border-line px-4 py-2.5 text-left last:border-0 hover:bg-white/[0.04]"
+                          className="block w-full border-b border-line px-4 py-2.5 text-left last:border-0 hover:bg-veil/[0.04]"
                           onClick={() => {
                             setInstitute(i)
                             setInstituteQ(i.name)
                           }}
                         >
-                          <div className="text-sm font-medium text-white">{i.name}</div>
+                          <div className="text-sm font-medium text-fg">{i.name}</div>
                           <div className="font-mono text-[11px] text-slate-500">
                             {[i.city, i.state].filter(Boolean).join(', ')}
                           </div>
@@ -818,11 +818,11 @@ function CampusRelay({ institute }: { institute: InstituteBrief | null }) {
         <MonoLabel className="text-slate-500">Live campus relay telemetry</MonoLabel>
         <span className="text-[11px] text-iris-400">{institute ? `${institute.slug.toUpperCase()} // 8 WK` : 'CAMPUS_STREAM // —'}</span>
       </div>
-      <div className="relative h-28 w-full overflow-hidden rounded-lg border border-white/[0.06] bg-ink-950/80 sm:h-32">
+      <div className="relative h-28 w-full overflow-hidden rounded-lg border border-line bg-ink-950/80 sm:h-32">
         <div className="absolute inset-0 bg-dot-grid opacity-30" />
         <div className="pointer-events-none absolute left-3 top-2 font-mono">
           <div className="text-[9px] uppercase tracking-wider text-slate-500">Campus verified minutes · this week</div>
-          <div className="text-xs font-semibold tracking-tight text-white sm:text-sm">
+          <div className="text-xs font-semibold tracking-tight text-fg sm:text-sm">
             {institute ? (stats.data ? stats.data.this_week.verified_minutes.toLocaleString('en-IN') : '…') : '—'}{' '}
             <span className="text-[10px] font-normal text-slate-400">min</span>
           </div>
@@ -847,20 +847,20 @@ function CampusRelay({ institute }: { institute: InstituteBrief | null }) {
           )}
         </svg>
       </div>
-      <div className="mt-3 grid grid-cols-1 gap-2 border-t border-white/[0.05] pt-3 font-mono text-[10px] text-slate-500 sm:grid-cols-2">
+      <div className="mt-3 grid grid-cols-1 gap-2 border-t border-line pt-3 font-mono text-[10px] text-slate-500 sm:grid-cols-2">
         <div>
           <span className="text-slate-400">&gt;</span>{' '}
           {institute ? (
             <>
               Linked to <span className="text-slate-300">{institute.slug.toUpperCase()}::CAMPUS</span>
-              {stats.data && ` · ${stats.data.total_students} students on FitSathi`}
+              {stats.data && ` · ${stats.data.total_students} students on Fitniti`}
             </>
           ) : (
             'No campus linked — you can add one later'
           )}
         </div>
         <div className="text-left text-slate-400 sm:text-right">
-          K-ANON: <span className="text-white">≥ 5</span> | <span className="text-brand-400">AGGREGATES ONLY</span>
+          K-ANON: <span className="text-fg">≥ 5</span> | <span className="text-brand-400">AGGREGATES ONLY</span>
         </div>
       </div>
     </div>
