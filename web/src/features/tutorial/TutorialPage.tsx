@@ -1,9 +1,11 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { clsx } from 'clsx'
-import { Alert, Badge, Button, Card, PageTitle, Spinner } from '@/components/ui'
+import { Alert, Badge, Button, Card, Icon, MonoLabel, SegmentBar, Spinner } from '@/components/ui'
+import { Backdrop } from '@/components/layout/Backdrop'
+import { FlowHeader } from '@/components/layout/FlowHeader'
 import { useAuthStore } from '@/features/auth/authStore'
-import { useExercises } from '@/features/exercises/ExercisesPage'
+import { useExercises } from '@/features/exercises/api'
 import { useSessionStore, type RunnerItem } from '@/features/workout/store/sessionStore'
 import { useWorkoutRunner } from '@/features/workout/hooks/useWorkoutRunner'
 import { SetupChecklist } from '@/features/workout/components/SetupChecklist'
@@ -140,13 +142,23 @@ export function TutorialPage() {
     if (stage === 'shadow' && passed) finish()
   }, [stage, passed, finish])
 
-  if (exercises.isPending) return <Centered><Spinner /></Centered>
-  if (exercises.isError) return <Centered><Alert>{errorMessage(exercises.error)}</Alert></Centered>
+  if (exercises.isPending)
+    return (
+      <Centered>
+        <Spinner className="h-6 w-6 text-pulse" />
+      </Centered>
+    )
+  if (exercises.isError)
+    return (
+      <Centered>
+        <Alert>{errorMessage(exercises.error)}</Alert>
+      </Centered>
+    )
   if (!exercise || !def || !clip || !tutorial) {
     return (
       <Centered>
-        <Alert>No camera tutorial is available for this exercise yet.</Alert>
-        <Button className="mt-3" variant="secondary" onClick={() => nav('/exercises')}>
+        <Alert tone="info">No camera tutorial is available for this exercise yet.</Alert>
+        <Button className="mt-4" variant="secondary" icon="arrow-left" onClick={() => nav('/exercises')}>
           Back to exercises
         </Button>
       </Centered>
@@ -155,224 +167,244 @@ export function TutorialPage() {
 
   const t = (v: { en: string; hi: string }) => (lang === 'hi' ? v.hi : v.en)
   const step = tutorial.steps[stepIndex]
+  const stageLabel = stage === 'watch' ? 'Learn the movement' : stage === 'position' ? 'Get into position' : stage === 'shadow' ? 'Follow the ghost' : 'Nice work'
+  const mirror = prefs.mirror !== false
 
   return (
-    <div className="mx-auto flex min-h-full max-w-md flex-col gap-3 p-4 pb-[calc(var(--safe-bottom)+16px)] md:max-w-2xl">
-      <PageTitle
-        title={exercise.name}
-        subtitle={stage === 'watch' ? 'Learn the movement' : stage === 'position' ? 'Get into position' : stage === 'shadow' ? 'Follow the ghost' : 'Nice work'}
-        right={<Badge tone="brand">{clip.view === 'side' ? 'Side view' : 'Front view'}</Badge>}
+    <div className="relative flex min-h-full flex-col">
+      <Backdrop variant="dots" />
+      <FlowHeader
+        tag="tutorial"
+        width="max-w-5xl"
+        right={
+          <button type="button" aria-label="Close tutorial" onClick={() => nav('/exercises')} className="rounded-lg p-2 text-slate-400 transition hover:bg-white/[0.05] hover:text-white">
+            <Icon name="x" size={20} />
+          </button>
+        }
       />
+      <main className="relative z-10 mx-auto flex w-full max-w-5xl flex-1 flex-col gap-6 px-4 py-8 pb-[calc(var(--safe-bottom)+24px)] sm:px-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div className="space-y-2">
+            <MonoLabel dot="pulse">Tutorial // {stageLabel}</MonoLabel>
+            <h1 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">{exercise.name}</h1>
+          </div>
+          <Badge tone="volt" mono icon="scan">
+            {clip.view === 'side' ? 'Side view' : 'Front view'}
+          </Badge>
+        </div>
 
-      <StageBar stage={stage} />
+        <StageBar stage={stage} />
 
-      {stage === 'watch' && (
-        <>
-          <Card className="relative aspect-square overflow-hidden p-0">
-            <DemoFigure clip={clip} />
-            <div className="pointer-events-none absolute inset-x-0 bottom-2 text-center text-[11px] text-slate-400">drag to rotate</div>
-          </Card>
-
-          <Card>
-            <div className="mb-1 text-xs uppercase tracking-wide text-slate-400">
-              Step {stepIndex + 1} of {tutorial.steps.length}
+        {stage === 'watch' && (
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <div className="relative aspect-square overflow-hidden rounded-2xl border border-line bg-ink-950 shadow-card">
+              <div className="absolute inset-0 bg-dot-signal opacity-40" />
+              <div className="absolute inset-0">
+                <DemoFigure clip={clip} />
+              </div>
+              <span className="pointer-events-none absolute left-3 top-3 font-mono text-[10px] text-slate-600">┏ [DEMO_FEED]</span>
+              <span className="pointer-events-none absolute right-3 top-3 font-mono text-[10px] text-pulse">{clip.view === 'side' ? 'SIDE' : 'FRONT'} ┓</span>
+              <span className="pointer-events-none absolute bottom-3 left-3 font-mono text-[10px] text-slate-500">┗ drag to rotate</span>
             </div>
-            <div className="text-lg font-bold">{t(step.title)}</div>
-            <p className="mt-1 text-sm text-slate-300">{t(step.body)}</p>
-            <div className="mt-3 flex gap-2">
-              <Button size="sm" variant="ghost" disabled={stepIndex === 0} onClick={() => setStepIndex((i) => i - 1)}>
-                Back
-              </Button>
-              {stepIndex < tutorial.steps.length - 1 ? (
-                <Button size="sm" className="flex-1" onClick={() => setStepIndex((i) => i + 1)}>
-                  Next
-                </Button>
-              ) : (
-                <Button size="sm" className="flex-1" onClick={() => setStage('position')}>
-                  Try it on camera
-                </Button>
+
+            <div className="space-y-4">
+              <Card radius="xl" pad="md" brackets>
+                <MonoLabel>
+                  Step {stepIndex + 1} of {tutorial.steps.length}
+                </MonoLabel>
+                <div className="mt-2 text-lg font-bold text-white">{t(step.title)}</div>
+                <p className="mt-1 text-sm leading-relaxed text-slate-300">{t(step.body)}</p>
+                <SegmentBar total={tutorial.steps.length} filled={stepIndex + 1} tone="pulse" height="h-1" className="mt-4" />
+                <div className="mt-4 flex gap-2">
+                  <Button size="sm" variant="ghost" icon="arrow-left" disabled={stepIndex === 0} onClick={() => setStepIndex((i) => i - 1)}>
+                    Back
+                  </Button>
+                  {stepIndex < tutorial.steps.length - 1 ? (
+                    <Button size="sm" variant="secondary" block iconRight="arrow-right" onClick={() => setStepIndex((i) => i + 1)}>
+                      Next
+                    </Button>
+                  ) : (
+                    <Button size="sm" variant="primary" block icon="camera" onClick={() => setStage('position')}>
+                      Try it on camera
+                    </Button>
+                  )}
+                </div>
+              </Card>
+
+              <Card radius="xl" pad="md">
+                <div className="mb-3 text-sm font-semibold text-white">What matters</div>
+                <ul className="space-y-2">
+                  {tutorial.keyPoints.map((k, i) => (
+                    <li key={i} className="flex gap-2.5 text-sm text-slate-300">
+                      <Icon name="check" size={15} className="mt-0.5 shrink-0 text-brand-400" />
+                      {t(k)}
+                    </li>
+                  ))}
+                </ul>
+              </Card>
+
+              <Card radius="xl" pad="md">
+                <div className="mb-3 text-sm font-semibold text-white">What usually goes wrong</div>
+                <ul className="space-y-2">
+                  {Object.entries(tutorial.commonMistakes).map(([id, m]) => (
+                    <li key={id} className="flex gap-2.5 text-sm text-slate-400">
+                      <Icon name="alert" size={15} className="mt-0.5 shrink-0 text-flame" />
+                      {t(m)}
+                    </li>
+                  ))}
+                </ul>
+              </Card>
+            </div>
+          </div>
+        )}
+
+        {(stage === 'position' || stage === 'shadow') && (
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+            <div className="relative aspect-[3/4] w-full overflow-hidden rounded-2xl border border-line bg-ink-950 shadow-card md:aspect-video">
+              <video ref={videoRef} className={clsx('absolute inset-0 h-full w-full object-cover', mirror && 'scale-x-[-1]')} playsInline muted />
+              <canvas ref={ghostCanvasRef} className={clsx('absolute inset-0 h-full w-full', mirror && 'scale-x-[-1]')} />
+              <canvas ref={canvasRef} className={clsx('absolute inset-0 h-full w-full', mirror && 'scale-x-[-1]')} />
+              <span className="pointer-events-none absolute left-3 top-3 font-mono text-[10px] text-slate-300/80">┏ [LIVE_FEED] PRACTICE</span>
+              <span className="pointer-events-none absolute bottom-3 left-3 font-mono text-[10px] text-brand-300/80">┗ NOTHING IS RECORDED</span>
+
+              {runner.stage === 'loading' && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-ink-950/75">
+                  <Spinner className="h-6 w-6 text-pulse" />
+                  <div className="font-mono text-xs text-slate-300">Starting camera…</div>
+                </div>
+              )}
+              {runner.stage === 'countdown' && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="pulse-ring flex h-28 w-28 items-center justify-center rounded-full border-4 border-brand-400 bg-ink-950/60 font-mono text-6xl font-black text-brand-300 shadow-glow-signal">
+                    {runner.countdown || 'GO'}
+                  </div>
+                </div>
+              )}
+              {stage === 'shadow' && cue && cue.tone !== 'count' && (
+                <div className="absolute inset-x-0 top-10 flex justify-center px-4">
+                  <div
+                    className={clsx(
+                      'rounded-2xl px-4 py-2 text-center text-xl font-extrabold shadow-lg',
+                      cue.tone === 'correction' && 'bg-rose-500 text-white',
+                      cue.tone === 'praise' && 'bg-brand-400 text-ink-950',
+                      cue.tone === 'info' && 'border border-line bg-ink-800/90 text-slate-100',
+                    )}
+                  >
+                    {cue.text}
+                  </div>
+                </div>
+              )}
+              {runner.stage === 'error' && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-ink-950/90 px-6 text-center">
+                  <div className="text-sm text-rose-200">{runner.error}</div>
+                  <Button size="sm" variant="secondary" icon="arrow-left" onClick={() => setStage('watch')}>
+                    Back to the demo
+                  </Button>
+                </div>
               )}
             </div>
-          </Card>
 
-          <Card>
-            <div className="mb-2 text-sm font-semibold">What matters</div>
-            <ul className="space-y-1.5">
-              {tutorial.keyPoints.map((k, i) => (
-                <li key={i} className="flex gap-2 text-sm text-slate-300">
-                  <span className="text-brand-400">✓</span>
-                  {t(k)}
-                </li>
-              ))}
-            </ul>
-          </Card>
-
-          <Card>
-            <div className="mb-2 text-sm font-semibold">What usually goes wrong</div>
-            <ul className="space-y-1.5">
-              {Object.entries(tutorial.commonMistakes).map(([id, m]) => (
-                <li key={id} className="flex gap-2 text-sm text-slate-400">
-                  <span className="text-amber-400">!</span>
-                  {t(m)}
-                </li>
-              ))}
-            </ul>
-          </Card>
-        </>
-      )}
-
-      {(stage === 'position' || stage === 'shadow') && (
-        <>
-          <div className="relative aspect-[3/4] w-full overflow-hidden rounded-2xl bg-slate-950 md:aspect-video">
-            <video ref={videoRef} className={clsx('absolute inset-0 h-full w-full object-cover', prefs.mirror !== false && 'scale-x-[-1]')} playsInline muted />
-            <canvas ref={ghostCanvasRef} className={clsx('absolute inset-0 h-full w-full', prefs.mirror !== false && 'scale-x-[-1]')} />
-            <canvas ref={canvasRef} className={clsx('absolute inset-0 h-full w-full', prefs.mirror !== false && 'scale-x-[-1]')} />
-
-            {runner.stage === 'loading' && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-slate-950/70">
-                <Spinner />
-                <div className="text-sm text-slate-300">Starting camera…</div>
-              </div>
-            )}
-            {runner.stage === 'countdown' && (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="pulse-ring flex h-28 w-28 items-center justify-center rounded-full border-4 border-brand-400 bg-slate-950/60 text-6xl font-black text-brand-300">
-                  {runner.countdown || 'GO'}
+            {stage === 'position' ? (
+              <Card radius="xl" pad="md" className="self-start">
+                <div className="mb-3 text-sm font-semibold text-white">{clip.view === 'side' ? 'Stand side-on, whole body visible' : 'Face the camera, whole body visible'}</div>
+                <SetupChecklist framing={runner.framing} orientation={def.orientation} />
+                <p className="mt-3 text-xs leading-relaxed text-slate-400">Line yourself up with the glowing figure. Tracking starts on its own.</p>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <Button size="sm" variant="secondary" icon="refresh" onClick={runner.switchCamera}>
+                    Switch camera
+                  </Button>
+                  <Button size="sm" variant="ghost" icon="arrow-left" onClick={() => setStage('watch')}>
+                    Back to the demo
+                  </Button>
                 </div>
-              </div>
-            )}
-            {stage === 'shadow' && cue && cue.tone !== 'count' && (
-              <div className="absolute inset-x-0 top-3 flex justify-center px-4">
-                <div
-                  className={clsx(
-                    'rounded-2xl px-4 py-2 text-center text-xl font-extrabold shadow-lg',
-                    cue.tone === 'correction' && 'bg-rose-500 text-white',
-                    cue.tone === 'praise' && 'bg-brand-500 text-slate-950',
-                    cue.tone === 'info' && 'bg-slate-800/90 text-slate-100',
-                  )}
-                >
-                  {cue.text}
-                </div>
-              </div>
-            )}
-            {runner.stage === 'error' && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-slate-950/90 px-6 text-center">
-                <div className="text-sm text-rose-200">{runner.error}</div>
-                <Button size="sm" variant="secondary" onClick={() => setStage('watch')}>
-                  Back to the demo
-                </Button>
-              </div>
-            )}
-          </div>
-
-          {stage === 'position' ? (
-            <Card>
-              <div className="mb-2 text-sm font-semibold">
-                {clip.view === 'side' ? 'Stand side-on, whole body visible' : 'Face the camera, whole body visible'}
-              </div>
-              <SetupChecklist framing={runner.framing} orientation={def.orientation} />
-              <p className="mt-2 text-xs text-slate-400">Line yourself up with the glowing figure. Tracking starts on its own.</p>
-              <div className="mt-3 flex gap-2">
-                <Button size="sm" variant="secondary" onClick={runner.switchCamera}>
-                  Switch camera
-                </Button>
-                <Button size="sm" variant="ghost" onClick={() => setStage('watch')}>
-                  Back to the demo
-                </Button>
-              </div>
-            </Card>
-          ) : (
-            <Card>
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="text-xs uppercase tracking-wide text-slate-400">{t(tutorial.shadowCue)}</div>
-                  <div className="text-lg font-bold">
-                    {isHold ? `${Math.floor(heldMs / 1000)}s / ${HOLD_TARGET_MS / 1000}s held` : `${cleanStreak} / ${CLEAN_REPS_TARGET} clean in a row`}
-                  </div>
-                  {!isHold && <div className="text-xs text-slate-500">{reps} total reps</div>}
-                </div>
-                <div className="flex gap-1.5">
-                  {!isHold &&
-                    Array.from({ length: CLEAN_REPS_TARGET }, (_, i) => (
-                      <span key={i} className={clsx('h-3 w-3 rounded-full', i < cleanStreak ? 'bg-brand-400' : 'bg-slate-700')} />
-                    ))}
-                </div>
-              </div>
-              <div className="mt-3 flex gap-2">
-                <Button size="sm" variant="ghost" onClick={() => setStage('watch')}>
-                  Watch again
-                </Button>
-                <Button size="sm" variant="secondary" className="flex-1" onClick={finish}>
-                  I am done practising
-                </Button>
-              </div>
-            </Card>
-          )}
-        </>
-      )}
-
-      {stage === 'done' && outcome && (
-        <>
-          <Card className="text-center">
-            <div className="text-5xl">💪</div>
-            <div className="mt-2 text-xl font-bold">You have got the shape of it</div>
-            <div className="mt-1 text-sm text-slate-300">
-              {outcome.reps} rep{outcome.reps === 1 ? '' : 's'} practised · form score {outcome.formScore}
-            </div>
-          </Card>
-
-          <Card>
-            <div className="mb-2 text-sm font-semibold">
-              {Object.keys(outcome.flags).length ? 'Watch these next time' : 'Nothing to correct — that was clean'}
-            </div>
-            {Object.keys(outcome.flags).length ? (
-              <ul className="space-y-1.5">
-                {Object.entries(outcome.flags)
-                  .sort((a, b) => b[1] - a[1])
-                  .map(([id, count]) => {
-                    const m = tutorial.commonMistakes[id]
-                    const rule = def.rules.find((r) => r.id === id)
-                    return (
-                      <li key={id} className="flex gap-2 text-sm text-slate-300">
-                        <span className="text-amber-400">!</span>
-                        <span>
-                          {m ? t(m) : rule ? t(rule.cue) : id}
-                          <span className="text-slate-500"> · {count}×</span>
-                        </span>
-                      </li>
-                    )
-                  })}
-              </ul>
+              </Card>
             ) : (
-              <ul className="space-y-1.5">
-                {tutorial.keyPoints.map((k, i) => (
-                  <li key={i} className="flex gap-2 text-sm text-slate-300">
-                    <span className="text-brand-400">✓</span>
-                    {t(k)}
-                  </li>
-                ))}
-              </ul>
+              <Card radius="xl" pad="md" className="self-start">
+                <MonoLabel tone="pulse">{t(tutorial.shadowCue)}</MonoLabel>
+                <div className="mt-2 font-mono text-2xl font-bold text-white">
+                  {isHold ? `${Math.floor(heldMs / 1000)}s / ${HOLD_TARGET_MS / 1000}s` : `${cleanStreak} / ${CLEAN_REPS_TARGET}`}
+                </div>
+                <div className="font-mono text-[11px] text-slate-400">{isHold ? 'held steady' : `clean reps in a row · ${reps} total`}</div>
+                {!isHold && (
+                  <div className="mt-3 flex gap-1.5">
+                    {Array.from({ length: CLEAN_REPS_TARGET }, (_, i) => (
+                      <span key={i} className={clsx('h-2 flex-1 rounded-full', i < cleanStreak ? 'bg-brand-400 shadow-[0_0_8px_rgba(0,229,153,0.5)]' : 'bg-ink-700')} />
+                    ))}
+                  </div>
+                )}
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <Button size="sm" variant="ghost" icon="refresh" onClick={() => setStage('watch')}>
+                    Watch again
+                  </Button>
+                  <Button size="sm" variant="secondary" onClick={finish}>
+                    I'm done practising
+                  </Button>
+                </div>
+              </Card>
             )}
-          </Card>
-
-          <div className="mt-auto flex gap-2">
-            <Button
-              variant="ghost"
-              onClick={() => {
-                finishedRef.current = false
-                setOutcome(null)
-                setStepIndex(0)
-                setStage('watch')
-              }}
-            >
-              Practise again
-            </Button>
-            <Button className="flex-1" onClick={() => nav('/exercises')}>
-              Done
-            </Button>
           </div>
-        </>
-      )}
+        )}
+
+        {stage === 'done' && outcome && (
+          <div className="mx-auto w-full max-w-2xl space-y-4">
+            <Card radius="xl" pad="lg" brackets className="text-center">
+              <span className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full border border-brand-400/40 bg-brand-400/10 text-brand-400 shadow-glow-signal">
+                <Icon name="check" size={26} strokeWidth={2.5} />
+              </span>
+              <div className="text-xl font-bold text-white">You've got the shape of it</div>
+              <div className="mt-1 font-mono text-xs text-slate-400">
+                {outcome.reps} rep{outcome.reps === 1 ? '' : 's'} practised · form score {outcome.formScore}
+              </div>
+            </Card>
+
+            <Card radius="xl" pad="md">
+              <div className="mb-3 text-sm font-semibold text-white">{Object.keys(outcome.flags).length ? 'Watch these next time' : 'Nothing to correct — that was clean'}</div>
+              <ul className="space-y-2">
+                {Object.keys(outcome.flags).length
+                  ? Object.entries(outcome.flags)
+                      .sort((a, b) => b[1] - a[1])
+                      .map(([id, count]) => {
+                        const m = tutorial.commonMistakes[id]
+                        const rule = def.rules.find((r) => r.id === id)
+                        return (
+                          <li key={id} className="flex gap-2.5 text-sm text-slate-300">
+                            <Icon name="alert" size={15} className="mt-0.5 shrink-0 text-flame" />
+                            <span>
+                              {m ? t(m) : rule ? t(rule.cue) : id}
+                              <span className="font-mono text-slate-500"> · {count}×</span>
+                            </span>
+                          </li>
+                        )
+                      })
+                  : tutorial.keyPoints.map((k, i) => (
+                      <li key={i} className="flex gap-2.5 text-sm text-slate-300">
+                        <Icon name="check" size={15} className="mt-0.5 shrink-0 text-brand-400" />
+                        {t(k)}
+                      </li>
+                    ))}
+              </ul>
+            </Card>
+
+            <div className="flex gap-2">
+              <Button
+                variant="ghost"
+                icon="refresh"
+                onClick={() => {
+                  finishedRef.current = false
+                  setOutcome(null)
+                  setStepIndex(0)
+                  setStage('watch')
+                }}
+              >
+                Practise again
+              </Button>
+              <Button variant="primary" block iconRight="arrow-right" onClick={() => nav('/exercises')}>
+                Done
+              </Button>
+            </div>
+          </div>
+        )}
+      </main>
     </div>
   )
 }
@@ -386,17 +418,19 @@ function StageBar({ stage }: { stage: Stage }) {
   ]
   const current = stages.findIndex((s) => s.id === stage)
   return (
-    <div className="flex gap-1.5">
+    <div className="grid grid-cols-4 gap-2">
       {stages.map((s, i) => (
-        <div key={s.id} className="flex-1">
-          <div className={clsx('h-1 rounded-full', i <= current ? 'bg-brand-400' : 'bg-slate-800')} />
-          <div className={clsx('mt-1 text-[10px]', i <= current ? 'text-brand-300' : 'text-slate-600')}>{s.label}</div>
+        <div key={s.id}>
+          <div className={clsx('h-1 rounded-full transition-colors', i <= current ? 'bg-pulse' : 'bg-white/[0.08]', i === current && 'shadow-[0_0_10px_rgba(0,242,254,0.55)]')} />
+          <div className={clsx('mt-1.5 font-mono text-[10px] uppercase tracking-[0.12em]', i <= current ? 'text-pulse' : 'text-slate-600')}>
+            0{i + 1} {s.label}
+          </div>
         </div>
       ))}
     </div>
   )
 }
 
-function Centered({ children }: { children: React.ReactNode }) {
+function Centered({ children }: { children: ReactNode }) {
   return <div className="flex min-h-[60vh] flex-col items-center justify-center p-6 text-center">{children}</div>
 }

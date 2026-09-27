@@ -394,9 +394,7 @@ def _provider_with(side_effects):
 
 
 def _gen(p, timeout_s=10.0):
-    return p.generate(
-        system="s", user="u", model="m", timeout_s=timeout_s, max_output_tokens=10
-    )
+    return p.generate(system="s", user="u", model="m", timeout_s=timeout_s, max_output_tokens=10)
 
 
 def test_a_congested_call_is_retried_once_and_succeeds():

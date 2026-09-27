@@ -1,104 +1,105 @@
-import { useState, type FormEvent } from 'react'
-import { Link, Navigate, useNavigate } from 'react-router-dom'
-import { Alert, Button, Card, Input, Label } from '@/components/ui'
-import { useAuthStore } from '@/features/auth/authStore'
+import { useState, type FormEvent, type ReactNode } from 'react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { Alert, Button, Field, Icon, Input } from '@/components/ui'
+import { Backdrop } from '@/components/layout/Backdrop'
+import { FlowHeader } from '@/components/layout/FlowHeader'
 import { useLogin, useRegister } from '@/features/auth/api'
-import { useInstallPrompt } from '@/hooks/useInstallPrompt'
 import { errorMessage } from '@/lib/apiClient'
 
-function Logo() {
-  return (
-    <div className="mb-6 flex items-center gap-2">
-      <img src="/icons/icon.svg" alt="" className="h-9 w-9 rounded-lg" />
-      <div className="text-2xl font-black tracking-tight">FitSathi</div>
-    </div>
-  )
-}
+export { WelcomePage } from '@/features/auth/pages/WelcomePage'
 
-export function WelcomePage() {
-  const token = useAuthStore((s) => s.token)
-  const install = useInstallPrompt()
-  if (token) return <Navigate to="/home" replace />
+/** Shared frame for sign-in and sign-up: the campus step's command card on the welcome grid. */
+function AuthFrame({
+  process,
+  status,
+  title,
+  subtitle,
+  children,
+  footer,
+}: {
+  process: string
+  status: string
+  title: string
+  subtitle: string
+  children: ReactNode
+  footer: ReactNode
+}) {
   return (
-    <div className="mx-auto flex h-full max-w-md flex-col px-6 pb-8 pt-[calc(var(--safe-top)+40px)]">
-      <Logo />
-      <h1 className="text-3xl font-black leading-tight">
-        A coach that <span className="text-brand-400">sees</span> you.
-        <br />A campus that notices.
-      </h1>
-      <ul className="mt-6 space-y-3 text-slate-300">
-        <li className="flex gap-3">
-          <span className="text-brand-400">●</span> Your phone camera counts reps and corrects your form — on-device, video never uploaded.
-        </li>
-        <li className="flex gap-3">
-          <span className="text-brand-400">●</span> A 10–30 minute plan that adapts to what the camera saw yesterday.
-        </li>
-        <li className="flex gap-3">
-          <span className="text-brand-400">●</span> Camera-verified minutes on squad and campus leaderboards nobody can fake.
-        </li>
-      </ul>
-      <div className="mt-auto space-y-2 pt-8">
-        <Link to="/register">
-          <Button size="lg" className="w-full">
-            Get started
-          </Button>
-        </Link>
-        <Link to="/login">
-          <Button size="lg" variant="secondary" className="w-full">
-            I have an account
-          </Button>
-        </Link>
-        {install.canInstall && (
-          <Button variant="ghost" className="w-full" onClick={install.install}>
-            Install app
-          </Button>
-        )}
-        <div className="pt-2 text-center text-xs text-slate-500">No equipment. No gym. Works offline in the hostel.</div>
-      </div>
+    <div className="relative flex min-h-full flex-col">
+      <Backdrop variant="tech" />
+      <FlowHeader
+        logoTo="/"
+        width="max-w-5xl"
+        right={
+          <Link to="/" className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-400 transition hover:text-white">
+            <Icon name="arrow-left" size={14} /> Back
+          </Link>
+        }
+      />
+      <main className="relative z-10 mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-4 py-10 sm:py-16">
+        <div className="mb-8 space-y-3 text-center">
+          <div className="inline-flex items-center gap-1.5 rounded-md border border-brand-400/30 bg-brand-950/40 px-2.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider text-brand-400">
+            <Icon name="shield-check" size={12} /> Secure session
+          </div>
+          <h1 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">{title}</h1>
+          <p className="text-sm leading-relaxed text-slate-400">{subtitle}</p>
+        </div>
+        <section className="overflow-hidden rounded-xl border border-white/10 bg-ink-900/90 shadow-[0_8px_32px_rgba(0,0,0,0.65),0_0_0_1px_rgba(255,255,255,0.05)] backdrop-blur-xl">
+          <div className="flex items-center justify-between border-b border-line bg-ink-850/60 px-5 py-3 font-mono text-[11px] text-slate-400">
+            <span className="font-medium tracking-wider text-slate-300">{process}</span>
+            <span className="text-brand-400">{status}</span>
+          </div>
+          <div className="p-6 sm:p-7">{children}</div>
+        </section>
+        <div className="mt-6 text-center text-sm text-slate-400">{footer}</div>
+      </main>
     </div>
   )
 }
 
 export function LoginPage() {
   const nav = useNavigate()
+  const loc = useLocation()
   const login = useLogin()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const from = (loc.state as { from?: string } | null)?.from
 
   const submit = async (e: FormEvent) => {
     e.preventDefault()
     const d = await login.mutateAsync({ email, password })
-    nav(d.user.onboarding_completed ? '/home' : '/onboarding', { replace: true })
+    nav(d.user.onboarding_completed ? (from && from !== '/login' ? from : '/home') : '/onboarding', { replace: true })
   }
 
   return (
-    <div className="mx-auto flex h-full max-w-md flex-col px-6 pt-[calc(var(--safe-top)+40px)]">
-      <Logo />
-      <h1 className="mb-4 text-2xl font-bold">Welcome back</h1>
-      <Card>
-        <form onSubmit={submit} className="space-y-3">
-          <div>
-            <Label>Email</Label>
-            <Input type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-          </div>
-          <div>
-            <Label>Password</Label>
-            <Input type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-          </div>
-          {login.isError && <Alert>{errorMessage(login.error)}</Alert>}
-          <Button type="submit" className="w-full" size="lg" loading={login.isPending}>
-            Log in
-          </Button>
-        </form>
-      </Card>
-      <p className="mt-4 text-center text-sm text-slate-400">
-        New here?{' '}
-        <Link to="/register" className="font-semibold text-brand-400">
-          Create an account
-        </Link>
-      </p>
-      <p className="mt-6 text-center text-xs text-slate-600">Demo: demo@fitsathi.app / demo12345</p>
-    </div>
+    <AuthFrame
+      process="AUTH.SESSION // SIGN_IN"
+      status="BEARER · JWT"
+      title="Welcome back"
+      subtitle="Pick up your streak where you left it."
+      footer={
+        <>
+          New here?{' '}
+          <Link to="/register" className="font-semibold text-brand-400 transition hover:text-white">
+            Create an account
+          </Link>
+          <p className="mt-6 font-mono text-[11px] text-slate-600">Demo: demo@fitsathi.app / demo12345</p>
+        </>
+      }
+    >
+      <form onSubmit={submit} className="space-y-5">
+        <Field label="Email">
+          {(id) => <Input id={id} type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="you@college.edu" />}
+        </Field>
+        <Field label="Password">
+          {(id) => <Input id={id} type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} required placeholder="••••••••" />}
+        </Field>
+        {login.isError && <Alert>{errorMessage(login.error)}</Alert>}
+        <Button type="submit" variant="signal" size="lg" block loading={login.isPending} iconRight="arrow-right">
+          Log in
+        </Button>
+      </form>
+    </AuthFrame>
   )
 }
 
@@ -116,35 +117,41 @@ export function RegisterPage() {
   }
 
   return (
-    <div className="mx-auto flex h-full max-w-md flex-col px-6 pt-[calc(var(--safe-top)+40px)]">
-      <Logo />
-      <h1 className="mb-4 text-2xl font-bold">Create your account</h1>
-      <Card>
-        <form onSubmit={submit} className="space-y-3">
-          <div>
-            <Label>Name</Label>
-            <Input autoComplete="name" value={name} onChange={(e) => setName(e.target.value)} required maxLength={80} placeholder="What should the coach call you?" />
-          </div>
-          <div>
-            <Label>Email</Label>
-            <Input type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-          </div>
-          <div>
-            <Label>Password</Label>
-            <Input type="password" autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={8} placeholder="At least 8 characters" />
-          </div>
-          {register.isError && <Alert>{errorMessage(register.error)}</Alert>}
-          <Button type="submit" className="w-full" size="lg" loading={register.isPending}>
-            Continue
-          </Button>
-        </form>
-      </Card>
-      <p className="mt-4 text-center text-sm text-slate-400">
-        Already have an account?{' '}
-        <Link to="/login" className="font-semibold text-brand-400">
-          Log in
-        </Link>
-      </p>
-    </div>
+    <AuthFrame
+      process="AUTH.SESSION // NEW_ATHLETE"
+      status="STEP 0 OF 3"
+      title="Create your account"
+      subtitle="Thirty seconds here, then three quick steps to build your first plan."
+      footer={
+        <>
+          Already have an account?{' '}
+          <Link to="/login" className="font-semibold text-brand-400 transition hover:text-white">
+            Log in
+          </Link>
+        </>
+      }
+    >
+      <form onSubmit={submit} className="space-y-5">
+        <Field label="Name" hint="What should the coach call you?">
+          {(id) => <Input id={id} autoComplete="name" value={name} onChange={(e) => setName(e.target.value)} required maxLength={80} placeholder="Asha" />}
+        </Field>
+        <Field label="Email">
+          {(id) => <Input id={id} type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="you@college.edu" />}
+        </Field>
+        <Field label="Password" meta={<span className={password.length >= 8 ? 'font-mono text-[10px] text-brand-400' : 'font-mono text-[10px] text-slate-500'}>{password.length >= 8 ? '✓ LONG ENOUGH' : 'MIN 8 CHARS'}</span>}>
+          {(id) => (
+            <Input id={id} type="password" autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={8} placeholder="At least 8 characters" />
+          )}
+        </Field>
+        {register.isError && <Alert>{errorMessage(register.error)}</Alert>}
+        <Button type="submit" variant="signal" size="lg" block loading={register.isPending} iconRight="arrow-right">
+          Continue
+        </Button>
+        <p className="flex items-start gap-2 text-[11px] leading-relaxed text-slate-500">
+          <Icon name="lock" size={13} className="mt-0.5 shrink-0" />
+          Your camera never uploads video. Only reps, timings and scores are stored with your account.
+        </p>
+      </form>
+    </AuthFrame>
   )
 }

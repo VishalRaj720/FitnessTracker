@@ -1,162 +1,110 @@
-import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Alert, Badge, Button, Card, Spinner } from '@/components/ui'
+import { useQuery } from '@tanstack/react-query'
+import { Button, ButtonLink, Icon } from '@/components/ui'
 import { useAuthStore } from '@/features/auth/authStore'
-import { useMe } from '@/features/auth/api'
 import { useMySquad, useProgress, useRegeneratePlan, useTodayPlan } from '@/features/home/api'
-import { errorMessage } from '@/lib/apiClient'
-import { targetLabel } from '@/lib/format'
-import { renderRationale } from '@/lib/rationale'
+import { CampusBanner, FeatureStrip, FormTraceCard, FuelCard, SquadCard, ThisWeekCard, TodayPlanCard } from '@/features/home/widgets'
 import { useLeaderboard } from '@/features/squad/api'
+import { useNutritionDay } from '@/features/nutrition/api'
+import { getDefinition } from '@/cv/exercises'
+import { api } from '@/lib/apiClient'
+import { firstName, greeting } from '@/lib/people'
+import type { InstituteStats } from '@/types/api'
 
 export function HomePage() {
   const nav = useNavigate()
   const user = useAuthStore((s) => s.user)
-  useMe()
   const plan = useTodayPlan()
   const progress = useProgress()
   const squad = useMySquad()
   const board = useLeaderboard(squad.data?.id)
   const regen = useRegeneratePlan()
-  const [showWhy, setShowWhy] = useState(false)
+  const fuel = useNutritionDay()
+  const campus = useQuery({
+    queryKey: ['institute', user?.institute?.slug, 'stats'],
+    queryFn: () => api<InstituteStats>(`/institutes/${user!.institute!.slug}/stats?weeks=8`, { auth: false }),
+    enabled: !!user?.institute,
+    staleTime: 60_000,
+  })
 
-  const firstName = user?.name?.split(' ')[0] ?? 'there'
-  const streak = progress.data?.streak.current ?? user?.stats.current_streak ?? 0
-  const week = progress.data?.this_week
-  const myRow = board.data?.rows.find((r) => r.is_me)
-  const offline = (plan.data as { __offline?: boolean } | undefined)?.__offline
+  const offline = !!(plan.data as { __offline?: boolean } | undefined)?.__offline
+  const done = plan.data?.status === 'completed'
+  const now = new Date()
+  const protocol = `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, '0')}`
+  // "Calibrate camera" opens the guided camera tutorial for the first exercise that has one.
+  const calibrateSlug = plan.data?.items.find((i) => i.exercise.cv_supported && getDefinition(i.exercise.slug)?.tutorial)?.exercise.slug
 
-  const startWorkout = (mode?: 'manual') => {
+  const startWorkout = () => {
     if (!plan.data) return
-    nav('/workout/preview', { state: { plan: plan.data, title: "Today's workout", mode } })
+    nav('/workout/preview', { state: { plan: plan.data, title: "Today's workout" } })
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-start justify-between">
-        <div>
-          <div className="text-sm text-slate-400">{greeting()}</div>
-          <h1 className="text-2xl font-bold">{firstName}</h1>
-        </div>
-        <div className="flex items-center gap-1 rounded-xl bg-slate-900 px-3 py-1.5">
-          <span className="text-xl">🔥</span>
-          <div>
-            <div className="text-lg font-black leading-none">{streak}</div>
-            <div className="text-[10px] uppercase tracking-wide text-slate-400">day streak</div>
+    <div className="space-y-10">
+      <section className="flex flex-col justify-between gap-6 border-b border-line pb-6 xl:flex-row xl:items-end" aria-labelledby="home-title">
+        <div className="max-w-4xl space-y-3">
+          <div className="inline-flex items-center gap-2 rounded border border-white/10 bg-ink-900 px-2.5 py-1 font-mono text-[11px] tracking-wider text-pulse">
+            <span className="h-1.5 w-1.5 rounded-full bg-pulse" />
+            ATHLETE DISCIPLINE PROTOCOL // {protocol}
           </div>
+          <h1 id="home-title" className="text-balance text-3xl font-extrabold leading-[1.12] tracking-tight text-white sm:text-4xl lg:text-5xl">
+            {greeting()}, {firstName(user?.name)}.
+            <br className="hidden sm:block" />{' '}
+            <span className="text-slate-300">{done ? 'Today’s session is in the bank.' : 'Your command dashboard is ready.'}</span>
+          </h1>
+          <p className="max-w-2xl text-sm leading-relaxed text-slate-400 sm:text-base">
+            FitSathi turns scattered daily routines, on-device camera form checks, fuel targets and verified minutes into one calm, low-noise cockpit.
+          </p>
+        </div>
+        <div className="flex flex-col items-start gap-3.5 sm:flex-row xl:flex-col xl:items-end">
+          <div className="flex flex-wrap items-center gap-3">
+            <Button variant="light" mono size="md" iconRight="arrow-right" onClick={startWorkout} disabled={!plan.data}>
+              Start routine
+            </Button>
+            <ButtonLink variant="secondary" mono size="md" to={calibrateSlug ? `/exercises/${calibrateSlug}/tutorial` : '/exercises'}>
+              Calibrate camera
+            </ButtonLink>
+          </div>
+          <Link to="/progress" className="inline-flex items-center gap-1.5 pt-1 font-mono text-xs text-slate-400 transition-colors hover:text-pulse">
+            Live telemetry layer: /progress <Icon name="arrow-right" size={12} className="text-pulse" />
+          </Link>
+        </div>
+      </section>
+
+      <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-12">
+        <div className="space-y-6 lg:col-span-7">
+          <TodayPlanCard
+            plan={plan.data}
+            pending={plan.isPending}
+            error={plan.error}
+            offline={offline}
+            profile={user?.profile}
+            onStart={startWorkout}
+            onRegenerate={() => regen.mutate()}
+            regenerating={regen.isPending}
+            onRetry={() => void plan.refetch()}
+          />
+          <div className="flex flex-wrap items-center justify-between gap-2 rounded border border-white/5 bg-ink-900/60 p-4 font-mono text-xs text-slate-400">
+            <span className="flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full bg-pulse" />
+              POSE ENGINE: MediaPipe Pose Landmarker · on-device inference
+            </span>
+            <span className="text-white/40">ZERO-CLOUD VIDEO PRIVACY</span>
+          </div>
+        </div>
+
+        <div className="space-y-6 lg:col-span-5">
+          <FormTraceCard progress={progress.data} pending={progress.isPending} />
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <ThisWeekCard progress={progress.data} targetDays={user?.profile?.days_per_week ?? 4} />
+            <SquadCard squad={squad.data} board={board.data} />
+          </div>
+          <FuelCard day={fuel.data} pending={fuel.isPending} />
+          {user && <CampusBanner user={user} activeStudents={campus.data?.this_week.active_students} />}
         </div>
       </div>
 
-      {/* Today's plan */}
-      <Card className="border-brand-500/30 bg-gradient-to-br from-slate-900 to-slate-900/40">
-        <div className="mb-2 flex items-center justify-between">
-          <div className="text-xs font-semibold uppercase tracking-wide text-brand-300">Today's plan</div>
-          {plan.data && (
-            <div className="flex items-center gap-2">
-              {offline && <Badge tone="warn">offline</Badge>}
-              {plan.data.status === 'completed' && <Badge tone="brand">done today</Badge>}
-              <span className="text-xs text-slate-400">~{plan.data.estimated_minutes} min</span>
-            </div>
-          )}
-        </div>
-
-        {plan.isPending && (
-          <div className="flex items-center gap-2 py-6 text-sm text-slate-400">
-            <Spinner className="h-4 w-4" /> Building your plan…
-          </div>
-        )}
-        {plan.isError && <Alert>{errorMessage(plan.error)}</Alert>}
-
-        {plan.data && (
-          <>
-            <ul className="divide-y divide-slate-800">
-              {plan.data.items.map((it) => (
-                <li key={it.id} className="flex items-center justify-between py-2">
-                  <div>
-                    <div className="font-medium">{it.exercise.name}</div>
-                    <div className="text-xs text-slate-400">
-                      {targetLabel(it)}
-                      {it.focus_cue ? ` · ${it.focus_cue}` : ''}
-                    </div>
-                  </div>
-                  {it.exercise.cv_supported ? <Badge tone="brand">Camera</Badge> : <Badge>Timer</Badge>}
-                </li>
-              ))}
-            </ul>
-
-            <button type="button" onClick={() => setShowWhy((v) => !v)} className="mt-2 text-xs font-medium text-slate-400 underline-offset-2 hover:underline">
-              {showWhy ? 'Hide' : 'Why this plan?'}
-            </button>
-            {showWhy && (
-              <ul className="mt-1 space-y-1 rounded-xl bg-slate-950/60 p-3 text-xs text-slate-300">
-                {renderRationale(plan.data.rationale).map((line, i) => (
-                  <li key={i}>• {line}</li>
-                ))}
-                <li className="pt-1 text-slate-500">Generated by {plan.data.generated_by} — deterministic rules, no black box.</li>
-              </ul>
-            )}
-
-            <div className="mt-3 flex gap-2">
-              <Button size="lg" className="flex-1" onClick={() => startWorkout()}>
-                {plan.data.status === 'completed' ? 'Do it again' : 'Start workout'}
-              </Button>
-              {plan.data.status !== 'completed' && !offline && (
-                <Button variant="ghost" size="sm" onClick={() => regen.mutate()} loading={regen.isPending} title="Shuffle today's exercises">
-                  ↻
-                </Button>
-              )}
-            </div>
-          </>
-        )}
-      </Card>
-
-      {/* Week + squad */}
-      <div className="grid grid-cols-2 gap-3">
-        <Card className="p-3.5">
-          <div className="text-xs uppercase tracking-wide text-slate-400">This week</div>
-          <div className="mt-1 text-2xl font-bold">
-            {week?.days_done ?? 0}
-            <span className="text-base font-medium text-slate-500"> / {week?.target_days ?? user?.profile?.days_per_week ?? 4} days</span>
-          </div>
-          <div className="mt-2 flex gap-1">
-            {Array.from({ length: week?.target_days ?? 4 }).map((_, i) => (
-              <div key={i} className={`h-1.5 flex-1 rounded-full ${i < (week?.days_done ?? 0) ? 'bg-brand-500' : 'bg-slate-800'}`} />
-            ))}
-          </div>
-          <div className="mt-1 text-xs text-slate-500">{week?.verified_minutes ?? 0} verified min</div>
-        </Card>
-        <Link to="/squad">
-          <Card className="h-full p-3.5">
-            <div className="text-xs uppercase tracking-wide text-slate-400">Squad</div>
-            {squad.data ? (
-              <>
-                <div className="mt-1 text-2xl font-bold">#{myRow?.rank ?? '–'}</div>
-                <div className="text-xs text-slate-500">
-                  of {squad.data.member_count} in {squad.data.name}
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="mt-1 text-base font-semibold">No squad yet</div>
-                <div className="text-xs text-brand-300">Create or join →</div>
-              </>
-            )}
-          </Card>
-        </Link>
-      </div>
-
-      {user?.institute && (
-        <Link to={`/campus/${user.institute.slug}`} className="block text-center text-xs text-slate-500 underline-offset-2 hover:underline">
-          View {user.institute.name} campus dashboard →
-        </Link>
-      )}
+      <FeatureStrip />
     </div>
   )
-}
-
-function greeting(): string {
-  const h = new Date().getHours()
-  if (h < 12) return 'Good morning'
-  if (h < 17) return 'Good afternoon'
-  return 'Good evening'
 }

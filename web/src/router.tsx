@@ -1,13 +1,15 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { RequireAuth, RequireOnboarded } from '@/app/guards'
 import { AppShell } from '@/components/layout/AppShell'
-import { LoginPage, RegisterPage, WelcomePage } from '@/features/auth/pages/AuthPages'
+import { LoginPage, RegisterPage } from '@/features/auth/pages/AuthPages'
+import { WelcomePage } from '@/features/auth/pages/WelcomePage'
 import { OnboardingPage } from '@/features/onboarding/OnboardingPage'
 import { HomePage } from '@/features/home/HomePage'
 import { ExercisesPage } from '@/features/exercises/ExercisesPage'
 import { SquadPage } from '@/features/squad/SquadPage'
 import { CoachPage } from '@/features/companion/CoachPage'
 import { ProgressPage } from '@/features/progress/ProgressPage'
+import { NutritionPage } from '@/features/nutrition/NutritionPage'
 import { ProfilePage, SettingsPage } from '@/features/profile/ProfilePage'
 import { CampusDashboardPage } from '@/features/campus/CampusDashboardPage'
 import { TutorialPage } from '@/features/tutorial/TutorialPage'
@@ -42,6 +44,8 @@ export const router = createBrowserRouter([
               { path: '/squad', element: <SquadPage /> },
               { path: '/coach', element: <CoachPage /> },
               { path: '/progress', element: <ProgressPage /> },
+              { path: '/nutrition', element: <NutritionPage /> },
+              { path: '/diet', element: <Navigate to="/nutrition" replace /> },
               { path: '/profile', element: <ProfilePage /> },
               { path: '/profile/settings', element: <SettingsPage /> },
             ],

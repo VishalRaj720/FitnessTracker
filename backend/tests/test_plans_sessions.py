@@ -132,6 +132,19 @@ def test_unknown_exercise_rejected(client):
     assert r.json()["error"]["code"] == "exercise_not_found"
 
 
+def test_backwards_session_times_are_a_422_not_a_500(client):
+    # The model_validator's ValueError used to reach the JSON encoder and crash the handler.
+    token = register(client)["access_token"]
+    onboard(client, token)
+    plan = client.get("/api/v1/plans/today", headers=auth(token)).json()
+    payload = _session_payload(plan)
+    payload["ended_at"], payload["started_at"] = payload["started_at"], payload["ended_at"]
+    r = client.post("/api/v1/sessions", json=payload, headers=auth(token))
+    assert r.status_code == 422
+    assert r.json()["error"]["code"] == "validation_error"
+    assert "ended_at must be after started_at" in str(r.json()["error"]["details"])
+
+
 def test_other_user_cannot_read_session(client):
     t1 = register(client)["access_token"]
     onboard(client, t1)

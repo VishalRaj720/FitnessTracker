@@ -5,6 +5,7 @@ from app.api.v1 import (
     companion,
     exercises,
     institutes,
+    nutrition,
     plans,
     progress,
     sessions,
@@ -13,5 +14,16 @@ from app.api.v1 import (
 )
 
 api_router = APIRouter(prefix="/api/v1")
-for r in (auth, users, institutes, exercises, plans, sessions, progress, squads, companion):
+for r in (
+    auth,
+    users,
+    institutes,
+    exercises,
+    plans,
+    sessions,
+    progress,
+    squads,
+    nutrition,
+    companion,
+):
     api_router.include_router(r.router)

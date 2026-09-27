@@ -33,6 +33,7 @@ def _is_transient(exc: Exception) -> bool:
     name = type(exc).__name__
     return name.endswith(("ConnectError", "ReadTimeout", "ConnectTimeout", "RemoteProtocolError"))
 
+
 # Requests are short and mostly spent waiting on the network, so a small shared pool is
 # enough. It also gives us a hard wall-clock timeout that does not depend on the SDK
 # honouring one, which matters for the in-workout cue where a late answer is a useless one.

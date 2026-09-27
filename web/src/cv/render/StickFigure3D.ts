@@ -9,6 +9,10 @@ export interface StickFigure3DOptions {
   /** Slowly orbit when the user is not dragging. */
   autoOrbit?: boolean
   maxDpr?: number
+  /** Share of the tighter canvas axis the skeleton fills (the head circle sits outside it). */
+  margin?: number
+  /** Multiplier on bone and head stroke widths; below 1 draws a finer wireframe. */
+  boneScale?: number
 }
 
 const FOCAL = 2.2
@@ -32,6 +36,8 @@ export class StickFigure3D {
   private ctx: CanvasRenderingContext2D
   private sampler: StickFigure3DOptions['sampler']
   private maxDpr: number
+  private margin: number
+  private boneScale: number
   private raf = 0
   private running = false
   private t0 = 0
@@ -55,6 +61,8 @@ export class StickFigure3D {
     this.pitch = opts.pitch ?? 0
     this.autoOrbit = opts.autoOrbit ?? true
     this.maxDpr = opts.maxDpr ?? 2
+    this.margin = opts.margin ?? 0.8
+    this.boneScale = opts.boneScale ?? 1
     const ctx = canvas.getContext('2d', { alpha: true })
     if (!ctx) throw new Error('2D canvas context unavailable')
     this.ctx = ctx
@@ -208,7 +216,7 @@ export class StickFigure3D {
     // Pass 2: scale to fit whichever axis is tighter, then centre the box in the canvas.
     const boxW = Math.max(0.2, maxU - minU)
     const boxH = Math.max(0.2, maxV - minV)
-    const margin = 0.8
+    const margin = this.margin
     const fit = Math.min((this.cssW * margin) / boxW, (this.cssH * margin) / boxH)
     const ox = this.cssW / 2 - ((minU + maxU) / 2) * fit
     const oy = this.cssH / 2 - ((minV + maxV) / 2) * fit
@@ -227,7 +235,7 @@ export class StickFigure3D {
       const depth = (this.cam[a * 3 + 2] + this.cam[b * 3 + 2]) / 2
       const k = clamp((depth + 0.9) / 1.8, 0, 1)
       ctx.strokeStyle = mixColor(BONE_FAR, BONE_NEAR, k)
-      ctx.lineWidth = 7 + k * 5
+      ctx.lineWidth = (7 + k * 5) * this.boneScale
       ctx.beginPath()
       ctx.moveTo(this.sx[a], this.sy[a])
       ctx.lineTo(this.sx[b], this.sy[b])
@@ -245,7 +253,7 @@ export class StickFigure3D {
     const hx = this.sx[LM.NOSE]
     const hy = this.sy[LM.NOSE]
     ctx.strokeStyle = BONE_NEAR
-    ctx.lineWidth = 7
+    ctx.lineWidth = 7 * this.boneScale
     ctx.beginPath()
     ctx.moveTo(neckX, neckY)
     ctx.lineTo(hx, hy)
